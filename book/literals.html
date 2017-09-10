@@ -122,8 +122,8 @@ grammar error
   |
   = false is a rust keyword
 </code></pre>
-<p>This is because every one of the rules you define will populate and <code>enum</code> name
-<code>Rule</code>. Thus, if any rules conflicts with Rust's naming scheme, it will error
+<p>This is because every one of the rules you define will populate an <code>enum</code> named
+<code>Rule</code>. Thus, if any rules conflict with Rust's naming scheme, it will error
 out with an ambiguous message which is why <em>pest</em> tries its best to catch any
 possible error before it reaches the compiler.</p>
 <p>A simple (but less elegant) solution here would be to suffix these rules with
