@@ -1,0 +1,336 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title> - </title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme -->
+        
+
+        
+
+        <!-- Fetch Clipboard.js from CDN but have a local fallback -->
+        <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
+        <script>
+            if (typeof Clipboard == 'undefined') {
+                document.write(unescape("%3Cscript src='clipboard.min.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch store.js from local - TODO add CDN when 2.x.x is available on cdnjs -->
+        <script src="store.js"></script>
+
+        <!-- Custom JS script -->
+        
+
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = store.get('theme');
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = store.get('sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li class="affix"><a href="./intro.html">Introduction</a></li><li><a href="./setup.html"><strong>1.</strong> Setup</a></li><li><a href="./peg.html"><strong>2.</strong> Parsing expression grammar</a></li><li><a href="./literals.html"><strong>3.</strong> Literals</a></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page" tabindex="-1">
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush"></i>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="print.html#introduction" id="introduction"><h1>Introduction</h1></a>
+<p><em>Speed or simplicity? Why not <strong>both</strong>?</em></p>
+<p>The motivation behind <em>pest</em> was to come up with a parser that would maximize
+usability, both when designing the grammar, and when maintaining it after
+prolonged use and development. And, as Rust tradition mandates, this parser had
+to make sure that its use of high-level abstractions would not hinder
+performance. As such, <em>pest</em> is perfectly suited for complete beginners who want
+to learn and experiment with grammars and parsing, but who do not want to be
+constrained in terms of speed.</p>
+<p><em>pest</em> is implemented in Rust and requires some knowledge of the language in
+order to be used. The reason for picking it over other languages is that it
+offers C-like low level access and encourages the use of multi-threaded
+programming, both of great use when writing a compiler or VM to accompany your
+parser. At the same time, Rust's procedural macros and functional APIs provide a
+means to express the problem of parsing in a simple and natural way. It even
+comes with an <a href="https://doc.rust-lang.org/book/">official book</a> to get you
+started.</p>
+<p>This introduction will explore the implementation of a subset of Rust's own
+grammar, from the simplest terminals to the construction of an AST. After
+reading it, you should be comfortable writing parsers with <em>pest</em>.</p>
+<a class="header" href="print.html#setup" id="setup"><h1>Setup</h1></a>
+<p>Before getting into the more theoretical parts of grammars and APIs, let's first
+make sure we're all set up.</p>
+<a class="header" href="print.html#rust and cargo" id="rust and cargo"><h2>Rust and Cargo</h2></a>
+<p>The easiest way to install Rust and Cargo together is to follow the instructions
+on <a href="https://rustup.rs">rustup.rs</a>. Once that is out of the way, make sure you
+add <em>pest</em> to your <code>Cargo.toml</code>:</p>
+<pre><code class="language-toml">pest = &quot;^1.0.0-beta&quot;
+pest_derive = &quot;^1.0.0-beta&quot;
+</code></pre>
+<p><em>pest_derive</em> is the part of the parser that analyzes, verifies, optimizes, and
+generates the code that then makes use of the APIs found in the <em>pest</em> crate.
+This is separate because the actual procedural macro that derives the parser for
+you is linked at compile time.</p>
+<a class="header" href="print.html#the pest grammar file" id="the pest grammar file"><h2>The <code>.pest</code> grammar file</h2></a>
+<p>The actual grammar gets saved in separate <code>.pest</code> files, relative to Cargo's
+<code>src</code> directory. They are then used in order to derive an implementation of the
+<a href="https://docs.rs/pest/1.0.0-beta/pest/trait.Parser.html">Parser</a> trait.</p>
+<p>Due to the fact that procedural macro do not offer an API to tell the compiler
+which files are relevant to compilation, it is necessary to provide a small hint
+in the form of a debug-only <code>const</code> in order to make sure that your grammar gets
+recompiled after every change.</p>
+<p>So, you should add the following code to the Rust file where you want the parser
+to be.</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+#[cfg(debug_assertions)]
+const _GRAMMAR: &amp;'static str = include_str!(&quot;path/to/rust.pest&quot;); // relative to this file
+
+#[derive(Parser)]
+#[grammar = &quot;path/to/rust.pest&quot;] // relative to src
+struct RustParser;
+#}</code></pre></pre>
+<p>Also, don't forget to add the crate dependency in your crate's main file.</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+extern crate pest;
+#[macro_use]
+extern crate pest_derive;
+#}</code></pre></pre>
+<a class="header" href="print.html#parsing expression grammar" id="parsing expression grammar"><h1>Parsing expression grammar</h1></a>
+<p>Parsing expression grammar, or PEG, is the formal grammar that <em>pest</em> uses to
+describe the kind of inputs it accepts. This type of grammar is similar in
+concept to regular expressions with named groups with the exception that regex
+is <em>generative</em>, i.e. used to generate strings, while PEG is <em>analytic</em>, i.e.
+used to test whether strings match the grammar.</p>
+<a class="header" href="print.html#generative vs analytics approach" id="generative vs analytics approach"><h2>Generative vs. analytics approach</h2></a>
+<p>Let's take a look at a simple regex example in order to illustrate these
+concepts a bit better:</p>
+<pre><code class="language-javascript">/^(a*)(a)$/
+</code></pre>
+<p>This regex generates a string that starts from the beginning (<code>^</code>), matches zero
+or more <code>'a'</code> (<code>a*</code>), matches one <code>'a'</code> (<code>a</code>), then it makes sure it reached the
+end of its input. Since this a generative definition, we can generate the string
+<code>&quot;aa&quot;</code> by generating one <code>'a'</code> from the first group and the second <code>'a'</code> from
+the second group.</p>
+<p>If we define the same rule in pest, it will look something like this:</p>
+<pre><code>soi ~ &quot;a&quot;* ~ &quot;a&quot; ~ eoi
+</code></pre>
+<p><code>soi</code> and <code>eoi</code> stand for start-of-input and end-of-input respectively and work
+much like their regex counterparts. <code>~</code> is used in order to crate sequences,
+while the rest of the syntax should be straightforward coming from the previous
+example.</p>
+<p>Part of the analytical approach of PEGs is the fact that they run eagerly. If we
+take the example generated by the regex, the PEG variant will eagerly match both
+<code>a</code>s in the <code>&quot;a&quot;*</code> expression, leaving the second <code>&quot;a&quot;</code> unsatisfied. Every
+expression in PEG tries to match as much as it possibly can. And, once it
+matched, it will not backtrack in order to satisfy the next expression. At
+first, this may seem like a bit of a hindrance, but it offer something else in
+exchange.</p>
+<a class="header" href="print.html#non-ambiguity" id="non-ambiguity"><h2>Non-ambiguity</h2></a>
+<p>If a string is accepted by a PEG grammar, it is guaranteed to be matched in one
+single manner. Let's take the following regex example in order to illustrate
+this:</p>
+<pre><code class="language-javascript">/(a*)(a*)/
+</code></pre>
+<p>The string <code>&quot;aaaa&quot;</code> has, theoretically, 5 different ways of being accepted in
+terms of how the groups are split, namely <code>(&quot;aaaa&quot;)()</code>, <code>(&quot;aaa&quot;)(&quot;a&quot;)</code>,
+<code>(&quot;aa&quot;)(&quot;aa&quot;)</code>, <code>(&quot;a&quot;)(&quot;aaa&quot;)</code>, and <code>()(&quot;aaaa&quot;)</code>. The only way the equivalent
+PEG grammar can match this is by eagerly matching the whole string in the first
+expression <code>(&quot;aaaa&quot;)()</code>.</p>
+<a class="header" href="print.html#choice order" id="choice order"><h2>Choice order</h2></a>
+<p>In order to keep the promise of non-ambiguity, choice expressions have to be run
+in a predefined order, from right to left. This has an relevant implication when
+rules have overlapping beginnings. Take the following example:</p>
+<pre><code>(&quot;a&quot; | &quot;ab&quot;) ~ eoi
+</code></pre>
+<p>This may look perfectly correct, but is in fact incapable of accepting the
+string <code>&quot;ab&quot;</code>, since the first choice will match <code>&quot;a&quot;</code>, leaving <code>&quot;b&quot;</code> at the
+hand of the <code>eoi</code> rule which will then fail. And, since there is no way to match
+<code>&quot;ab&quot;</code>, it can be simplified to simply <code>&quot;a&quot; ~ eoi</code>. If, however, we do want to
+match both, we have to make sure that the longer expression comes first:</p>
+<pre><code>(&quot;ab&quot; | &quot;a&quot;) ~ eoi
+</code></pre>
+<p>This way, <code>&quot;ab&quot;</code> will get matched by the first expression, while <code>&quot;a&quot;</code> will fail
+it, making way for the second one to match.</p>
+<a class="header" href="print.html#literals" id="literals"><h1>Literals</h1></a>
+<p>A good place to start when writing out the grammar of a language are the
+literals. For our small Rust subset, the literals that we are going to define
+are booleans, integers, floating point numbers, strings, types, and identifiers.</p>
+<a class="header" href="print.html#booleans" id="booleans"><h2>Booleans</h2></a>
+<p>Defining booleans is probably the easiest step. We need a rule with two
+variants, <code>true</code> and <code>false</code>:</p>
+<pre><code>bool = { &quot;true&quot; | &quot;false&quot; }
+</code></pre>
+<p>This, however, will only generate a token for the <code>bool</code> rule without telling us
+which variant it is, forcing us to dig through the input in order to see whether
+it is <code>true</code> or <code>false</code>. In order to parse this only once and get the necessary
+information right away, we can make <code>true</code> and <code>false</code> separate rules:</p>
+<pre><code>true  = { &quot;true&quot; }
+false = { &quot;false&quot; }
+bool  = { true | false }
+</code></pre>
+<p>Unfortunately, running <code>cargo check</code> will print the following error:</p>
+<pre><code>grammar error
+
+ --&gt; rust.pest:1:1
+  |
+1 | true  = { &quot;true&quot; }
+  | ^--^
+  |
+  = true is a rust keyword
+
+grammar error
+
+ --&gt; rust.pest:2:1
+  |
+2 | false = { &quot;false&quot; }
+  | ^---^
+  |
+  = false is a rust keyword
+</code></pre>
+<p>This is because every one of the rules you define will populate and <code>enum</code> name
+<code>Rule</code>. Thus, if any rules conflicts with Rust's naming scheme, it will error
+out with an ambiguous message which is why <em>pest</em> tries its best to catch any
+possible error before it reaches the compiler.</p>
+<p>A simple (but less elegant) solution here would be to suffix these rules with
+<code>_lit</code>:</p>
+<pre><code>true_lit  = { &quot;true&quot; }
+false_lit = { &quot;false&quot; }
+bool  = { true_lit | false_lit }
+</code></pre>
+<p>This seems to work fine, but before we head on to integers, let's first write a
+couple of tests. <em>pest</em> comes with a handy macro for asserting parse results
+named <a href="https://docs.rs/pest/1.0.0-beta/pest/macro.parses_to.html">parses_to!</a>.</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+#[test]
+fn true_lit() {
+    parses_to! {
+        parser: RustParser,     // our parser struct
+        input: &quot;true&quot;,          // the input we're testing
+        rule: Rule::bool,       // the rule that should be run
+        tokens: [
+            bool(0, 4, [        // name_of_rule(start_pos, end_pos, [children])
+                true_lit(0, 4)  // name_of_rule(start_pos, end_pos): no children
+            ])
+        ]
+    };
+}
+
+#[test]
+fn false_lit() {
+    parses_to! {
+        parser: RustParser,
+        input: &quot;false&quot;,
+        rule: Rule::bool,
+        tokens: [
+            bool(0, 5, [
+                false_lit(0, 5)
+            ])
+        ]
+    };
+}
+#}</code></pre></pre>
+<a class="header" href="print.html#integers" id="integers"><h2>Integers</h2></a>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+
+                
+
+            </div>
+
+            
+
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+    <script type="text/javascript">
+        var socket = new WebSocket("ws://localhost:3001");
+        socket.onmessage = function (event) {
+            if (event.data === "reload") {
+                socket.close();
+                location.reload(true); // force reload from server (not from cache)
+            }
+        };
+
+        window.onbeforeunload = function() {
+            socket.close();
+        }
+    </script>
+
+
+        
+
+        
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+    </body>
+</html>

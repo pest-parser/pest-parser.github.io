@@ -1,0 +1,226 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Literals - </title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme -->
+        
+
+        
+
+        <!-- Fetch Clipboard.js from CDN but have a local fallback -->
+        <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
+        <script>
+            if (typeof Clipboard == 'undefined') {
+                document.write(unescape("%3Cscript src='clipboard.min.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch store.js from local - TODO add CDN when 2.x.x is available on cdnjs -->
+        <script src="store.js"></script>
+
+        <!-- Custom JS script -->
+        
+
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = store.get('theme');
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = store.get('sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li class="affix"><a href="./intro.html">Introduction</a></li><li><a href="./setup.html"><strong>1.</strong> Setup</a></li><li><a href="./peg.html"><strong>2.</strong> Parsing expression grammar</a></li><li><a href="./literals.html" class="active"><strong>3.</strong> Literals</a></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page" tabindex="-1">
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush"></i>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="literals.html#literals" id="literals"><h1>Literals</h1></a>
+<p>A good place to start when writing out the grammar of a language are the
+literals. For our small Rust subset, the literals that we are going to define
+are booleans, integers, floating point numbers, strings, types, and identifiers.</p>
+<a class="header" href="literals.html#booleans" id="booleans"><h2>Booleans</h2></a>
+<p>Defining booleans is probably the easiest step. We need a rule with two
+variants, <code>true</code> and <code>false</code>:</p>
+<pre><code>bool = { &quot;true&quot; | &quot;false&quot; }
+</code></pre>
+<p>This, however, will only generate a token for the <code>bool</code> rule without telling us
+which variant it is, forcing us to dig through the input in order to see whether
+it is <code>true</code> or <code>false</code>. In order to parse this only once and get the necessary
+information right away, we can make <code>true</code> and <code>false</code> separate rules:</p>
+<pre><code>true  = { &quot;true&quot; }
+false = { &quot;false&quot; }
+bool  = { true | false }
+</code></pre>
+<p>Unfortunately, running <code>cargo check</code> will print the following error:</p>
+<pre><code>grammar error
+
+ --&gt; rust.pest:1:1
+  |
+1 | true  = { &quot;true&quot; }
+  | ^--^
+  |
+  = true is a rust keyword
+
+grammar error
+
+ --&gt; rust.pest:2:1
+  |
+2 | false = { &quot;false&quot; }
+  | ^---^
+  |
+  = false is a rust keyword
+</code></pre>
+<p>This is because every one of the rules you define will populate and <code>enum</code> name
+<code>Rule</code>. Thus, if any rules conflicts with Rust's naming scheme, it will error
+out with an ambiguous message which is why <em>pest</em> tries its best to catch any
+possible error before it reaches the compiler.</p>
+<p>A simple (but less elegant) solution here would be to suffix these rules with
+<code>_lit</code>:</p>
+<pre><code>true_lit  = { &quot;true&quot; }
+false_lit = { &quot;false&quot; }
+bool  = { true_lit | false_lit }
+</code></pre>
+<p>This seems to work fine, but before we head on to integers, let's first write a
+couple of tests. <em>pest</em> comes with a handy macro for asserting parse results
+named <a href="https://docs.rs/pest/1.0.0-beta/pest/macro.parses_to.html">parses_to!</a>.</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+#[test]
+fn true_lit() {
+    parses_to! {
+        parser: RustParser,     // our parser struct
+        input: &quot;true&quot;,          // the input we're testing
+        rule: Rule::bool,       // the rule that should be run
+        tokens: [
+            bool(0, 4, [        // name_of_rule(start_pos, end_pos, [children])
+                true_lit(0, 4)  // name_of_rule(start_pos, end_pos): no children
+            ])
+        ]
+    };
+}
+
+#[test]
+fn false_lit() {
+    parses_to! {
+        parser: RustParser,
+        input: &quot;false&quot;,
+        rule: Rule::bool,
+        tokens: [
+            bool(0, 5, [
+                false_lit(0, 5)
+            ])
+        ]
+    };
+}
+#}</code></pre></pre>
+<a class="header" href="literals.html#integers" id="integers"><h2>Integers</h2></a>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+                    <a rel="prev" href="./peg.html" class="mobile-nav-chapters previous">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+
+            </div>
+
+            
+                <a href="./peg.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+            
+
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+    <script type="text/javascript">
+        var socket = new WebSocket("ws://localhost:3001");
+        socket.onmessage = function (event) {
+            if (event.data === "reload") {
+                socket.close();
+                location.reload(true); // force reload from server (not from cache)
+            }
+        };
+
+        window.onbeforeunload = function() {
+            socket.close();
+        }
+    </script>
+
+
+        
+
+        
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+    </body>
+</html>

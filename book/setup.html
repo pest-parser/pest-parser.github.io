@@ -1,0 +1,195 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Setup - </title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme -->
+        
+
+        
+
+        <!-- Fetch Clipboard.js from CDN but have a local fallback -->
+        <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
+        <script>
+            if (typeof Clipboard == 'undefined') {
+                document.write(unescape("%3Cscript src='clipboard.min.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch store.js from local - TODO add CDN when 2.x.x is available on cdnjs -->
+        <script src="store.js"></script>
+
+        <!-- Custom JS script -->
+        
+
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = store.get('theme');
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = store.get('sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li class="affix"><a href="./intro.html">Introduction</a></li><li><a href="./setup.html" class="active"><strong>1.</strong> Setup</a></li><li><a href="./peg.html"><strong>2.</strong> Parsing expression grammar</a></li><li><a href="./literals.html"><strong>3.</strong> Literals</a></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page" tabindex="-1">
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush"></i>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="setup.html#setup" id="setup"><h1>Setup</h1></a>
+<p>Before getting into the more theoretical parts of grammars and APIs, let's first
+make sure we're all set up.</p>
+<a class="header" href="setup.html#rust and cargo" id="rust and cargo"><h2>Rust and Cargo</h2></a>
+<p>The easiest way to install Rust and Cargo together is to follow the instructions
+on <a href="https://rustup.rs">rustup.rs</a>. Once that is out of the way, make sure you
+add <em>pest</em> to your <code>Cargo.toml</code>:</p>
+<pre><code class="language-toml">pest = &quot;^1.0.0-beta&quot;
+pest_derive = &quot;^1.0.0-beta&quot;
+</code></pre>
+<p><em>pest_derive</em> is the part of the parser that analyzes, verifies, optimizes, and
+generates the code that then makes use of the APIs found in the <em>pest</em> crate.
+This is separate because the actual procedural macro that derives the parser for
+you is linked at compile time.</p>
+<a class="header" href="setup.html#the pest grammar file" id="the pest grammar file"><h2>The <code>.pest</code> grammar file</h2></a>
+<p>The actual grammar gets saved in separate <code>.pest</code> files, relative to Cargo's
+<code>src</code> directory. They are then used in order to derive an implementation of the
+<a href="https://docs.rs/pest/1.0.0-beta/pest/trait.Parser.html">Parser</a> trait.</p>
+<p>Due to the fact that procedural macro do not offer an API to tell the compiler
+which files are relevant to compilation, it is necessary to provide a small hint
+in the form of a debug-only <code>const</code> in order to make sure that your grammar gets
+recompiled after every change.</p>
+<p>So, you should add the following code to the Rust file where you want the parser
+to be.</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+#[cfg(debug_assertions)]
+const _GRAMMAR: &amp;'static str = include_str!(&quot;path/to/rust.pest&quot;); // relative to this file
+
+#[derive(Parser)]
+#[grammar = &quot;path/to/rust.pest&quot;] // relative to src
+struct RustParser;
+#}</code></pre></pre>
+<p>Also, don't forget to add the crate dependency in your crate's main file.</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+extern crate pest;
+#[macro_use]
+extern crate pest_derive;
+#}</code></pre></pre>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+                    <a rel="prev" href="./intro.html" class="mobile-nav-chapters previous">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="./peg.html" class="mobile-nav-chapters next">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+
+            </div>
+
+            
+                <a href="./intro.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+            
+
+            
+                <a href="./peg.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+    <script type="text/javascript">
+        var socket = new WebSocket("ws://localhost:3001");
+        socket.onmessage = function (event) {
+            if (event.data === "reload") {
+                socket.close();
+                location.reload(true); // force reload from server (not from cache)
+            }
+        };
+
+        window.onbeforeunload = function() {
+            socket.close();
+        }
+    </script>
+
+
+        
+
+        
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+    </body>
+</html>
