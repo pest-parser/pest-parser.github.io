@@ -204,6 +204,26 @@ match both, we have to make sure that the longer expression comes first:</p>
 </code></pre>
 <p>This way, <code>&quot;ab&quot;</code> will get matched by the first expression, while <code>&quot;a&quot;</code> will fail
 it, making way for the second one to match.</p>
+<a class="header" href="print.html#left-recursion" id="left-recursion"><h2>Left-recursion</h2></a>
+<p>Because of their eager nature, PEGs will always start exploring possible paths
+from the left. This means that, if a rules gets to run itself before making any
+kind of progress, it will result in a stack-overflow. The following examples all
+fail to compile:</p>
+<pre><code>// Rule calls itself right away.
+rule = { rule }
+
+// Rule makes no progress before calling itself. (since &quot;&quot; always matches)
+rule = { &quot;&quot; ~ rule }
+
+// Rules indirectly left-recurse.
+rule_a = { rule_b }
+rule_b = { rule_a }
+
+// Rule still causes a stack-overflow for any other input than &quot;a&quot;.
+rule = { &quot;a&quot; | rule }
+</code></pre>
+<p>All left-recursion use cases can be rewritten in PEG using repetition, as will
+be seen in later chapters.</p>
 <a class="header" href="print.html#literals" id="literals"><h1>Literals</h1></a>
 <p>A good place to start when writing out the grammar of a language are the
 literals. For our small Rust subset, the literals that we are going to define
@@ -358,6 +378,7 @@ fn one_exponent() {
 #}</code></pre></pre>
 <p>More interesting test cases could be <code>&quot;0.e0&quot;</code>, <code>&quot;0.0e+0&quot;</code>, <code>&quot;0.0&quot;</code>,
 <code>&quot;0__.0__e-0__&quot;</code>.</p>
+<a class="header" href="print.html#strings" id="strings"><h2>Strings</h2></a>
 
                 </div>
 
