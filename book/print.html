@@ -227,7 +227,8 @@ be seen in later chapters.</p>
 <a class="header" href="print.html#literals" id="literals"><h1>Literals</h1></a>
 <p>A good place to start when writing out the grammar of a language are the
 literals. For our small Rust subset, the literals that we are going to define
-are booleans, integers, floating point numbers, strings, types, and identifiers.</p>
+are booleans, integers, floating point numbers, strings, characters, types, and
+identifiers.</p>
 <a class="header" href="print.html#booleans" id="booleans"><h2>Booleans</h2></a>
 <p>Defining booleans is probably the easiest step. We need a rule with two
 variants, <code>true</code> and <code>false</code>:</p>
@@ -379,6 +380,86 @@ fn one_exponent() {
 <p>More interesting test cases could be <code>&quot;0.e0&quot;</code>, <code>&quot;0.0e+0&quot;</code>, <code>&quot;0.0&quot;</code>,
 <code>&quot;0__.0__e-0__&quot;</code>.</p>
 <a class="header" href="print.html#strings" id="strings"><h2>Strings</h2></a>
+<p>Strings can get a little bit tricky since you have to make sure that you include
+string escapes in your grammar. This is needed since you have no other way of
+knowing exactly where the string ending quote will be and also because it makes
+escaping easier later on.</p>
+<p>Let's start by focusing on the high level definition. A string is a repetition
+of raw string parts (containing no escapes) and actual escapes, all enclosed
+within a pair of quotes:</p>
+<pre><code>string = { &quot;\&quot;&quot; ~ (raw_string | escape)* ~ &quot;\&quot;&quot; }
+</code></pre>
+<p>Raw strings can basically be any character apart from <code>'\'</code>, since that means
+we're about to start an escape clause, and <code>'&quot;'</code>, since that means we're about
+to end the string. In order to match anything but these two characters, we look
+ahead and fail the rule if we match these two characters. For this, we're going
+to use a negative lookahead (<code>!</code>). After we made sure that we're matching the
+correct character, we use the predefined rule <code>any</code> to actually force the parser
+to skip this character, since the lookahead is non-destructive:</p>
+<pre><code>raw_string = { (!(&quot;\\&quot; | &quot;\&quot;&quot;) ~ any)+ }
+</code></pre>
+<p>Rust string literals can be:</p>
+<ul>
+<li>predefined: <code>'\n'</code>, <code>'\r'</code>, <code>'\t'</code>, <code>'\\'</code>, <code>'\0'</code>,</li>
+<li>bytes: <code>'\x$$'</code>, where <code>$$</code> are two hexadecimal digits</li>
+<li>unicode: <code>\u{$}</code> - <code>\u{$$$$$$}</code>, where <code>$</code>s are from 1 up to 6 hexadecimal
+digits</li>
+</ul>
+<p>A good place to start is to define the hex digit:</p>
+<pre><code>hex = _{ '0'..'9' | 'a'..'f' | 'A'..'F' }
+</code></pre>
+<p>To define a rule that can have from 1 up to 6 hex digits is to check whether
+you have 6 already, and, if not, to match as many as possible. This way, if you
+have more than 6, the rule will match the 6 and fail later down the path. It you
+have less than 6, the second part of the choice will obviously match less than 6
+as well.</p>
+<pre><code>unicode_hex = { hex ~ hex ~ hex ~ hex ~ hex ~ hex | hex+ }
+</code></pre>
+<p>We now have everything we need to define escapes:</p>
+<pre><code>predefined = { &quot;n&quot; | &quot;r&quot; | &quot;t&quot; | &quot;\\&quot; | &quot;0&quot; }
+byte       = { &quot;x&quot; ~ hex ~ hex }
+unicode    = { &quot;u&quot; ~ &quot;{&quot; ~ unicode_hex ~ &quot;}&quot; }
+escape     = { &quot;\\&quot; ~ (predefined | byte | unicode) }
+</code></pre>
+<p>For the sake of compactness, we can write a single test that encompasses
+everything interesting:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+#[test]
+fn string_with_all_escape_types() {
+    parses_to! {
+        parser: RustParser,
+        input: r#&quot;&quot;a\nb\x0Fc\u{a}d\u{AbAbAb}e&quot;&quot;#,
+        rule: Rule::string,
+        tokens: [
+            string(0, 28, [
+                raw_string(1, 2),
+                escape(2, 4, [
+                    predefined(3, 4)
+                ]),
+                raw_string(4, 5),
+                escape(5, 9, [
+                    byte(6, 9)
+                ]),
+                raw_string(9, 10),
+                escape(10, 15, [
+                    unicode(11, 15, [
+                        unicode_hex(13, 14)
+                    ])
+                ]),
+                raw_string(15, 16),
+                escape(16, 26, [
+                    unicode(17, 26, [
+                        unicode_hex(19, 25)
+                    ])
+                ]),
+                raw_string(26, 27)
+            ])
+        ]
+    };
+}
+#}</code></pre></pre>
 
                 </div>
 
