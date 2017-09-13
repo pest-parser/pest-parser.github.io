@@ -416,7 +416,7 @@ as well.</p>
 <pre><code>unicode_hex = { hex ~ hex ~ hex ~ hex ~ hex ~ hex | hex+ }
 </code></pre>
 <p>We now have everything we need to define escapes:</p>
-<pre><code>predefined = { &quot;n&quot; | &quot;r&quot; | &quot;t&quot; | &quot;\\&quot; | &quot;0&quot; }
+<pre><code>predefined = { &quot;n&quot; | &quot;r&quot; | &quot;t&quot; | &quot;\\&quot; | &quot;0&quot; | &quot;\&quot;&quot; | &quot;'&quot; }
 byte       = { &quot;x&quot; ~ hex ~ hex }
 unicode    = { &quot;u&quot; ~ &quot;{&quot; ~ unicode_hex ~ &quot;}&quot; }
 escape     = { &quot;\\&quot; ~ (predefined | byte | unicode) }
@@ -460,6 +460,39 @@ fn string_with_all_escape_types() {
     };
 }
 #}</code></pre></pre>
+<a class="header" href="print.html#characters" id="characters"><h2>Characters</h2></a>
+<p>Characters are very similar to strings, with the obvious exception that may only
+store one character:</p>
+<pre><code>chr = { &quot;'&quot; ~ (escape | any) ~ &quot;'&quot; }
+</code></pre>
+<p>Tests should cover at least the usual and the escape cases, e.g. <code>&quot;'a'&quot;</code>,
+<code>&quot;'\''&quot;</code>.</p>
+<a class="header" href="print.html#types" id="types"><h2>Types</h2></a>
+<p>Types should only be the few primitives defined here:</p>
+<pre><code>i32_ty  = { &quot;i32&quot; }
+f32_ty  = { &quot;f32&quot; }
+char_ty = { &quot;char&quot; }
+str_ty  = { &quot;str&quot; }
+
+ty = { i32_ty | f32_ty | char_ty | str_ty }
+</code></pre>
+<p>Writing one test for each of the four cases should suffice.</p>
+<a class="header" href="print.html#identifiers" id="identifiers"><h2>Identifiers</h2></a>
+<p>Full-blown Rust identifiers can be a bit complex, so we will only focus on ASCII
+variants:</p>
+<ul>
+<li>an identifier is made up of alphanumeric characters and underscores</li>
+<li>the first character cannot be a digit</li>
+<li>underscores need to be followed by at least another character</li>
+</ul>
+<p>This can be implemented by having a choice clause between two cases:</p>
+<pre><code>ident_char = _{ 'a'..'z' | 'A'..'Z' | '0'..'9' | &quot;_&quot; }
+ident      =  {
+    ('a'..'z' | 'A'..'Z') ~ ident_char* |
+    &quot;_&quot; ~ ident_char+
+}
+</code></pre>
+<p>Interesting test cases could be <code>&quot;aBc0&quot;</code>, <code>&quot;_0AbC&quot;</code>.</p>
 
                 </div>
 
