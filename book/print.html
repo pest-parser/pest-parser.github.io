@@ -66,7 +66,7 @@
         </script>
 
         <div id="sidebar" class="sidebar">
-            <ul class="chapter"><li class="affix"><a href="./intro.html">Introduction</a></li><li><a href="./setup.html"><strong>1.</strong> Setup</a></li><li><a href="./peg.html"><strong>2.</strong> Parsing expression grammar</a></li><li><a href="./literals.html"><strong>3.</strong> Literals</a></li></ul>
+            <ul class="chapter"><li class="affix"><a href="./intro.html">Introduction</a></li><li><a href="./setup.html"><strong>1.</strong> Setup</a></li><li><a href="./peg.html"><strong>2.</strong> Parsing expression grammar</a></li><li><a href="./literals.html"><strong>3.</strong> Literals</a></li><li><a href="./syntax.html"><strong>4.</strong> Syntax</a></li></ul>
         </div>
 
         <div id="page-wrapper" class="page-wrapper">
@@ -222,8 +222,8 @@ rule_b = { rule_a }
 // Rule still causes a stack-overflow for any other input than &quot;a&quot;.
 rule = { &quot;a&quot; | rule }
 </code></pre>
-<p>All left-recursion use cases can be rewritten in PEG using repetition, as will
-be seen in later chapters.</p>
+<p>All left-recursion use cases can be rewritten in PEG using repetition or layers
+of indirection, as will be seen in later chapters.</p>
 <a class="header" href="print.html#literals" id="literals"><h1>Literals</h1></a>
 <p>A good place to start when writing out the grammar of a language are the
 literals. For our small Rust subset, the literals that we are going to define
@@ -493,6 +493,81 @@ ident      =  {
 }
 </code></pre>
 <p>Interesting test cases could be <code>&quot;aBc0&quot;</code>, <code>&quot;_0AbC&quot;</code>.</p>
+<a class="header" href="print.html#syntax" id="syntax"><h1>Syntax</h1></a>
+<p>Now that we have literals defined, the next step is to compose them into the
+syntax of the language. This syntax will only focus on expressions, statements,
+and functions as a subset of Rust. These in turn will not be complete
+definitions.</p>
+<a class="header" href="print.html#expressions" id="expressions"><h2>Expressions</h2></a>
+<p>We will define expressions as a combination of unary and infix operations, and
+method calls. The operators that we will use for this subset are:</p>
+<pre><code>op_unary_minus =  { &quot;-&quot; }
+op_unary_not   =  { &quot;!&quot; }
+op_unary       = _{
+    op_unary_minus |
+    op_unary_not
+}
+
+op_plus          =  { &quot;+&quot; }
+op_minus         =  { &quot;-&quot; }
+op_times         =  { &quot;*&quot; }
+op_divide        =  { &quot;/&quot; }
+op_and           =  { &quot;&amp;&amp;&quot; }
+op_or            =  { &quot;||&quot; }
+op_greater       =  { &quot;&gt;&quot; }
+op_greater_equal =  { &quot;&gt;=&quot; }
+op_lower         =  { &quot;&lt;&quot; }
+op_lower_equal   =  { &quot;&lt;=&quot; }
+op_equal         =  { &quot;==&quot; }
+op_infix         = _{
+    op_plus |
+    op_minus |
+    op_times |
+    op_divide |
+    op_and |
+    op_or |
+    op_greater |
+    op_greater_equal |
+    op_lower |
+    op_lower_equal |
+    op_equal
+}
+
+paren_open  = { &quot;(&quot; }
+paren_close = { &quot;)&quot; }
+</code></pre>
+<p>We also defined parentheses rules since they will come in handy in a bit.
+Because PEGs do not support left-recursion, we will have to make sure to have
+a layer of indirection when defining infix expressions, while unaries and method
+calls will be defined with the use of repetitions.</p>
+<p>The easiest way to start would be to define expressions with the highest
+priorities. These expressions will be the only ones that unaries can be formed
+with and methods can be called on. They are the literals defined in the previous
+chapter plus expressions nested in parentheses:</p>
+<pre><code>value = {
+    float | // float comes before int since they overlap
+    int |
+    chr |
+    string |
+    ident |
+    paren_open ~ expr ~ paren_close
+}
+</code></pre>
+<p>With that out of the way, a next step would be to define what a call should look
+like:</p>
+<pre><code>dot   =  { &quot;.&quot; }
+comma =  { &quot;,&quot; }
+args  = _{ expr ~ (comma ~ expr)* }
+call  =  { ident ~ paren_open ~ args? ~ paren_close }
+</code></pre>
+<p>Now we can include unaries and method calls in one single term rule that will
+be used in infix expressions:</p>
+<pre><code>term = { op_unary* ~ value ~ (dot ~ call)* }
+expr = { term ~ (op_infix ~ term)* }
+</code></pre>
+<p>Extensive testing would be handy here, especially more complex cases that
+combine expression types, but also separate tests for individual behavior.</p>
+<a class="header" href="print.html#statements" id="statements"><h2>Statements</h2></a>
 
                 </div>
 
