@@ -1,0 +1,451 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Syntax of pest parsers - </title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="../">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme -->
+        
+
+        
+
+        <!-- Fetch Clipboard.js from CDN but have a local fallback -->
+        <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
+        <script>
+            if (typeof Clipboard == 'undefined') {
+                document.write(unescape("%3Cscript src='clipboard.min.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch store.js from local - TODO add CDN when 2.x.x is available on cdnjs -->
+        <script src="store.js"></script>
+
+        <!-- Custom JS script -->
+        
+
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = store.get('theme');
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = store.get('sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="./intro.html"><strong>1.</strong> Introduction</a></li><li><ul class="section"><li><a href="./examples/csv.html"><strong>1.1.</strong> Example: CSV</a></li></ul></li><li><a href="./parser_api.html"><strong>2.</strong> Parser API</a></li><li><ul class="section"><li><a href="./examples/ini.html"><strong>2.1.</strong> Example: INI (WIP)</a></li></ul></li><li><a href="./grammars/grammars.html"><strong>3.</strong> Grammars</a></li><li><ul class="section"><li><a href="./grammars/peg.html"><strong>3.1.</strong> Parsing expression grammars</a></li><li><a href="./grammars/syntax.html" class="active"><strong>3.2.</strong> Syntax of pest parsers</a></li><li><a href="./examples/json.html"><strong>3.3.</strong> Example: JSON (WIP)</a></li></ul></li><li><a href="./precedence.html"><strong>4.</strong> Operator precedence (WIP)</a></li><li><ul class="section"><li><a href="./examples/calculator.html"><strong>4.1.</strong> Example: Calculator (WIP)</a></li></ul></li><li><a href="./examples/awk.html"><strong>5.</strong> Final project: Awk clone (WIP)</a></li><li><a href="./examples/rust/setup.html"><strong>6.</strong> Bonus project: Rust grammar (WIP)</a></li><li><ul class="section"><li><a href="./examples/rust/literals.html"><strong>6.1.</strong> Literals</a></li><li><a href="./examples/rust/syntax.html"><strong>6.2.</strong> Syntax</a></li></ul></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page" tabindex="-1">
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush"></i>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="syntax.html#syntax of pest parsers" id="syntax of pest parsers"><h1>Syntax of pest parsers</h1></a>
+<p><code>pest</code> grammars are lists of rules. Rules are defined like this:</p>
+<pre><code>my_rule = { ... }
+
+another_rule = {        // comments are preceded by two slashes
+    ...                 // whitespace goes anywhere
+}
+</code></pre>
+<p>Since rule names are translated into Rust enum variants, they are not allowed
+to be Rust keywords.</p>
+<p>The left curly bracket <code>{</code> defining a rule can be preceded by <a href="syntax.html#silent-and-atomic-rules">symbols that
+affect its operation</a>:</p>
+<pre><code>silent_rule = _{ ... }
+atomic_rule = @{ ... }
+</code></pre>
+<a class="header" href="syntax.html#expressions" id="expressions"><h2>Expressions</h2></a>
+<p>Grammar rules are built from <em>expressions</em> (hence &quot;parsing expression
+grammar&quot;). These expressions are a terse, formal description of how to parse an
+input string.</p>
+<p>Expressions are composable: they can be built out of other expressions and
+nested inside of each other to produce arbitrarily complex rules (although you
+should break very complicated expressions into multiple rules to make them
+easier to manage).</p>
+<p>PEG expressions are suitable for both high-level meaning, like &quot;a function
+signature, followed by a function body&quot;, and low-level meaning, like &quot;a
+semicolon, followed by a line feed&quot;. The combining form &quot;followed by&quot;,
+the <a href="syntax.html#sequence">sequence operator</a>, is the same in either case.</p>
+<a class="header" href="syntax.html#terminals" id="terminals"><h3>Terminals</h3></a>
+<p>The most basic rule is a <strong>literal string</strong> in double quotes: <code>&quot;text&quot;</code>.</p>
+<p>A string can be <strong>case-insensitive</strong> (for ASCII characters only) if preceded by
+a caret: <code>^&quot;text&quot;</code>.</p>
+<p>A single <strong>character in a range</strong> is written as two single-quoted characters,
+separated by two dots: <code>'0'..'9'</code>.</p>
+<p>You can match <strong>any single character</strong> at all with the special rule <code>any</code>. This
+is equivalent to <code>'\u{00}'..'\u{10FFFF}'</code>, any single Unicode character.</p>
+<pre><code>&quot;a literal string&quot;
+^&quot;ASCII case-insensitive string&quot;
+'a'..'z'
+any
+</code></pre>
+<p>Finally, you can <strong>refer to other rules</strong> by writing their names directly, and
+even <strong>use rules recursively</strong>:</p>
+<pre><code>my_rule = { &quot;slithy &quot; ~ other_rule }
+other_rule = { &quot;toves&quot; }
+recursive_rule = { &quot;mimsy &quot; ~ recursive_rule }
+</code></pre>
+<a class="header" href="syntax.html#sequence" id="sequence"><h3>Sequence</h3></a>
+<p>The sequence operator is written as a tilde <code>~</code>.</p>
+<pre><code>first ~ and_then
+
+(&quot;abc&quot;) ~ (^&quot;def&quot;) ~ ('g'..'z')        // matches &quot;abcDEFr&quot;
+</code></pre>
+<p>When matching a sequence expression, <code>first</code> is attempted. If <code>first</code> matches
+successfully, <code>and_then</code> is attempted next. However, if <code>first</code> fails, the
+entire expression fails.</p>
+<p>A list of expressions can be chained together with sequences, which indicates
+that <em>all</em> of the components must occur, in the specified order.</p>
+<a class="header" href="syntax.html#ordered choice" id="ordered choice"><h3>Ordered choice</h3></a>
+<p>The choice operator is written as a vertical line <code>|</code>.</p>
+<pre><code>first | or_else
+
+(&quot;abc&quot;) | (^&quot;def&quot;) | ('g'..'z')        // matches &quot;DEF&quot;
+</code></pre>
+<p>When matching a choice expression, <code>first</code> is attempted. If <code>first</code> matches
+successfully, the entire expression <em>succeeds immediately</em>. However, if <code>first</code>
+fails, <code>or_else</code> is attempted next.</p>
+<p>Note that <code>first</code> and <code>or_else</code> are always attempted at the same position, even
+if <code>first</code> matched some input before it failed. When encountering a parse
+failure, the engine will try the next ordered choice as though no input had
+been matched. Failed parses never consume any input.</p>
+<pre><code>start = { &quot;Beware &quot; ~ creature }
+creature = {
+    (&quot;the &quot; ~ &quot;Jabberwock&quot;)
+    | (&quot;the &quot; ~ &quot;Jubjub bird&quot;)
+}
+
+&quot;Beware the Jubjub bird&quot;
+ ^ (start) Parses via the second choice of `creature`,
+           even though the first choice matched &quot;the &quot; successfully.
+</code></pre>
+<p>It is somewhat tempting to borrow terminology and think of this operation as
+&quot;alternation&quot; or simply &quot;OR&quot;, but this is misleading. The word &quot;choice&quot; is used
+specifically because <a href="grammars/peg.html#ordered-choice">the operation is <em>not</em> merely logical &quot;OR&quot;</a>.</p>
+<a class="header" href="syntax.html#repetition" id="repetition"><h3>Repetition</h3></a>
+<p>There are two repetition operators: the asterisk <code>*</code> and plus sign <code>+</code>. They
+are placed after an expression. The asterisk <code>*</code> indicates that the preceding
+expression can occur <strong>zero or more</strong> times. The plus sign <code>+</code> indicates that
+the preceding expression can occur <strong>one or more</strong> times (it must occur at
+least once).</p>
+<p>The question mark operator <code>?</code> is similar, except it indicates that the
+expression is <strong>optional</strong> — it can occur zero or one times.</p>
+<pre><code>(&quot;zero&quot; ~ &quot;or&quot; ~ &quot;more&quot;)*
+ (&quot;one&quot; | &quot;or&quot; | &quot;more&quot;)+
+           (^&quot;optional&quot;)?
+</code></pre>
+<p>Note that <code>expr*</code> will always succeed, because it is allowed to match zero
+times. For example, if followed by a choice, as in <code>expr* | otherwise</code>, the
+rule <code>otherwise</code> will never be reached!</p>
+<p>Other <strong>numbers of repetitions</strong> can be indicated using curly brackets:</p>
+<pre><code>expr{n}           // exactly n repetitions
+expr{m, n}        // between m and n repetitions, inclusive
+
+expr{, n}         // at most n repetitions
+expr{m, }         // at least m repetitions
+</code></pre>
+<p>Thus <code>expr*</code> is equivalent to <code>expr{0, }</code>; <code>expr+</code> is equivalent to <code>expr{1, }</code>; and <code>expr?</code> is equivalent to <code>expr{0, 1}</code>.</p>
+<a class="header" href="syntax.html#predicates" id="predicates"><h3>Predicates</h3></a>
+<p>Preceding an expression with an ampersand <code>&amp;</code> or exclamation mark <code>!</code> turns it
+into a <em>predicate</em> that never consumes any input. You might know these
+operators as &quot;lookahead&quot; or &quot;non-progressing&quot;.</p>
+<p>The <strong>positive predicate</strong>, written as an ampersand <code>&amp;</code>, attempts to match its
+inner expression. If the inner expression succeeds, parsing continues, but at
+the <em>same position</em> as the predicate — <code>&amp;foo ~ bar</code> is thus a kind of
+&quot;AND&quot; statement: &quot;the input string must match <code>foo</code> AND <code>bar</code>&quot;. If the inner
+expression fails, the whole expression fails too.</p>
+<p>The <strong>negative predicate</strong>, written as an exclamation mark <code>!</code>, attempts to
+match its inner expression. If the inner expression <em>fails</em>, the predicate
+<em>succeeds</em> and parsing continues at the same position as the predicate. If the
+inner expression <em>succeeds</em>, the predicate <em>fails</em> — <code>!foo ~ bar</code> is thus
+a kind of &quot;NOT&quot; statement: &quot;the input string must match <code>bar</code> but NOT <code>foo</code>&quot;.</p>
+<p>This leads to the common idiom meaning &quot;any character but&quot;:</p>
+<pre><code>not_space_or_tab = {
+    !(                // if the following text is not
+        &quot; &quot;           //     a space
+        | &quot;\t&quot;        //     or a tab
+    )
+    ~ any             // then consume one character
+}
+
+triple_quoted_string = {
+    &quot;'''&quot;
+    ~ triple_quoted_character*
+    ~ &quot;'''&quot;
+}
+triple_quoted_character = {
+    !&quot;'''&quot;        // if the following text is not three apostrophes
+    ~ any         // then consume one character
+}
+</code></pre>
+<a class="header" href="syntax.html#operator precedence and grouping wip" id="operator precedence and grouping wip"><h2>Operator precedence and grouping (WIP)</h2></a>
+<p>The repetition operators asterisk <code>*</code>, plus sign <code>+</code>, and question mark <code>?</code>
+apply to the immediately preceding expression.</p>
+<pre><code>&quot;One &quot; ~ &quot;or &quot; ~ &quot;more. &quot;+
+&quot;One &quot; ~ &quot;or &quot; ~ (&quot;more. &quot;+)
+    are equivalent and match
+&quot;One or more. more. more. more. &quot;
+</code></pre>
+<p>Larger expressions can be repeated by surrounding them with parentheses.</p>
+<pre><code>(&quot;One &quot; ~ &quot;or &quot; ~ &quot;more. &quot;)+
+    matches
+&quot;One or more. One or more. &quot;
+</code></pre>
+<p>Repetition operators have the highest precedence, followed by predicate
+operators, the sequence operator, and finally ordered choice.</p>
+<pre><code>my_rule = {
+    &quot;a&quot;* ~ &quot;b&quot;?
+    | &amp;&quot;b&quot;+ ~ &quot;a&quot;
+}
+    equivalent to
+my_rule = {
+      ( (&quot;a&quot;*) ~ (&quot;b&quot;?) )
+    | ( (&amp;(&quot;b&quot;+&quot;)) ~ &quot;a&quot; )
+}
+</code></pre>
+<a class="header" href="syntax.html#start and end of input" id="start and end of input"><h2>Start and end of input</h2></a>
+<p>The rules <code>soi</code> and <code>eoi</code> match the <em>start</em> and <em>end</em> of the input string,
+respectively. Neither consumes any text. They only indicate whether the parser
+is currently at one edge of the input.</p>
+<p>For example, to ensure that a rule matches the entire input, where any syntax
+error results in a failed parse (rather than a successful but incomplete
+parse):</p>
+<pre><code>main = {
+    soi
+    ~ (...)
+    ~ eoi
+}
+</code></pre>
+<a class="header" href="syntax.html#implicit whitespace" id="implicit whitespace"><h2>Implicit whitespace</h2></a>
+<p>Many languages and text formats allow arbitrary whitespace and comments between
+logical tokens. For instance, Rust considers <code>4+5</code> equivalent to <code>4 + 5</code> and <code>4 /* comment */ + 5</code>.</p>
+<p>The <strong>optional rules <code>whitespace</code> and <code>comment</code></strong> implement this behaviour. If
+either (or both) are defined, they will be implicitly inserted at every
+<a href="syntax.html#sequence">sequence</a> and between every <a href="syntax.html#repetition">repetition</a> (except in <a href="syntax.html#atomic">atomic rules</a>).</p>
+<pre><code>expression = { &quot;4&quot; ~ &quot;+&quot; ~ &quot;5&quot; }
+whitespace = _{ &quot; &quot; }
+comment = _{ &quot;/*&quot; ~ (!&quot;*/&quot; ~ any)* ~ &quot;*/&quot; }
+    matches
+&quot;4+5&quot;
+&quot;4 + 5&quot;
+&quot;4  +     5&quot;
+&quot;4 /* comment */ + 5&quot;
+</code></pre>
+<p>As you can see, <code>whitespace</code> and <code>comment</code> are run repeatedly, so they need
+only match a single whitespace character or a single comment. The grammar above
+is equivalent to:</p>
+<pre><code>expression = {
+    &quot;4&quot;   ~ (ws | com)*
+    ~ &quot;+&quot; ~ (ws | com)*
+    ~ &quot;5&quot;
+}
+ws = _{ &quot; &quot; }
+com = _{ &quot;/*&quot; ~ (!&quot;*/&quot; ~ any)* ~ &quot;*/&quot; }
+</code></pre>
+<p>Note that implicit whitespace is <em>not</em> inserted at the beginning or end of rules
+— for instance, <code>expression</code> does <em>not</em> match <code>&quot; 4+5 &quot;</code>. If you want to
+include implicit whitespace at the beginning and end of a rule, you will need to
+sandwich it between two empty rules (often <code>soi</code> and <code>eoi</code> <a href="syntax.html#start-and-end-of-input">as above</a>):</p>
+<pre><code>whitespace = _{ &quot; &quot; }
+expression = { &quot;4&quot; ~ &quot;+&quot; ~ &quot;5&quot; }
+main = { soi ~ expression ~ eoi }
+    matches
+&quot;4+5&quot;
+&quot;  4 + 5   &quot;
+</code></pre>
+<p>(Be sure to mark the <code>whitespace</code> and <code>comment</code> rules as <a href="syntax.html#silent-and-atomic-rules">silent</a> unless you
+want to see them included inside other rules!)</p>
+<a class="header" href="syntax.html#silent and atomic rules" id="silent and atomic rules"><h2>Silent and atomic rules</h2></a>
+<p><strong>Silent</strong> rules are just like normal rules — when run, they function the
+same way — except they do not produce <a href="parser_api.html#pairs">pairs</a> or <a href="parser_api.html#tokens">tokens</a>. If a rule is
+silent, it will never appear in a parse result.</p>
+<p>To make a silent rule, precede the left curly bracket <code>{</code> with a low line
+(underscore) <code>_</code>.</p>
+<pre><code>silent = _{ ... }
+</code></pre>
+<a class="header" href="syntax.html#atomic" id="atomic"><h3>Atomic</h3></a>
+<p><code>pest</code> has two kinds of atomic rules: <strong>atomic</strong> and <strong>compound atomic</strong>. To
+make one, write the sigil before the left curly bracket <code>{</code>.</p>
+<pre><code>atomic = @{ ... }
+compound_atomic = ${ ... }
+</code></pre>
+<p>Both kinds of atomic rule prevent <a href="syntax.html#implicit-whitespace">implicit whitespace</a>: inside an atomic rule,
+the tilde <code>~</code> means &quot;immediately followed by&quot;, and <a href="syntax.html#repetition">repetition operators</a>
+(asterisk <code>*</code> and plus sign <code>+</code>) have no implicit separation. In addition, all
+other rules called from an atomic rule are also treated as atomic.</p>
+<p>The difference between the two is how they produce tokens for inner rules. In
+an atomic rule, interior matching rules are <a href="syntax.html#silent-and-atomic-rules">silent</a>. By contrast, compound
+atomic rules produce inner tokens as normal.</p>
+<p>Atomic rules are useful when the text you are parsing ignores whitespace except
+in a few cases, such as literal strings. In this instance, you can write
+<code>whitespace</code> or <code>comment</code> rules, then make your string-matching rule be atomic.</p>
+<a class="header" href="syntax.html#non-atomic" id="non-atomic"><h3>Non-atomic</h3></a>
+<p>Sometimes, you'll want to cancel the effects of atomic parsing. For instance,
+you might want to have string interpolation with an expression inside, where
+the inside expression can still have whitespace like normal.</p>
+<pre><code class="language-python">#!/bin/env python3
+print(f&quot;The answer is {2 + 4}.&quot;)
+</code></pre>
+<p>This is where you use a <strong>non-atomic</strong> rule. Write an exclamation mark <code>!</code> in
+front of the defining curly bracket. The rule will run as non-atomic, whether
+it is called from an atomic rule or not.</p>
+<pre><code>fstring = @{ &quot;\&quot;&quot; ~ ... }
+expr = !{ ... }
+</code></pre>
+<a class="header" href="syntax.html#the stack wip" id="the stack wip"><h2>The stack (WIP)</h2></a>
+<p><code>pest</code> maintains a stack that can be manipulated directly from the grammar. An
+expression can be matched and pushed onto the stack with the keyword <code>push</code>,
+then later matched exactly with the keywords <code>peek</code> and <code>pop</code>.</p>
+<p>Using the stack allows <em>the exact same text</em> to be matched multiple times,
+rather than <em>the same pattern</em>.</p>
+<p>For example,</p>
+<pre><code>same_text = {
+    push( &quot;a&quot; | &quot;b&quot; | &quot;c&quot; )
+    ~ pop
+}
+same_pattern = {
+    (&quot;a&quot; | &quot;b&quot; | &quot;c&quot;)
+    ~ (&quot;a&quot; | &quot;b&quot; | &quot;c&quot;)
+}
+</code></pre>
+<p>In this case, <code>same_pattern</code> will match <code>&quot;ab&quot;</code>, while <code>same_text</code> will not.</p>
+<p>One practical use is in parsing Rust <a href="https://doc.rust-lang.org/book/second-edition/appendix-02-operators.html#standalone-syntax">&quot;raw string literals&quot;</a>, which look like
+this:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+const raw_str: &amp;str = r###&quot;
+    Some number of number signs # followed by a quotation mark &quot;.
+
+    Quotation marks can be used anywhere inside: &quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;,
+    as long as one is not followed by a matching number of number signs,
+    which ends the string: &quot;###;
+#}</code></pre></pre>
+<p>When parsing a raw string, we have to keep track of how many number signs <code>#</code>
+occurred before the quotation mark. We can do this using the stack:</p>
+<pre><code>raw_string = {
+    &quot;r&quot; ~ push(&quot;#&quot;*) ~ &quot;\&quot;&quot;    // push the number signs onto the stack
+    ~ raw_string_interior
+    ~ &quot;\&quot;&quot; ~ pop               // match a quotation mark and the number signs
+}
+raw_string_interior = {
+    (
+        !(&quot;\&quot;&quot; ~ peek)    // unless the next character is a quotation mark
+                          // followed by the correct amount of number signs,
+        ~ any             // consume one character
+    )*
+}
+</code></pre>
+<a class="header" href="syntax.html#cheat sheet" id="cheat sheet"><h1>Cheat sheet</h1></a>
+<table><thead><tr><th align="center"> Syntax           </th><th align="center"> Meaning                           </th><th align="center"> Syntax                  </th><th align="center"> Meaning              </th></tr></thead><tbody>
+<tr><td align="center"> <code>foo = { ... }</code> </td><td align="center"> <a href="syntax.html#syntax-of-pest-parsers">regular rule</a>                    </td><td align="center"> <code>baz = @{ ... }</code>        </td><td align="center"> <a href="syntax.html#atomic">atomic</a>             </td></tr>
+<tr><td align="center"> <code>bar = _{ ... }</code> </td><td align="center"> <a href="syntax.html#silent-and-atomic-rules">silent</a>                          </td><td align="center"> <code>qux = ${ ... }</code>        </td><td align="center"> <a href="syntax.html#atomic">compound-atomic</a>    </td></tr>
+<tr><td align="center">                  </td><td align="center">                                   </td><td align="center"> <code>plugh = !{ ... }</code>      </td><td align="center"> <a href="syntax.html#non-atomic">non-atomic</a>         </td></tr>
+<tr><td align="center"> <code>&quot;abc&quot;</code>          </td><td align="center"> <a href="syntax.html#terminals">exact string</a>                    </td><td align="center"> <code>^&quot;abc&quot;</code>                </td><td align="center"> <a href="syntax.html#terminals">case insensitive</a>   </td></tr>
+<tr><td align="center"> <code>'a'..'z'</code>       </td><td align="center"> <a href="syntax.html#terminals">character range</a>                 </td><td align="center"> <code>any</code>                   </td><td align="center"> <a href="syntax.html#terminals">any character</a>      </td></tr>
+<tr><td align="center"> <code>foo ~ bar</code>      </td><td align="center"> <a href="syntax.html#sequence">sequence</a>                        </td><td align="center"> <code>baz | qux</code> </td><td align="center"> <a href="syntax.html#ordered-choice">ordered choice</a>     </td></tr>
+<tr><td align="center"> <code>foo*</code>           </td><td align="center"> <a href="syntax.html#repetition">zero or more</a>                    </td><td align="center"> <code>bar+</code>                  </td><td align="center"> <a href="syntax.html#repetition">one or more</a>        </td></tr>
+<tr><td align="center"> <code>baz?</code>           </td><td align="center"> <a href="syntax.html#repetition">optional</a>                        </td><td align="center"> <code>qux{n}</code>                </td><td align="center"> <a href="syntax.html#repetition">exactly <em>n</em></a>        </td></tr>
+<tr><td align="center"> <code>qux{m, n}</code>      </td><td align="center"> <a href="syntax.html#repetition">between <em>m</em> and <em>n</em> (inclusive)</a> </td><td align="center">                         </td><td align="center">                      </td></tr>
+<tr><td align="center"> <code>&amp;foo</code>           </td><td align="center"> <a href="syntax.html#predicates">positive predicate</a>              </td><td align="center"> <code>!bar</code>                  </td><td align="center"> <a href="syntax.html#predicates">negative predicate</a> </td></tr>
+<tr><td align="center"> <code>push(baz)</code>      </td><td align="center"> <a href="syntax.html#the-stack-wip">match and push</a>                  </td><td align="center">                         </td><td align="center">                      </td></tr>
+<tr><td align="center"> <code>pop</code>            </td><td align="center"> <a href="syntax.html#the-stack-wip">match and pop</a>                   </td><td align="center"> <code>peek</code>                  </td><td align="center"> <a href="syntax.html#the-stack-wip">match without pop</a>  </td></tr>
+</tbody></table>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+                    <a rel="prev" href="./grammars/peg.html" class="mobile-nav-chapters previous">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="./examples/json.html" class="mobile-nav-chapters next">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+
+            </div>
+
+            
+                <a href="./grammars/peg.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+            
+
+            
+                <a href="./examples/json.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+
+        
+
+        
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+    </body>
+</html>

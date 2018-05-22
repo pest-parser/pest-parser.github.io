@@ -1,0 +1,147 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Final project: Awk clone (WIP) - </title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="../">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme -->
+        
+
+        
+
+        <!-- Fetch Clipboard.js from CDN but have a local fallback -->
+        <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
+        <script>
+            if (typeof Clipboard == 'undefined') {
+                document.write(unescape("%3Cscript src='clipboard.min.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch store.js from local - TODO add CDN when 2.x.x is available on cdnjs -->
+        <script src="store.js"></script>
+
+        <!-- Custom JS script -->
+        
+
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = store.get('theme');
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = store.get('sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="./intro.html"><strong>1.</strong> Introduction</a></li><li><ul class="section"><li><a href="./examples/csv.html"><strong>1.1.</strong> Example: CSV</a></li></ul></li><li><a href="./parser_api.html"><strong>2.</strong> Parser API</a></li><li><ul class="section"><li><a href="./examples/ini.html"><strong>2.1.</strong> Example: INI (WIP)</a></li></ul></li><li><a href="./grammars/grammars.html"><strong>3.</strong> Grammars</a></li><li><ul class="section"><li><a href="./grammars/peg.html"><strong>3.1.</strong> Parsing expression grammars</a></li><li><a href="./grammars/syntax.html"><strong>3.2.</strong> Syntax of pest parsers</a></li><li><a href="./examples/json.html"><strong>3.3.</strong> Example: JSON (WIP)</a></li></ul></li><li><a href="./precedence.html"><strong>4.</strong> Operator precedence (WIP)</a></li><li><ul class="section"><li><a href="./examples/calculator.html"><strong>4.1.</strong> Example: Calculator (WIP)</a></li></ul></li><li><a href="./examples/awk.html" class="active"><strong>5.</strong> Final project: Awk clone (WIP)</a></li><li><a href="./examples/rust/setup.html"><strong>6.</strong> Bonus project: Rust grammar (WIP)</a></li><li><ul class="section"><li><a href="./examples/rust/literals.html"><strong>6.1.</strong> Literals</a></li><li><a href="./examples/rust/syntax.html"><strong>6.2.</strong> Syntax</a></li></ul></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page" tabindex="-1">
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush"></i>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="awk.html#final project awk clone wip" id="final project awk clone wip"><h1>Final project: Awk clone (WIP)</h1></a>
+<p>This chapter will walk through the creation of a simple variant of <a href="http://pubs.opengroup.org/onlinepubs/9699919799/utilities/awk.html">Awk</a> (only
+loosely following the POSIX specification). It will probably have several
+sections. It will provide an example of a full project based on <code>pest</code> with a
+manageable grammar, a straightforward AST, and a fairly simple interpreter.</p>
+<p>This Awk clone will support regex patterns, string and numeric variables, most
+of the POSIX operators, and some functions. It will not support user-defined
+functions in the interest of avoiding variable scoping.</p>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+                    <a rel="prev" href="./examples/calculator.html" class="mobile-nav-chapters previous">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="./examples/rust/setup.html" class="mobile-nav-chapters next">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+
+            </div>
+
+            
+                <a href="./examples/calculator.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+            
+
+            
+                <a href="./examples/rust/setup.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+
+        
+
+        
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+    </body>
+</html>

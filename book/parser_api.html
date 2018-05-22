@@ -1,0 +1,351 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Parser API - </title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme -->
+        
+
+        
+
+        <!-- Fetch Clipboard.js from CDN but have a local fallback -->
+        <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
+        <script>
+            if (typeof Clipboard == 'undefined') {
+                document.write(unescape("%3Cscript src='clipboard.min.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch store.js from local - TODO add CDN when 2.x.x is available on cdnjs -->
+        <script src="store.js"></script>
+
+        <!-- Custom JS script -->
+        
+
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = store.get('theme');
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = store.get('sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="./intro.html"><strong>1.</strong> Introduction</a></li><li><ul class="section"><li><a href="./examples/csv.html"><strong>1.1.</strong> Example: CSV</a></li></ul></li><li><a href="./parser_api.html" class="active"><strong>2.</strong> Parser API</a></li><li><ul class="section"><li><a href="./examples/ini.html"><strong>2.1.</strong> Example: INI (WIP)</a></li></ul></li><li><a href="./grammars/grammars.html"><strong>3.</strong> Grammars</a></li><li><ul class="section"><li><a href="./grammars/peg.html"><strong>3.1.</strong> Parsing expression grammars</a></li><li><a href="./grammars/syntax.html"><strong>3.2.</strong> Syntax of pest parsers</a></li><li><a href="./examples/json.html"><strong>3.3.</strong> Example: JSON (WIP)</a></li></ul></li><li><a href="./precedence.html"><strong>4.</strong> Operator precedence (WIP)</a></li><li><ul class="section"><li><a href="./examples/calculator.html"><strong>4.1.</strong> Example: Calculator (WIP)</a></li></ul></li><li><a href="./examples/awk.html"><strong>5.</strong> Final project: Awk clone (WIP)</a></li><li><a href="./examples/rust/setup.html"><strong>6.</strong> Bonus project: Rust grammar (WIP)</a></li><li><ul class="section"><li><a href="./examples/rust/literals.html"><strong>6.1.</strong> Literals</a></li><li><a href="./examples/rust/syntax.html"><strong>6.2.</strong> Syntax</a></li></ul></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page" tabindex="-1">
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush"></i>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="parser_api.html#parser api" id="parser api"><h1>Parser API</h1></a>
+<p><code>pest</code> provides several ways of accessing the results of a successful parse. We
+will use the following grammar to demonstrate examples:</p>
+<pre><code>number = { '0'..'9'+ }                   // one or more decimal digits
+enclosed = { &quot;(..&quot; ~ number ~ &quot;..)&quot; }    // for instance, &quot;(..6472..)&quot;
+sum = { number ~ &quot; + &quot; ~ number }        // for instance, &quot;1362 + 12&quot;
+</code></pre>
+<a class="header" href="parser_api.html#tokens" id="tokens"><h2>Tokens</h2></a>
+<p><code>pest</code> represents successful parses using <em>tokens</em>. Whenever a rule matches,
+two tokens are produced: one at the <em>start</em> of the text that the rule matched,
+and one at the <em>end</em>. For example, the rule <code>number</code> applied to the string
+<code>&quot;3130 abc&quot;</code> would match and produce this pair of tokens:</p>
+<pre><code>&quot;3130 abc&quot;
+ |   ^ end(number)
+ ^ start(number)
+</code></pre>
+<p>Note that the rule doesn't match the entire input text. It only matches as much
+text as possible, then stops if successful.</p>
+<p>A token is like a cursor in the input string. It has a character position in
+the string, as well as a reference to the rule that created it.</p>
+<a class="header" href="parser_api.html#nested rules" id="nested rules"><h3>Nested rules</h3></a>
+<p>If a named rule contains another named rule, tokens will be produced for <em>both</em>
+rules. For instance, the rule <code>enclosed</code> applied to the string <code>&quot;(..6472..)&quot;</code>
+would match and produce these four tokens:</p>
+<pre><code>&quot;(..6472..)&quot;
+ |  |   |  ^ end(enclosed)
+ |  |   ^ end(number)
+ |  ^ start(number)
+ ^ start(enclosed)
+</code></pre>
+<p>Sometimes, tokens might not occur at distinct character positions. For example,
+when parsing the rule <code>sum</code>, the inner <code>number</code> rules share some start and end
+positions:</p>
+<pre><code>&quot;1773 + 1362&quot;
+ |   |  |   ^ end(sum)
+ |   |  |   ^ end(number)
+ |   |  ^ start(number)
+ |   ^ end(number)
+ ^ start(number)
+ ^ start(sum)
+</code></pre>
+<p>In fact, for a rule that matches empty input, the start and end tokens will be
+at the same position!</p>
+<a class="header" href="parser_api.html#interface" id="interface"><h3>Interface</h3></a>
+<p>Tokens are exposed as the <a href="https://docs.rs/pest/1.0/pest/enum.Token.html"><code>Token</code></a> enum, which has <code>Start</code> and <code>End</code> variants.
+You can get an iterator of <code>Token</code>s by calling <code>tokens</code> on a parse result:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+let parse_result = Parser::parse(Rule::sum, &quot;1773 + 1362&quot;).unwrap();
+let tokens = parse_result.tokens();
+
+for token in tokens {
+    println!(&quot;{:?}&quot;, token);
+}
+#}</code></pre></pre>
+<p>After a successful parse, tokens will occur as nested pairs of matching <code>Start</code>
+and <code>End</code>. Both kinds of tokens have two fields:</p>
+<ul>
+<li><code>rule</code>, which explains which rule generated them; and</li>
+<li><code>pos</code>, which indicates their positions.</li>
+</ul>
+<p>A start token's position is the first character that the rule matched. An end
+token's position is the first character that the rule did not match —
+that is, an end token refers to a position <em>after</em> the match. If a rule matched
+the entire input string, the end token points to an imaginary position <em>after</em>
+the string.</p>
+<a class="header" href="parser_api.html#pairs" id="pairs"><h2>Pairs</h2></a>
+<p>Tokens are not the most convenient interface, however. Usually you will want to
+explore the parse tree by considering matching pairs of tokens. For this
+purpose, <code>pest</code> provides the <a href="https://docs.rs/pest/1.0/pest/iterators/struct.Pair.html"><code>Pair</code></a> type.</p>
+<p>A <code>Pair</code> represents a matching pair of tokens, or, equivalently, the spanned
+text that a named rule successfully matched. It is commonly used in several
+ways:</p>
+<ul>
+<li>Determining which rule produced the <code>Pair</code></li>
+<li>Using the <code>Pair</code> as a raw <code>&amp;str</code></li>
+<li>Inspecting the inner named sub-rules that produced the <code>Pair</code></li>
+</ul>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+let pair = Parser::parse(Rule::enclosed, &quot;(..6472..) and more text&quot;)
+    .unwrap().next().unwrap();
+
+assert_eq!(pair.as_rule(), Rule::enclosed);
+assert_eq!(pair.as_str(), &quot;(..6472..)&quot;);
+
+let inner_rules = pair.into_inner();
+println!(&quot;{}&quot;, inner_rules); // --&gt; [number(3, 7)]
+#}</code></pre></pre>
+<p>In general, a <code>Pair</code> might have any number of inner rules: zero, one, or more.
+For maximum flexibility, <code>Pair::into_inner()</code> returns <code>Pairs</code>, which is an
+iterator over each pair.</p>
+<p>This means that you can use <code>for</code> loops on parse results, as well as iterator
+methods such as <code>map</code>, <code>filter</code>, and <code>collect</code>.</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+let pairs = Parser::parse(Rule::sum, &quot;1773 + 1362&quot;)
+    .unwrap().next().unwrap()
+    .into_inner();
+
+let numbers = pairs
+    .clone()
+    .map(|pair| str::parse(pair.as_str()).unwrap())
+    .collect::&lt;Vec&lt;i32&gt;&gt;();
+assert_eq!(vec![1773, 1362], numbers);
+
+for (found, expected) in pairs.zip(vec![&quot;1773&quot;, &quot;1362&quot;]) {
+    assert_eq!(Rule::number, found.as_rule());
+    assert_eq!(expected, found.as_str());
+}
+#}</code></pre></pre>
+<p><code>Pairs</code> iterators are also commonly used via the <code>next</code> method directly. If a
+rule consists of a known number of sub-rules (for instance, the rule <code>sum</code> has
+exactly two sub-rules), the sub-matches can be extracted with <code>next</code> and
+<code>unwrap</code>:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+let parse_result = Parser::parse(Rule::sum, &quot;1773 + 1362&quot;)
+    .unwrap().next().unwrap();
+let mut inner_rules = parse_result.into_inner();
+
+let match1 = inner_rules.next().unwrap();
+let match2 = inner_rules.next().unwrap();
+
+assert_eq!(match1.as_str(), &quot;1773&quot;);
+assert_eq!(match2.as_str(), &quot;1362&quot;);
+#}</code></pre></pre>
+<p>Sometimes rules will not have a known number of sub-rules, such as when a
+sub-rule is repeated with an asterisk <code>*</code>:</p>
+<pre><code>list = { number* }
+</code></pre>
+<p>In cases like these it is not possible to call <code>.next().unwrap()</code>, because the
+number of sub-rules depends on the input string — it cannot be known at
+compile time.</p>
+<a class="header" href="parser_api.html#the parse method" id="the parse method"><h2>The <code>parse</code> method</h2></a>
+<p>A <code>pest</code>-derived <a href="https://docs.rs/pest/1.0/pest/trait.Parser.html"><code>Parser</code></a> has a single method <code>parse</code> which returns a
+<code>Result&lt; Pairs, Error &gt;</code>. To access the underlying parse tree, it is necessary
+to <code>match</code> on or <code>unwrap</code> the result:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+match Parser::parse(Rule::enclosed, &quot;(..6472..)&quot;) {
+    Ok(mut pairs) =&gt; {
+        let enclosed = pairs.next().unwrap();
+        // ...
+    }
+    Err(error) =&gt; {
+        // ...
+    }
+}
+#}</code></pre></pre>
+<p>Our examples so far have included the calls
+<code>Parser::parse(...).unwrap().next().unwrap()</code>. The first <code>unwrap</code> turns the
+result into a <code>Pairs</code>. If parsing had failed, the program would panic! We only
+use <code>unwrap</code> in these examples because we already know that they will parse
+successfully.</p>
+<p>In the example above, in order to get to the <code>enclosed</code> rule inside of the
+<code>Pairs</code>, we use the iterator interface. The <code>next()</code> call returns an
+<code>Option&lt;Pair&gt;</code>, which we finally <code>unwrap</code> to get the <code>Pair</code> for the <code>enclosed</code>
+rule.</p>
+<a class="header" href="parser_api.html#using pair and pairs with a grammar" id="using pair and pairs with a grammar"><h3>Using <code>Pair</code> and <code>Pairs</code> with a grammar</h3></a>
+<p>While the <code>Result</code> from <code>Parser::parse(...)</code> might very well be an error on
+invalid input, <code>Pair</code> and <code>Pairs</code> often have more subtle behavior. For
+instance, with this grammar:</p>
+<pre><code>number = { '0'..'9'+ }
+sum = { number ~ &quot; + &quot; ~ number }
+</code></pre>
+<p>this function will <em>never</em> panic:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+fn process(pair: Pair&lt;Rule&gt;) -&gt; f64 {
+    match pair.as_rule() {
+        Rule::number =&gt; str::parse(pair.as_str()).unwrap(),
+        Rule::sum =&gt; {
+            let mut pairs = pair.into_inner();
+
+            let num1 = pairs.next().unwrap();
+            let num2 = pairs.next().unwrap();
+
+            process(num1) + process(num2)
+        }
+    }
+}
+#}</code></pre></pre>
+<p><code>str::parse(...).unwrap()</code> is safe because the <code>number</code> rule only ever matches
+digits, which <code>str::parse(...)</code> can handle. And <code>pairs.next().unwrap()</code> is safe
+to call twice because a <code>sum</code> match <em>always</em> has two sub-matches, which is
+guaranteed by the grammar.</p>
+<p>Since these sorts of guarantees are awkward to express with Rust types, <code>pest</code>
+only provides a few high-level types to represent parse trees. Nevertheless,
+you <em>should</em> rely on the meaning of your grammar for properties such as
+&quot;contains <em>n</em> sub-rules&quot;, &quot;is safe to <code>parse</code> to <code>f32</code>&quot;, and &quot;never fails to
+match&quot;. Idiomatic <code>pest</code> code uses <code>unwrap</code> and <code>unreachable!</code>.</p>
+<a class="header" href="parser_api.html#spans and positions" id="spans and positions"><h2>Spans and positions</h2></a>
+<p>Occasionally, you will want to refer to a matching rule in the context of the
+raw source text, rather than the interior text alone. For example, you might
+want to print the entire line that contained the match. For this you can use
+<a href="https://docs.rs/pest/1.0/pest/struct.Span.html"><code>Span</code></a> and <a href="https://docs.rs/pest/1.0/pest/struct.Position.html"><code>Position</code></a>.</p>
+<p>A <code>Span</code> is returned from <code>Pair::into_span</code>. Spans have a start position and an
+end position (which correspond to the start and end tokens of the rule that
+made the pair).</p>
+<p>Spans can be decomposed into their start and end <code>Position</code>s, which provide
+useful methods for examining the string around that position. For example,
+<code>Position::line_col()</code> finds out the line and column number of a position,
+while <code>Position::skip(n)</code> moves forward the given number of characters.</p>
+<p>Essentially, a <code>Position</code> is a <code>Token</code> without a rule. In fact, you can use
+pattern matching to turn a <code>Token</code> into its component <code>Rule</code> and <code>Position</code>.</p>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+                    <a rel="prev" href="./examples/csv.html" class="mobile-nav-chapters previous">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="./examples/ini.html" class="mobile-nav-chapters next">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+
+            </div>
+
+            
+                <a href="./examples/csv.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+            
+
+            
+                <a href="./examples/ini.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+
+        
+
+        
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+    </body>
+</html>

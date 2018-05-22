@@ -1,0 +1,245 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <title>Parsing expression grammars - </title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <base href="../">
+
+        <link rel="stylesheet" href="book.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <link rel="shortcut icon" href="favicon.png">
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme -->
+        
+
+        
+
+        <!-- Fetch Clipboard.js from CDN but have a local fallback -->
+        <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
+        <script>
+            if (typeof Clipboard == 'undefined') {
+                document.write(unescape("%3Cscript src='clipboard.min.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch JQuery from CDN but have a local fallback -->
+        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
+        <script>
+            if (typeof jQuery == 'undefined') {
+                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
+            }
+        </script>
+
+        <!-- Fetch store.js from local - TODO add CDN when 2.x.x is available on cdnjs -->
+        <script src="store.js"></script>
+
+        <!-- Custom JS script -->
+        
+
+    </head>
+    <body class="light">
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme = store.get('theme');
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            $('body').removeClass().addClass(theme);
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var sidebar = store.get('sidebar');
+            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
+            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+        </script>
+
+        <div id="sidebar" class="sidebar">
+            <ul class="chapter"><li><a href="./intro.html"><strong>1.</strong> Introduction</a></li><li><ul class="section"><li><a href="./examples/csv.html"><strong>1.1.</strong> Example: CSV</a></li></ul></li><li><a href="./parser_api.html"><strong>2.</strong> Parser API</a></li><li><ul class="section"><li><a href="./examples/ini.html"><strong>2.1.</strong> Example: INI (WIP)</a></li></ul></li><li><a href="./grammars/grammars.html"><strong>3.</strong> Grammars</a></li><li><ul class="section"><li><a href="./grammars/peg.html" class="active"><strong>3.1.</strong> Parsing expression grammars</a></li><li><a href="./grammars/syntax.html"><strong>3.2.</strong> Syntax of pest parsers</a></li><li><a href="./examples/json.html"><strong>3.3.</strong> Example: JSON (WIP)</a></li></ul></li><li><a href="./precedence.html"><strong>4.</strong> Operator precedence (WIP)</a></li><li><ul class="section"><li><a href="./examples/calculator.html"><strong>4.1.</strong> Example: Calculator (WIP)</a></li></ul></li><li><a href="./examples/awk.html"><strong>5.</strong> Final project: Awk clone (WIP)</a></li><li><a href="./examples/rust/setup.html"><strong>6.</strong> Bonus project: Rust grammar (WIP)</a></li><li><ul class="section"><li><a href="./examples/rust/literals.html"><strong>6.1.</strong> Literals</a></li><li><a href="./examples/rust/syntax.html"><strong>6.2.</strong> Syntax</a></li></ul></li></ul>
+        </div>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page" tabindex="-1">
+                <div id="menu-bar" class="menu-bar">
+                    <div class="left-buttons">
+                        <i id="sidebar-toggle" class="fa fa-bars"></i>
+                        <i id="theme-toggle" class="fa fa-paint-brush"></i>
+                    </div>
+
+                    <h1 class="menu-title"></h1>
+
+                    <div class="right-buttons">
+                        <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                    </div>
+                </div>
+
+                <div id="content" class="content">
+                    <a class="header" href="peg.html#parsing expression grammar" id="parsing expression grammar"><h1>Parsing expression grammar</h1></a>
+<p>Parsing expression grammars (PEGs) are simply a strict representation of the
+simple imperative code that you would write if you were writing a parser by
+hand.</p>
+<pre><code>digit = {           // To recognize a digit...
+    '0'..'9'        //   take any character from '0' to '9'.
+}
+expression = {      // To recognize an expression...
+    digit+          //   first take as many digits as possible (at least one)...
+    | &quot;true&quot;        //   or, if that fails, the string &quot;true&quot;.
+}
+</code></pre>
+<p>In fact, <code>pest</code> produces code that is quite similar to the pseudo-code in the
+comments above.</p>
+<a class="header" href="peg.html#eagerness" id="eagerness"><h2>Eagerness</h2></a>
+<p>When a <a href="grammars/syntax.html#repetition">repetition</a> PEG expression is run on an input string,</p>
+<pre><code>('0'..'9')+      // one or more characters from '0' to '9'
+</code></pre>
+<p>it runs that expression as many times as it can (matching &quot;eagerly&quot;, or
+&quot;greedily&quot;). It either succeeds, consuming whatever it matched and passing the
+remaining input on to the next step in the parser,</p>
+<pre><code>&quot;42 boxes&quot;
+ ^ Running ('0'..'9')+
+
+&quot;42 boxes&quot;
+   ^ Successfully took one or more digits!
+
+&quot; boxes&quot;
+ ^ Remaining unparsed input.
+</code></pre>
+<p>or fails, consuming nothing.</p>
+<pre><code>&quot;galumphing&quot;
+ ^ Running ('0'..'9')+
+   Failed to take one or more digits!
+
+&quot;galumphing&quot;
+ ^ Remaining unparsed input (everything).
+</code></pre>
+<p>If an expression fails to match, the failure propagates upwards, eventually
+leading to a failed parse, unless the failure is &quot;caught&quot; somewhere in the
+grammar. The <em>choice operator</em> is one way to &quot;catch&quot; such failures.</p>
+<a class="header" href="peg.html#ordered choice" id="ordered choice"><h2>Ordered choice</h2></a>
+<p>The <a href="grammars/syntax.html#ordered-choice">choice operator</a>, written as a vertical line <code>|</code>, is <em>ordered</em>. The PEG
+expression <code>first | second</code> means &quot;try <code>first</code>; but if it fails, try <code>second</code>
+instead&quot;.</p>
+<p>In many cases, the ordering does not matter. For instance, <code>&quot;true&quot; | &quot;false&quot;</code>
+will match either the string <code>&quot;true&quot;</code> or the string <code>&quot;false&quot;</code> (and fail if
+neither occurs).</p>
+<p>However, sometimes the ordering <em>does</em> matter. Consider the PEG expression <code>&quot;a&quot; | &quot;ab&quot;</code>. You might expect it to match either the string <code>&quot;a&quot;</code> or the string
+<code>&quot;ab&quot;</code>. But it will not — the expression means &quot;try <code>&quot;a&quot;</code>; but if it
+fails, try <code>&quot;ab&quot;</code> instead&quot;. If you are matching on the string <code>&quot;abc&quot;</code>, &quot;try
+<code>&quot;a&quot;</code>&quot; will <em>not</em> fail; it will instead match <code>&quot;a&quot;</code> successfully, leaving
+<code>&quot;bc&quot;</code> unparsed!</p>
+<p>In general, when writing a parser with choices, put the longest or most
+specific choice first, and the shortest or most general choice last.</p>
+<a class="header" href="peg.html#non-backtracking" id="non-backtracking"><h2>Non-backtracking</h2></a>
+<p>During parsing, a PEG expression either succeeds or fails. If it succeeds, the
+next step is performed as usual. But if it fails, the whole expression fails.
+The engine will not back up and try again.</p>
+<p>Consider this grammar, matching on the string <code>&quot;frumious&quot;</code>:</p>
+<pre><code>word = {     // to recognize an word...
+    any*     //   take any character, zero or more times...
+    ~ any    //   followed by any character
+}
+</code></pre>
+<p>You might expect this rule to parse any input string that contains at least one
+character (equivalent to <code>any+</code>). But it will not. Instead, the first <code>any*</code>
+will eagerly eat the entire string — it will <em>succeed</em>. Then, the next
+<code>any</code> will have nothing left, so it will fail.</p>
+<pre><code>&quot;frumious&quot;
+ ^ (word)
+
+&quot;frumious&quot;
+         ^ (any*) Success! Continue to `any` with remaining input &quot;&quot;.
+
+&quot;&quot;
+ ^ (any) Failure! Expected one character, but found end of string.
+</code></pre>
+<p>In a system with backtracking (like regular expressions), you would back up one
+step, &quot;un-eating&quot; a character, and then try again. But PEGs do not do this. In
+the rule <code>first ~ second</code>, once <code>first</code> parses successfully, it has consumed
+some characters that will never come back. <code>second</code> can only run on the input
+that <code>first</code> did not consume.</p>
+<a class="header" href="peg.html#unambiguous" id="unambiguous"><h2>Unambiguous</h2></a>
+<p>These rules form an elegant and simple system. Every PEG rule is run on the
+remainder of the input string, consuming as much input as necessary. Once a
+rule is done, the rest of the input is passed on to the rest of the parser.</p>
+<p>For instance, the expression <code>('0'..'9')+</code>, &quot;one or more digits&quot;, will always
+match the largest sequence of consecutive digits possible. There is no danger
+of accidentally having a later rule back up and steal some digits in an
+unintuitive and nonlocal way.</p>
+<p>This contrasts with other parsing tools, such as regular expressions and CFGs,
+where the results of a rule often depend on code some distance away. Indeed,
+the famous &quot;shift/reduce conflict&quot; in LR parsers is not a problem in PEGs.</p>
+<a class="header" href="peg.html#dont panic" id="dont panic"><h1>Don't panic</h1></a>
+<p>This all might be a bit counterintuitive at first. But as you can see, the
+basic logic is very easy and straightforward. You can trivially step through
+the execution of any PEG expression.</p>
+<ul>
+<li>Try this.</li>
+<li>If it succeeds, try the next thing.</li>
+<li>Otherwise, try the other thing.</li>
+</ul>
+<pre><code>(this ~ next_thing) | (other_thing)
+</code></pre>
+<p>These rules together make PEGs very pleasant tools for writing a parser.</p>
+
+                </div>
+
+                <!-- Mobile navigation buttons -->
+                
+                    <a rel="prev" href="./grammars/grammars.html" class="mobile-nav-chapters previous">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a rel="next" href="./grammars/syntax.html" class="mobile-nav-chapters next">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+
+            </div>
+
+            
+                <a href="./grammars/grammars.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-left"></i>
+                </a>
+            
+
+            
+                <a href="./grammars/syntax.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                    <i class="fa fa-angle-right"></i>
+                </a>
+            
+
+        </div>
+
+
+        <!-- Local fallback for Font Awesome -->
+        <script>
+            if ($(".fa").css("font-family") !== "FontAwesome") {
+                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
+            }
+        </script>
+
+        <!-- Livereload script (if served using the cli tool) -->
+        
+
+        
+
+        
+
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+    </body>
+</html>

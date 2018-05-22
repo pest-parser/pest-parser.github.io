@@ -2,9 +2,9 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title> - A thoughtful introduction to the pest parser</title>
+        <title> - </title>
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <meta name="description" content="An introduction to the pest parser by implementing a Rust grammar subset">
+        <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <base href="">
@@ -66,7 +66,7 @@
         </script>
 
         <div id="sidebar" class="sidebar">
-            <ul class="chapter"><li class="affix"><a href="./intro.html">Introduction</a></li><li><a href="./setup.html"><strong>1.</strong> Setup</a></li><li><a href="./peg.html"><strong>2.</strong> Parsing expression grammar</a></li><li><a href="./literals.html"><strong>3.</strong> Literals</a></li><li><a href="./syntax.html"><strong>4.</strong> Syntax</a></li></ul>
+            <ul class="chapter"><li><a href="./intro.html"><strong>1.</strong> Introduction</a></li><li><ul class="section"><li><a href="./examples/csv.html"><strong>1.1.</strong> Example: CSV</a></li></ul></li><li><a href="./parser_api.html"><strong>2.</strong> Parser API</a></li><li><ul class="section"><li><a href="./examples/ini.html"><strong>2.1.</strong> Example: INI (WIP)</a></li></ul></li><li><a href="./grammars/grammars.html"><strong>3.</strong> Grammars</a></li><li><ul class="section"><li><a href="./grammars/peg.html"><strong>3.1.</strong> Parsing expression grammars</a></li><li><a href="./grammars/syntax.html"><strong>3.2.</strong> Syntax of pest parsers</a></li><li><a href="./examples/json.html"><strong>3.3.</strong> Example: JSON (WIP)</a></li></ul></li><li><a href="./precedence.html"><strong>4.</strong> Operator precedence (WIP)</a></li><li><ul class="section"><li><a href="./examples/calculator.html"><strong>4.1.</strong> Example: Calculator (WIP)</a></li></ul></li><li><a href="./examples/awk.html"><strong>5.</strong> Final project: Awk clone (WIP)</a></li><li><a href="./examples/rust/setup.html"><strong>6.</strong> Bonus project: Rust grammar (WIP)</a></li><li><ul class="section"><li><a href="./examples/rust/literals.html"><strong>6.1.</strong> Literals</a></li><li><a href="./examples/rust/syntax.html"><strong>6.2.</strong> Syntax</a></li></ul></li></ul>
         </div>
 
         <div id="page-wrapper" class="page-wrapper">
@@ -78,7 +78,7 @@
                         <i id="theme-toggle" class="fa fa-paint-brush"></i>
                     </div>
 
-                    <h1 class="menu-title">A thoughtful introduction to the pest parser</h1>
+                    <h1 class="menu-title"></h1>
 
                     <div class="right-buttons">
                         <i id="print-button" class="fa fa-print" title="Print this book"></i>
@@ -88,33 +88,941 @@
                 <div id="content" class="content">
                     <a class="header" href="print.html#introduction" id="introduction"><h1>Introduction</h1></a>
 <p><em>Speed or simplicity? Why not <strong>both</strong>?</em></p>
-<p>The motivation behind <em>pest</em> was to come up with a parser that would maximize
-usability, both when designing the grammar, and when maintaining it after
-prolonged use and development. And, as Rust tradition mandates, this parser had
-to make sure that its use of high-level abstractions would not hinder
-performance. As such, <em>pest</em> is perfectly suited for complete beginners who want
-to learn and experiment with grammars and parsing, but who do not want to be
-constrained in terms of speed.</p>
-<p><em>pest</em> is implemented in Rust and requires some knowledge of the language in
-order to be used. The reason for picking it over other languages is that it
-offers C-like low level access and encourages the use of multi-threaded
-programming, both of great use when writing a compiler or VM to accompany your
-parser. At the same time, Rust's procedural macros and functional APIs provide a
-means to express the problem of parsing in a simple and natural way. It even
-comes with an <a href="https://doc.rust-lang.org/book/">official book</a> to get you
-started.</p>
-<p>This introduction will explore the implementation of a subset of Rust's own
-grammar, from the simplest terminals to the construction of an AST. After
-reading it, you should be comfortable writing parsers with <em>pest</em>.</p>
-<a class="header" href="print.html#setup" id="setup"><h1>Setup</h1></a>
+<p><code>pest</code> is a library for writing plain-text parsers in Rust.</p>
+<p>Parsers that use <code>pest</code> are <strong>easy to design and maintain</strong> due to the use of
+<a href="./grammars/peg.html">Parsing Expression Grammars</a>, or <em>PEGs</em>. And, because of Rust's zero-cost
+abstractions, <code>pest</code> parsers can be <strong>very fast</strong>.</p>
+<a class="header" href="print.html#sample" id="sample"><h2>Sample</h2></a>
+<p>Here is the complete grammar for a simple calculator <a href="examples/calculator.html">developed in a (currently
+unwritten) later chapter</a>:</p>
+<pre><code>num = @{ int ~ (&quot;.&quot; ~ digit*)? ~ (^&quot;e&quot; ~ int)? }
+    int = { (&quot;+&quot; | &quot;-&quot;)? ~ digit+ }
+    digit = { '0'..'9' }
+
+operation = _{ add | subtract | multiply | divide | power }
+    add      = { &quot;+&quot; }
+    subtract = { &quot;-&quot; }
+    multiply = { &quot;*&quot; }
+    divide   = { &quot;/&quot; }
+    power    = { &quot;^&quot; }
+
+expr = { term ~ (operation ~ term)* }
+term = _{ num | &quot;(&quot; ~ expr ~ &quot;)&quot; }
+
+calculation = _{ soi ~ expr ~ eoi }
+
+whitespace = _{ &quot; &quot; | &quot;\t&quot; }
+</code></pre>
+<p>And here is the function that uses that parser to calculate answers:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+lazy_static! {
+    static ref PREC_CLIMBER: PrecClimber&lt;Rule&gt; = {
+        use Rule::*;
+        use Assoc::*;
+
+        PrecClimber::new(vec![
+            Operator::new(add, Left) | Operator::new(subtract, Left),
+            Operator::new(multiply, Left) | Operator::new(divide, Left),
+            Operator::new(power, Right)
+        ])
+    };
+}
+
+fn eval(expression: Pairs&lt;Rule&gt;) -&gt; f64 {
+    PREC_CLIMBER.climb(
+        expression,
+        |pair: Pair&lt;Rule&gt;| match pair.as_rule() {
+            Rule::num =&gt; pair.as_str().parse::&lt;f64&gt;().unwrap(),
+            Rule::expr =&gt; eval(pair.into_inner()),
+            _ =&gt; unreachable!(),
+        },
+        |lhs: f64, op: Pair&lt;Rule&gt;, rhs: f64| match op.as_rule() {
+            Rule::add      =&gt; lhs + rhs,
+            Rule::subtract =&gt; lhs - rhs,
+            Rule::multiply =&gt; lhs * rhs,
+            Rule::divide   =&gt; lhs / rhs,
+            Rule::power    =&gt; lhs.powf(rhs),
+            _ =&gt; unreachable!(),
+        },
+    )
+}
+#}</code></pre></pre>
+<a class="header" href="print.html#about this book" id="about this book"><h2>About this book</h2></a>
+<p>This book provides an overview of <code>pest</code> as well as several example parsers.
+For more details of <code>pest</code>'s API, check <a href="https://docs.rs/pest/">the documentation</a>.</p>
+<p>Note that <code>pest</code> uses some advanced features of the Rust language. For an
+introduction to Rust, consult the <a href="https://doc.rust-lang.org/stable/book/second-edition/">official Rust book</a>.</p>
+<a class="header" href="print.html#example csv" id="example csv"><h1>Example: CSV</h1></a>
+<p>Comma-Separated Values is a very simple text format. CSV files consist of a
+list of <em>records</em>, each on a separate line. Each record is a list of <em>fields</em>
+separated by commas.</p>
+<p>For example, here is a CSV file with numeric fields:</p>
+<pre><code>65279,1179403647,1463895090
+3.1415927,2.7182817,1.618034
+-40,-273.15
+13,42
+65537
+</code></pre>
+<p>Let's write a program that computes the <strong>sum of these fields</strong> and counts the
+<strong>number of records</strong>.</p>
+<a class="header" href="print.html#setup" id="setup"><h2>Setup</h2></a>
+<p>Start by initializing a new project using <a href="https://doc.rust-lang.org/cargo/">Cargo</a>:</p>
+<pre><code class="language-shell">$ cargo init --bin csv-tool
+     Created binary (application) project
+$ cd csv-tool
+</code></pre>
+<p>Add the <code>pest</code> and <code>pest_derive</code> crates to the dependencies section in <code>Cargo.toml</code>:</p>
+<pre><code class="language-toml">[dependencies]
+pest = &quot;1.0&quot;
+pest_derive = &quot;1.0&quot;
+</code></pre>
+<p>And finally bring <code>pest</code> and <code>pest_derive</code> into scope in <code>src/main.rs</code>:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+extern crate pest;
+#[macro_use]
+extern crate pest_derive;
+#}</code></pre></pre>
+<p>The <code>#[macro_use]</code> attribute is necessary to use <code>pest</code> to generate parsing
+code! This is a very important attribute.</p>
+<a class="header" href="print.html#writing the parser" id="writing the parser"><h2>Writing the parser</h2></a>
+<p><code>pest</code> works by compiling a description of a file format, called a <em>grammar</em>,
+into Rust code. Let's write a grammar for a CSV file that contains numbers.
+Create a new file named <code>src/csv.pest</code> with a single line:</p>
+<pre><code>field = { ('0'..'9' | &quot;.&quot; | &quot;-&quot;)+ }
+</code></pre>
+<p>This is a description of every number field: each character is either a digit
+<code>0</code> through <code>9</code>, a full stop <code>.</code>, or a hyphen–minus <code>-</code>. The plus sign
+<code>+</code> indicates that the pattern can occur one or more times.</p>
+<p>Rust needs to know to compile this file using <code>pest</code>:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+use pest::Parser;
+
+const _GRAMMAR: &amp;str = include_str!(&quot;csv.pest&quot;);
+
+#[derive(Parser)]
+#[grammar = &quot;csv.pest&quot;]
+pub struct CSVParser;
+#}</code></pre></pre>
+<p>If you run <code>cargo doc</code>, you will see that <code>pest</code> has created the function
+<code>CSVParser::parse</code> and an enum called <code>Rule</code> with a single variant
+<code>Rule::field</code>.</p>
+<p>Let's test it out! Rewrite <code>main</code>:</p>
+<pre><pre class="playpen"><code class="language-rust">fn main() {
+    let successful_parse = CSVParser::parse(Rule::field, &quot;-273.15&quot;);
+    println!(&quot;{:?}&quot;, successful_parse);
+
+    let unsuccessful_parse = CSVParser::parse(Rule::field, &quot;this is not a number&quot;);
+    println!(&quot;{:?}&quot;, unsuccessful_parse);
+}
+</code></pre></pre>
+<pre><code class="language-shell">$ cargo run
+  [ ... ]
+Ok(Pairs { pairs: [Pair { rule: field, span: Span { start: 0, end: 7 }, inner: Pairs { pairs: [] } }] })
+Err(ParsingError { positives: [field], negatives: [], pos: Position { pos: 0 } })
+</code></pre>
+<p>Yikes! That's a complicated type! But you can see that the successful parse was
+<code>Ok</code>, while the failed parse was <code>Err</code>. We'll get into the details later.</p>
+<p>For now, let's complete the grammar:</p>
+<pre><code>field = { ('0'..'9' | &quot;.&quot; | &quot;-&quot;)+ }
+record = { field ~ (&quot;,&quot; ~ field)* }
+file = { soi ~ (record ~ (&quot;\r\n&quot; | &quot;\n&quot;))* ~ eoi }
+</code></pre>
+<p>The tilde <code>~</code> means &quot;and then&quot;, so that <code>&quot;abc&quot; ~ &quot;def&quot;</code> matches <code>abc</code> followed
+by <code>def</code>. (For this grammar, <code>&quot;abc&quot; ~ &quot;def&quot;</code> is exactly the same as <code>&quot;abcdef&quot;</code>,
+although this is not true in general; see <a href="./grammars/syntax.html">a later chapter about
+<code>whitespace</code></a>.)</p>
+<p>In addition to literal strings (<code>&quot;\r\n&quot;</code>) and character ranges (<code>'0'..'9'</code>),
+rules can contain other rules. For instance, a <code>record</code> is a <code>field</code>, and
+optionally a comma <code>,</code> and then another <code>field</code> repeated as many times as
+necessary. The asterisk <code>*</code> is just like the plus sign <code>+</code>, except the pattern
+is optional: it can occur any number of times at all (zero or more).</p>
+<p>There are two more rules that we haven't defined: <code>soi</code> and <code>eoi</code> are two
+special rules that match, respectively, the <em>start of input</em> and the <em>end of
+input</em>. Without <code>eoi</code>, the <code>file</code> rule would gladly parse an invalid file! It
+would just stop as soon as it found the first invalid character and report a
+successful parse, possibly consisting of nothing at all!</p>
+<a class="header" href="print.html#the main program loop" id="the main program loop"><h2>The main program loop</h2></a>
+<p>Now we're ready to finish the program. We will use <a href="https://doc.rust-lang.org/std/fs/struct.File.html"><code>File</code></a> to read the CSV
+file into memory. We'll also be messy and use <a href="https://doc.rust-lang.org/std/option/enum.Option.html#method.expect"><code>expect</code></a> everywhere.</p>
+<pre><pre class="playpen"><code class="language-rust">use std::fs::File;
+use std::io::Read;
+
+fn main() {
+    let mut unparsed_file = String::new();
+    File::open(&quot;numbers.csv&quot;)
+        .expect(&quot;cannot open file&quot;)
+        .read_to_string(&amp;mut unparsed_file)
+        .expect(&quot;cannot read file&quot;);
+
+    // ...
+}
+</code></pre></pre>
+<p>Next we invoke the parser on the file. Don't worry about the specific types for
+now. Just know that we're producing a <a href="https://docs.rs/pest/1.0/pest/iterators/struct.Pair.html"><code>pest::iterators::Pair</code></a> that represents
+the <code>file</code> rule in our grammar.</p>
+<pre><pre class="playpen"><code class="language-rust">fn main() {
+    // ...
+
+    let file = CSVParser::parse(Rule::file, &amp;unparsed_file)
+        .expect(&quot;unsuccessful parse&quot;) // unwrap the parse result
+        .next().unwrap(); // get and unwrap the `file` rule; never fails
+
+    // ...
+}
+</code></pre></pre>
+<p>Finally, we iterate over the <code>record</code>s and <code>field</code>s, while keeping track of the
+count and sum, then print those numbers out.</p>
+<pre><pre class="playpen"><code class="language-rust">fn main() {
+    // ...
+
+    let mut field_sum: f64 = 0.0;
+    let mut record_count: u64 = 0;
+
+    for record in file.into_inner() {
+        record_count += 1;
+
+        for field in record.into_inner() {
+            field_sum += field.as_str().parse::&lt;f64&gt;().unwrap();
+        }
+    }
+
+    println!(&quot;Sum of fields: {}&quot;, field_sum);
+    println!(&quot;Number of records: {}&quot;, record_count);
+}
+</code></pre></pre>
+<p>If <code>p</code> is a parse result (a <a href="https://docs.rs/pest/1.0/pest/iterators/struct.Pair.html"><code>Pair</code></a>) for a rule in the grammar, then
+<code>p.into_inner()</code> returns an <a href="https://doc.rust-lang.org/std/iter/index.html">iterator</a> over the named sub-rules of that rule.
+For instance, since the <code>file</code> rule in our grammar has <code>record</code> as a sub-rule,
+<code>file.into_inner()</code> returns an iterator over each parsed <code>record</code>. Similarly,
+since a <code>record</code> contains <code>field</code> sub-rules, <code>record.into_inner()</code> returns an
+iterator over each parsed <code>field</code>.</p>
+<a class="header" href="print.html#done" id="done"><h2>Done</h2></a>
+<p>Try it out! Copy the sample CSV at the top of this chapter into a file called
+<code>numbers.csv</code>, then run the program! You should see something like this:</p>
+<pre><code class="language-shell">$ cargo run
+  [ ... ]
+Sum of fields: 2643429302.327908
+Number of records: 5
+</code></pre>
+<a class="header" href="print.html#parser api" id="parser api"><h1>Parser API</h1></a>
+<p><code>pest</code> provides several ways of accessing the results of a successful parse. We
+will use the following grammar to demonstrate examples:</p>
+<pre><code>number = { '0'..'9'+ }                   // one or more decimal digits
+enclosed = { &quot;(..&quot; ~ number ~ &quot;..)&quot; }    // for instance, &quot;(..6472..)&quot;
+sum = { number ~ &quot; + &quot; ~ number }        // for instance, &quot;1362 + 12&quot;
+</code></pre>
+<a class="header" href="print.html#tokens" id="tokens"><h2>Tokens</h2></a>
+<p><code>pest</code> represents successful parses using <em>tokens</em>. Whenever a rule matches,
+two tokens are produced: one at the <em>start</em> of the text that the rule matched,
+and one at the <em>end</em>. For example, the rule <code>number</code> applied to the string
+<code>&quot;3130 abc&quot;</code> would match and produce this pair of tokens:</p>
+<pre><code>&quot;3130 abc&quot;
+ |   ^ end(number)
+ ^ start(number)
+</code></pre>
+<p>Note that the rule doesn't match the entire input text. It only matches as much
+text as possible, then stops if successful.</p>
+<p>A token is like a cursor in the input string. It has a character position in
+the string, as well as a reference to the rule that created it.</p>
+<a class="header" href="print.html#nested rules" id="nested rules"><h3>Nested rules</h3></a>
+<p>If a named rule contains another named rule, tokens will be produced for <em>both</em>
+rules. For instance, the rule <code>enclosed</code> applied to the string <code>&quot;(..6472..)&quot;</code>
+would match and produce these four tokens:</p>
+<pre><code>&quot;(..6472..)&quot;
+ |  |   |  ^ end(enclosed)
+ |  |   ^ end(number)
+ |  ^ start(number)
+ ^ start(enclosed)
+</code></pre>
+<p>Sometimes, tokens might not occur at distinct character positions. For example,
+when parsing the rule <code>sum</code>, the inner <code>number</code> rules share some start and end
+positions:</p>
+<pre><code>&quot;1773 + 1362&quot;
+ |   |  |   ^ end(sum)
+ |   |  |   ^ end(number)
+ |   |  ^ start(number)
+ |   ^ end(number)
+ ^ start(number)
+ ^ start(sum)
+</code></pre>
+<p>In fact, for a rule that matches empty input, the start and end tokens will be
+at the same position!</p>
+<a class="header" href="print.html#interface" id="interface"><h3>Interface</h3></a>
+<p>Tokens are exposed as the <a href="https://docs.rs/pest/1.0/pest/enum.Token.html"><code>Token</code></a> enum, which has <code>Start</code> and <code>End</code> variants.
+You can get an iterator of <code>Token</code>s by calling <code>tokens</code> on a parse result:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+let parse_result = Parser::parse(Rule::sum, &quot;1773 + 1362&quot;).unwrap();
+let tokens = parse_result.tokens();
+
+for token in tokens {
+    println!(&quot;{:?}&quot;, token);
+}
+#}</code></pre></pre>
+<p>After a successful parse, tokens will occur as nested pairs of matching <code>Start</code>
+and <code>End</code>. Both kinds of tokens have two fields:</p>
+<ul>
+<li><code>rule</code>, which explains which rule generated them; and</li>
+<li><code>pos</code>, which indicates their positions.</li>
+</ul>
+<p>A start token's position is the first character that the rule matched. An end
+token's position is the first character that the rule did not match —
+that is, an end token refers to a position <em>after</em> the match. If a rule matched
+the entire input string, the end token points to an imaginary position <em>after</em>
+the string.</p>
+<a class="header" href="print.html#pairs" id="pairs"><h2>Pairs</h2></a>
+<p>Tokens are not the most convenient interface, however. Usually you will want to
+explore the parse tree by considering matching pairs of tokens. For this
+purpose, <code>pest</code> provides the <a href="https://docs.rs/pest/1.0/pest/iterators/struct.Pair.html"><code>Pair</code></a> type.</p>
+<p>A <code>Pair</code> represents a matching pair of tokens, or, equivalently, the spanned
+text that a named rule successfully matched. It is commonly used in several
+ways:</p>
+<ul>
+<li>Determining which rule produced the <code>Pair</code></li>
+<li>Using the <code>Pair</code> as a raw <code>&amp;str</code></li>
+<li>Inspecting the inner named sub-rules that produced the <code>Pair</code></li>
+</ul>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+let pair = Parser::parse(Rule::enclosed, &quot;(..6472..) and more text&quot;)
+    .unwrap().next().unwrap();
+
+assert_eq!(pair.as_rule(), Rule::enclosed);
+assert_eq!(pair.as_str(), &quot;(..6472..)&quot;);
+
+let inner_rules = pair.into_inner();
+println!(&quot;{}&quot;, inner_rules); // --&gt; [number(3, 7)]
+#}</code></pre></pre>
+<p>In general, a <code>Pair</code> might have any number of inner rules: zero, one, or more.
+For maximum flexibility, <code>Pair::into_inner()</code> returns <code>Pairs</code>, which is an
+iterator over each pair.</p>
+<p>This means that you can use <code>for</code> loops on parse results, as well as iterator
+methods such as <code>map</code>, <code>filter</code>, and <code>collect</code>.</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+let pairs = Parser::parse(Rule::sum, &quot;1773 + 1362&quot;)
+    .unwrap().next().unwrap()
+    .into_inner();
+
+let numbers = pairs
+    .clone()
+    .map(|pair| str::parse(pair.as_str()).unwrap())
+    .collect::&lt;Vec&lt;i32&gt;&gt;();
+assert_eq!(vec![1773, 1362], numbers);
+
+for (found, expected) in pairs.zip(vec![&quot;1773&quot;, &quot;1362&quot;]) {
+    assert_eq!(Rule::number, found.as_rule());
+    assert_eq!(expected, found.as_str());
+}
+#}</code></pre></pre>
+<p><code>Pairs</code> iterators are also commonly used via the <code>next</code> method directly. If a
+rule consists of a known number of sub-rules (for instance, the rule <code>sum</code> has
+exactly two sub-rules), the sub-matches can be extracted with <code>next</code> and
+<code>unwrap</code>:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+let parse_result = Parser::parse(Rule::sum, &quot;1773 + 1362&quot;)
+    .unwrap().next().unwrap();
+let mut inner_rules = parse_result.into_inner();
+
+let match1 = inner_rules.next().unwrap();
+let match2 = inner_rules.next().unwrap();
+
+assert_eq!(match1.as_str(), &quot;1773&quot;);
+assert_eq!(match2.as_str(), &quot;1362&quot;);
+#}</code></pre></pre>
+<p>Sometimes rules will not have a known number of sub-rules, such as when a
+sub-rule is repeated with an asterisk <code>*</code>:</p>
+<pre><code>list = { number* }
+</code></pre>
+<p>In cases like these it is not possible to call <code>.next().unwrap()</code>, because the
+number of sub-rules depends on the input string — it cannot be known at
+compile time.</p>
+<a class="header" href="print.html#the parse method" id="the parse method"><h2>The <code>parse</code> method</h2></a>
+<p>A <code>pest</code>-derived <a href="https://docs.rs/pest/1.0/pest/trait.Parser.html"><code>Parser</code></a> has a single method <code>parse</code> which returns a
+<code>Result&lt; Pairs, Error &gt;</code>. To access the underlying parse tree, it is necessary
+to <code>match</code> on or <code>unwrap</code> the result:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+match Parser::parse(Rule::enclosed, &quot;(..6472..)&quot;) {
+    Ok(mut pairs) =&gt; {
+        let enclosed = pairs.next().unwrap();
+        // ...
+    }
+    Err(error) =&gt; {
+        // ...
+    }
+}
+#}</code></pre></pre>
+<p>Our examples so far have included the calls
+<code>Parser::parse(...).unwrap().next().unwrap()</code>. The first <code>unwrap</code> turns the
+result into a <code>Pairs</code>. If parsing had failed, the program would panic! We only
+use <code>unwrap</code> in these examples because we already know that they will parse
+successfully.</p>
+<p>In the example above, in order to get to the <code>enclosed</code> rule inside of the
+<code>Pairs</code>, we use the iterator interface. The <code>next()</code> call returns an
+<code>Option&lt;Pair&gt;</code>, which we finally <code>unwrap</code> to get the <code>Pair</code> for the <code>enclosed</code>
+rule.</p>
+<a class="header" href="print.html#using pair and pairs with a grammar" id="using pair and pairs with a grammar"><h3>Using <code>Pair</code> and <code>Pairs</code> with a grammar</h3></a>
+<p>While the <code>Result</code> from <code>Parser::parse(...)</code> might very well be an error on
+invalid input, <code>Pair</code> and <code>Pairs</code> often have more subtle behavior. For
+instance, with this grammar:</p>
+<pre><code>number = { '0'..'9'+ }
+sum = { number ~ &quot; + &quot; ~ number }
+</code></pre>
+<p>this function will <em>never</em> panic:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+fn process(pair: Pair&lt;Rule&gt;) -&gt; f64 {
+    match pair.as_rule() {
+        Rule::number =&gt; str::parse(pair.as_str()).unwrap(),
+        Rule::sum =&gt; {
+            let mut pairs = pair.into_inner();
+
+            let num1 = pairs.next().unwrap();
+            let num2 = pairs.next().unwrap();
+
+            process(num1) + process(num2)
+        }
+    }
+}
+#}</code></pre></pre>
+<p><code>str::parse(...).unwrap()</code> is safe because the <code>number</code> rule only ever matches
+digits, which <code>str::parse(...)</code> can handle. And <code>pairs.next().unwrap()</code> is safe
+to call twice because a <code>sum</code> match <em>always</em> has two sub-matches, which is
+guaranteed by the grammar.</p>
+<p>Since these sorts of guarantees are awkward to express with Rust types, <code>pest</code>
+only provides a few high-level types to represent parse trees. Nevertheless,
+you <em>should</em> rely on the meaning of your grammar for properties such as
+&quot;contains <em>n</em> sub-rules&quot;, &quot;is safe to <code>parse</code> to <code>f32</code>&quot;, and &quot;never fails to
+match&quot;. Idiomatic <code>pest</code> code uses <code>unwrap</code> and <code>unreachable!</code>.</p>
+<a class="header" href="print.html#spans and positions" id="spans and positions"><h2>Spans and positions</h2></a>
+<p>Occasionally, you will want to refer to a matching rule in the context of the
+raw source text, rather than the interior text alone. For example, you might
+want to print the entire line that contained the match. For this you can use
+<a href="https://docs.rs/pest/1.0/pest/struct.Span.html"><code>Span</code></a> and <a href="https://docs.rs/pest/1.0/pest/struct.Position.html"><code>Position</code></a>.</p>
+<p>A <code>Span</code> is returned from <code>Pair::into_span</code>. Spans have a start position and an
+end position (which correspond to the start and end tokens of the rule that
+made the pair).</p>
+<p>Spans can be decomposed into their start and end <code>Position</code>s, which provide
+useful methods for examining the string around that position. For example,
+<code>Position::line_col()</code> finds out the line and column number of a position,
+while <code>Position::skip(n)</code> moves forward the given number of characters.</p>
+<p>Essentially, a <code>Position</code> is a <code>Token</code> without a rule. In fact, you can use
+pattern matching to turn a <code>Token</code> into its component <code>Rule</code> and <code>Position</code>.</p>
+<a class="header" href="print.html#example ini wip" id="example ini wip"><h1>Example: INI (WIP)</h1></a>
+<p>This section will walk through the creation of a simple <a href="https://en.wikipedia.org/wiki/INI_file">INI</a> parser. It will
+provide an example of using <code>next</code> as the primary method of interacting with
+parse trees.</p>
+<a class="header" href="print.html#grammars" id="grammars"><h1>Grammars</h1></a>
+<p>Like many parsing tools, <code>pest</code> operates using a <em>formal grammar</em> that is
+distinct from your Rust code. The format that <code>pest</code> uses is called a <em>parsing
+expression grammar</em>, or <em>PEG</em>. When building a project, <code>pest</code> automatically
+compiles the PEG, located in a separate file, into a plain Rust function that
+you can call.</p>
+<a class="header" href="print.html#how to activate pest" id="how to activate pest"><h2>How to activate <code>pest</code></h2></a>
+<p>Most projects will have at least two files that use <code>pest</code>: the parser (say,
+<code>src/parser/mod.rs</code>) and the grammar (<code>src/parser/grammar.pest</code>). Assuming that
+they are in the same directory:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+use pest::Parser;
+
+#[derive(Parser)]
+#[grammar = &quot;parser/grammar.pest&quot;] // relative to project `src`
+struct MyParser;
+
+const _GRAMMAR: &amp;str = include_str!(&quot;grammar.pest&quot;); // relative to this file
+#}</code></pre></pre>
+<p>Whenever you compile this file, <code>pest</code> will automatically use the grammar file
+to generate items like this:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+pub enum Rules { /* ... */ }
+
+impl Parser for MyParser {
+    pub fn parse(Rules, &amp;str) -&gt; pest::Pairs { /* ... */ }
+}
+#}</code></pre></pre>
+<p>You will never see <code>enum Rules</code> or <code>impl Parser</code> as plain text! The code only
+exists during compilation. However, you can use <code>Rules</code> just like any other
+enum, and you can use <code>parse(...)</code> through the <a href="https://docs.rs/pest/1.0/pest/iterators/struct.Pairs.html"><code>Pairs</code></a> interface described in
+the <a href="parser_api.html">Parser API chapter</a>.</p>
+<a class="header" href="print.html#technical note _grammar" id="technical note _grammar"><h3>Technical note: <code>_GRAMMAR</code></h3></a>
+<p>Rust uses &quot;incremental compilation&quot; to avoid recompiling files that haven't
+changed. Unfortunately, this means that changing the grammar file won't update
+the generated parser, because the Rust source code hasn't changed!</p>
+<p>To declare that the Rust source code depends on the grammar file, we copy that
+grammar directly into an unused string constant using <a href="https://doc.rust-lang.org/std/macro.include_str.html"><code>include_str!</code></a>.</p>
+<a class="header" href="print.html#warning about pegs" id="warning about pegs"><h2>Warning about PEGs!</h2></a>
+<p>Parsing expression grammars look quite similar to other parsing tools you might
+be used to, like regular expressions, BNF grammars, and others (Yacc/Bison,
+LALR, CFG). However, PEGs behave subtly differently: PEGs are <a href="grammars/peg.html#eagerness">eager</a>,
+<a href="grammars/peg.html#non-backtracking">non-backtracking</a>, <a href="grammars/peg.html#ordered-choice">ordered</a>, and <a href="grammars/peg.html#unambiguous">unambiguous</a>.</p>
+<p>Don't be scared if you don't recognize any of the above names! You're already a
+step ahead of people who do — when you use <code>pest</code>'s PEGs, you won't be
+tripped up by comparisons to other tools.</p>
+<p>If you have used other parsing tools before, be sure to read the next section
+carefully. We'll mention some common mistakes regarding PEGs.</p>
+<a class="header" href="print.html#parsing expression grammar" id="parsing expression grammar"><h1>Parsing expression grammar</h1></a>
+<p>Parsing expression grammars (PEGs) are simply a strict representation of the
+simple imperative code that you would write if you were writing a parser by
+hand.</p>
+<pre><code>digit = {           // To recognize a digit...
+    '0'..'9'        //   take any character from '0' to '9'.
+}
+expression = {      // To recognize an expression...
+    digit+          //   first take as many digits as possible (at least one)...
+    | &quot;true&quot;        //   or, if that fails, the string &quot;true&quot;.
+}
+</code></pre>
+<p>In fact, <code>pest</code> produces code that is quite similar to the pseudo-code in the
+comments above.</p>
+<a class="header" href="print.html#eagerness" id="eagerness"><h2>Eagerness</h2></a>
+<p>When a <a href="grammars/syntax.html#repetition">repetition</a> PEG expression is run on an input string,</p>
+<pre><code>('0'..'9')+      // one or more characters from '0' to '9'
+</code></pre>
+<p>it runs that expression as many times as it can (matching &quot;eagerly&quot;, or
+&quot;greedily&quot;). It either succeeds, consuming whatever it matched and passing the
+remaining input on to the next step in the parser,</p>
+<pre><code>&quot;42 boxes&quot;
+ ^ Running ('0'..'9')+
+
+&quot;42 boxes&quot;
+   ^ Successfully took one or more digits!
+
+&quot; boxes&quot;
+ ^ Remaining unparsed input.
+</code></pre>
+<p>or fails, consuming nothing.</p>
+<pre><code>&quot;galumphing&quot;
+ ^ Running ('0'..'9')+
+   Failed to take one or more digits!
+
+&quot;galumphing&quot;
+ ^ Remaining unparsed input (everything).
+</code></pre>
+<p>If an expression fails to match, the failure propagates upwards, eventually
+leading to a failed parse, unless the failure is &quot;caught&quot; somewhere in the
+grammar. The <em>choice operator</em> is one way to &quot;catch&quot; such failures.</p>
+<a class="header" href="print.html#ordered choice" id="ordered choice"><h2>Ordered choice</h2></a>
+<p>The <a href="grammars/syntax.html#ordered-choice">choice operator</a>, written as a vertical line <code>|</code>, is <em>ordered</em>. The PEG
+expression <code>first | second</code> means &quot;try <code>first</code>; but if it fails, try <code>second</code>
+instead&quot;.</p>
+<p>In many cases, the ordering does not matter. For instance, <code>&quot;true&quot; | &quot;false&quot;</code>
+will match either the string <code>&quot;true&quot;</code> or the string <code>&quot;false&quot;</code> (and fail if
+neither occurs).</p>
+<p>However, sometimes the ordering <em>does</em> matter. Consider the PEG expression <code>&quot;a&quot; | &quot;ab&quot;</code>. You might expect it to match either the string <code>&quot;a&quot;</code> or the string
+<code>&quot;ab&quot;</code>. But it will not — the expression means &quot;try <code>&quot;a&quot;</code>; but if it
+fails, try <code>&quot;ab&quot;</code> instead&quot;. If you are matching on the string <code>&quot;abc&quot;</code>, &quot;try
+<code>&quot;a&quot;</code>&quot; will <em>not</em> fail; it will instead match <code>&quot;a&quot;</code> successfully, leaving
+<code>&quot;bc&quot;</code> unparsed!</p>
+<p>In general, when writing a parser with choices, put the longest or most
+specific choice first, and the shortest or most general choice last.</p>
+<a class="header" href="print.html#non-backtracking" id="non-backtracking"><h2>Non-backtracking</h2></a>
+<p>During parsing, a PEG expression either succeeds or fails. If it succeeds, the
+next step is performed as usual. But if it fails, the whole expression fails.
+The engine will not back up and try again.</p>
+<p>Consider this grammar, matching on the string <code>&quot;frumious&quot;</code>:</p>
+<pre><code>word = {     // to recognize an word...
+    any*     //   take any character, zero or more times...
+    ~ any    //   followed by any character
+}
+</code></pre>
+<p>You might expect this rule to parse any input string that contains at least one
+character (equivalent to <code>any+</code>). But it will not. Instead, the first <code>any*</code>
+will eagerly eat the entire string — it will <em>succeed</em>. Then, the next
+<code>any</code> will have nothing left, so it will fail.</p>
+<pre><code>&quot;frumious&quot;
+ ^ (word)
+
+&quot;frumious&quot;
+         ^ (any*) Success! Continue to `any` with remaining input &quot;&quot;.
+
+&quot;&quot;
+ ^ (any) Failure! Expected one character, but found end of string.
+</code></pre>
+<p>In a system with backtracking (like regular expressions), you would back up one
+step, &quot;un-eating&quot; a character, and then try again. But PEGs do not do this. In
+the rule <code>first ~ second</code>, once <code>first</code> parses successfully, it has consumed
+some characters that will never come back. <code>second</code> can only run on the input
+that <code>first</code> did not consume.</p>
+<a class="header" href="print.html#unambiguous" id="unambiguous"><h2>Unambiguous</h2></a>
+<p>These rules form an elegant and simple system. Every PEG rule is run on the
+remainder of the input string, consuming as much input as necessary. Once a
+rule is done, the rest of the input is passed on to the rest of the parser.</p>
+<p>For instance, the expression <code>('0'..'9')+</code>, &quot;one or more digits&quot;, will always
+match the largest sequence of consecutive digits possible. There is no danger
+of accidentally having a later rule back up and steal some digits in an
+unintuitive and nonlocal way.</p>
+<p>This contrasts with other parsing tools, such as regular expressions and CFGs,
+where the results of a rule often depend on code some distance away. Indeed,
+the famous &quot;shift/reduce conflict&quot; in LR parsers is not a problem in PEGs.</p>
+<a class="header" href="print.html#dont panic" id="dont panic"><h1>Don't panic</h1></a>
+<p>This all might be a bit counterintuitive at first. But as you can see, the
+basic logic is very easy and straightforward. You can trivially step through
+the execution of any PEG expression.</p>
+<ul>
+<li>Try this.</li>
+<li>If it succeeds, try the next thing.</li>
+<li>Otherwise, try the other thing.</li>
+</ul>
+<pre><code>(this ~ next_thing) | (other_thing)
+</code></pre>
+<p>These rules together make PEGs very pleasant tools for writing a parser.</p>
+<a class="header" href="print.html#syntax of pest parsers" id="syntax of pest parsers"><h1>Syntax of pest parsers</h1></a>
+<p><code>pest</code> grammars are lists of rules. Rules are defined like this:</p>
+<pre><code>my_rule = { ... }
+
+another_rule = {        // comments are preceded by two slashes
+    ...                 // whitespace goes anywhere
+}
+</code></pre>
+<p>Since rule names are translated into Rust enum variants, they are not allowed
+to be Rust keywords.</p>
+<p>The left curly bracket <code>{</code> defining a rule can be preceded by <a href="print.html#silent-and-atomic-rules">symbols that
+affect its operation</a>:</p>
+<pre><code>silent_rule = _{ ... }
+atomic_rule = @{ ... }
+</code></pre>
+<a class="header" href="print.html#expressions" id="expressions"><h2>Expressions</h2></a>
+<p>Grammar rules are built from <em>expressions</em> (hence &quot;parsing expression
+grammar&quot;). These expressions are a terse, formal description of how to parse an
+input string.</p>
+<p>Expressions are composable: they can be built out of other expressions and
+nested inside of each other to produce arbitrarily complex rules (although you
+should break very complicated expressions into multiple rules to make them
+easier to manage).</p>
+<p>PEG expressions are suitable for both high-level meaning, like &quot;a function
+signature, followed by a function body&quot;, and low-level meaning, like &quot;a
+semicolon, followed by a line feed&quot;. The combining form &quot;followed by&quot;,
+the <a href="print.html#sequence">sequence operator</a>, is the same in either case.</p>
+<a class="header" href="print.html#terminals" id="terminals"><h3>Terminals</h3></a>
+<p>The most basic rule is a <strong>literal string</strong> in double quotes: <code>&quot;text&quot;</code>.</p>
+<p>A string can be <strong>case-insensitive</strong> (for ASCII characters only) if preceded by
+a caret: <code>^&quot;text&quot;</code>.</p>
+<p>A single <strong>character in a range</strong> is written as two single-quoted characters,
+separated by two dots: <code>'0'..'9'</code>.</p>
+<p>You can match <strong>any single character</strong> at all with the special rule <code>any</code>. This
+is equivalent to <code>'\u{00}'..'\u{10FFFF}'</code>, any single Unicode character.</p>
+<pre><code>&quot;a literal string&quot;
+^&quot;ASCII case-insensitive string&quot;
+'a'..'z'
+any
+</code></pre>
+<p>Finally, you can <strong>refer to other rules</strong> by writing their names directly, and
+even <strong>use rules recursively</strong>:</p>
+<pre><code>my_rule = { &quot;slithy &quot; ~ other_rule }
+other_rule = { &quot;toves&quot; }
+recursive_rule = { &quot;mimsy &quot; ~ recursive_rule }
+</code></pre>
+<a class="header" href="print.html#sequence" id="sequence"><h3>Sequence</h3></a>
+<p>The sequence operator is written as a tilde <code>~</code>.</p>
+<pre><code>first ~ and_then
+
+(&quot;abc&quot;) ~ (^&quot;def&quot;) ~ ('g'..'z')        // matches &quot;abcDEFr&quot;
+</code></pre>
+<p>When matching a sequence expression, <code>first</code> is attempted. If <code>first</code> matches
+successfully, <code>and_then</code> is attempted next. However, if <code>first</code> fails, the
+entire expression fails.</p>
+<p>A list of expressions can be chained together with sequences, which indicates
+that <em>all</em> of the components must occur, in the specified order.</p>
+<a class="header" href="print.html#ordered choice-1" id="ordered choice-1"><h3>Ordered choice</h3></a>
+<p>The choice operator is written as a vertical line <code>|</code>.</p>
+<pre><code>first | or_else
+
+(&quot;abc&quot;) | (^&quot;def&quot;) | ('g'..'z')        // matches &quot;DEF&quot;
+</code></pre>
+<p>When matching a choice expression, <code>first</code> is attempted. If <code>first</code> matches
+successfully, the entire expression <em>succeeds immediately</em>. However, if <code>first</code>
+fails, <code>or_else</code> is attempted next.</p>
+<p>Note that <code>first</code> and <code>or_else</code> are always attempted at the same position, even
+if <code>first</code> matched some input before it failed. When encountering a parse
+failure, the engine will try the next ordered choice as though no input had
+been matched. Failed parses never consume any input.</p>
+<pre><code>start = { &quot;Beware &quot; ~ creature }
+creature = {
+    (&quot;the &quot; ~ &quot;Jabberwock&quot;)
+    | (&quot;the &quot; ~ &quot;Jubjub bird&quot;)
+}
+
+&quot;Beware the Jubjub bird&quot;
+ ^ (start) Parses via the second choice of `creature`,
+           even though the first choice matched &quot;the &quot; successfully.
+</code></pre>
+<p>It is somewhat tempting to borrow terminology and think of this operation as
+&quot;alternation&quot; or simply &quot;OR&quot;, but this is misleading. The word &quot;choice&quot; is used
+specifically because <a href="grammars/peg.html#ordered-choice">the operation is <em>not</em> merely logical &quot;OR&quot;</a>.</p>
+<a class="header" href="print.html#repetition" id="repetition"><h3>Repetition</h3></a>
+<p>There are two repetition operators: the asterisk <code>*</code> and plus sign <code>+</code>. They
+are placed after an expression. The asterisk <code>*</code> indicates that the preceding
+expression can occur <strong>zero or more</strong> times. The plus sign <code>+</code> indicates that
+the preceding expression can occur <strong>one or more</strong> times (it must occur at
+least once).</p>
+<p>The question mark operator <code>?</code> is similar, except it indicates that the
+expression is <strong>optional</strong> — it can occur zero or one times.</p>
+<pre><code>(&quot;zero&quot; ~ &quot;or&quot; ~ &quot;more&quot;)*
+ (&quot;one&quot; | &quot;or&quot; | &quot;more&quot;)+
+           (^&quot;optional&quot;)?
+</code></pre>
+<p>Note that <code>expr*</code> will always succeed, because it is allowed to match zero
+times. For example, if followed by a choice, as in <code>expr* | otherwise</code>, the
+rule <code>otherwise</code> will never be reached!</p>
+<p>Other <strong>numbers of repetitions</strong> can be indicated using curly brackets:</p>
+<pre><code>expr{n}           // exactly n repetitions
+expr{m, n}        // between m and n repetitions, inclusive
+
+expr{, n}         // at most n repetitions
+expr{m, }         // at least m repetitions
+</code></pre>
+<p>Thus <code>expr*</code> is equivalent to <code>expr{0, }</code>; <code>expr+</code> is equivalent to <code>expr{1, }</code>; and <code>expr?</code> is equivalent to <code>expr{0, 1}</code>.</p>
+<a class="header" href="print.html#predicates" id="predicates"><h3>Predicates</h3></a>
+<p>Preceding an expression with an ampersand <code>&amp;</code> or exclamation mark <code>!</code> turns it
+into a <em>predicate</em> that never consumes any input. You might know these
+operators as &quot;lookahead&quot; or &quot;non-progressing&quot;.</p>
+<p>The <strong>positive predicate</strong>, written as an ampersand <code>&amp;</code>, attempts to match its
+inner expression. If the inner expression succeeds, parsing continues, but at
+the <em>same position</em> as the predicate — <code>&amp;foo ~ bar</code> is thus a kind of
+&quot;AND&quot; statement: &quot;the input string must match <code>foo</code> AND <code>bar</code>&quot;. If the inner
+expression fails, the whole expression fails too.</p>
+<p>The <strong>negative predicate</strong>, written as an exclamation mark <code>!</code>, attempts to
+match its inner expression. If the inner expression <em>fails</em>, the predicate
+<em>succeeds</em> and parsing continues at the same position as the predicate. If the
+inner expression <em>succeeds</em>, the predicate <em>fails</em> — <code>!foo ~ bar</code> is thus
+a kind of &quot;NOT&quot; statement: &quot;the input string must match <code>bar</code> but NOT <code>foo</code>&quot;.</p>
+<p>This leads to the common idiom meaning &quot;any character but&quot;:</p>
+<pre><code>not_space_or_tab = {
+    !(                // if the following text is not
+        &quot; &quot;           //     a space
+        | &quot;\t&quot;        //     or a tab
+    )
+    ~ any             // then consume one character
+}
+
+triple_quoted_string = {
+    &quot;'''&quot;
+    ~ triple_quoted_character*
+    ~ &quot;'''&quot;
+}
+triple_quoted_character = {
+    !&quot;'''&quot;        // if the following text is not three apostrophes
+    ~ any         // then consume one character
+}
+</code></pre>
+<a class="header" href="print.html#operator precedence and grouping wip" id="operator precedence and grouping wip"><h2>Operator precedence and grouping (WIP)</h2></a>
+<p>The repetition operators asterisk <code>*</code>, plus sign <code>+</code>, and question mark <code>?</code>
+apply to the immediately preceding expression.</p>
+<pre><code>&quot;One &quot; ~ &quot;or &quot; ~ &quot;more. &quot;+
+&quot;One &quot; ~ &quot;or &quot; ~ (&quot;more. &quot;+)
+    are equivalent and match
+&quot;One or more. more. more. more. &quot;
+</code></pre>
+<p>Larger expressions can be repeated by surrounding them with parentheses.</p>
+<pre><code>(&quot;One &quot; ~ &quot;or &quot; ~ &quot;more. &quot;)+
+    matches
+&quot;One or more. One or more. &quot;
+</code></pre>
+<p>Repetition operators have the highest precedence, followed by predicate
+operators, the sequence operator, and finally ordered choice.</p>
+<pre><code>my_rule = {
+    &quot;a&quot;* ~ &quot;b&quot;?
+    | &amp;&quot;b&quot;+ ~ &quot;a&quot;
+}
+    equivalent to
+my_rule = {
+      ( (&quot;a&quot;*) ~ (&quot;b&quot;?) )
+    | ( (&amp;(&quot;b&quot;+&quot;)) ~ &quot;a&quot; )
+}
+</code></pre>
+<a class="header" href="print.html#start and end of input" id="start and end of input"><h2>Start and end of input</h2></a>
+<p>The rules <code>soi</code> and <code>eoi</code> match the <em>start</em> and <em>end</em> of the input string,
+respectively. Neither consumes any text. They only indicate whether the parser
+is currently at one edge of the input.</p>
+<p>For example, to ensure that a rule matches the entire input, where any syntax
+error results in a failed parse (rather than a successful but incomplete
+parse):</p>
+<pre><code>main = {
+    soi
+    ~ (...)
+    ~ eoi
+}
+</code></pre>
+<a class="header" href="print.html#implicit whitespace" id="implicit whitespace"><h2>Implicit whitespace</h2></a>
+<p>Many languages and text formats allow arbitrary whitespace and comments between
+logical tokens. For instance, Rust considers <code>4+5</code> equivalent to <code>4 + 5</code> and <code>4 /* comment */ + 5</code>.</p>
+<p>The <strong>optional rules <code>whitespace</code> and <code>comment</code></strong> implement this behaviour. If
+either (or both) are defined, they will be implicitly inserted at every
+<a href="print.html#sequence">sequence</a> and between every <a href="print.html#repetition">repetition</a> (except in <a href="print.html#atomic">atomic rules</a>).</p>
+<pre><code>expression = { &quot;4&quot; ~ &quot;+&quot; ~ &quot;5&quot; }
+whitespace = _{ &quot; &quot; }
+comment = _{ &quot;/*&quot; ~ (!&quot;*/&quot; ~ any)* ~ &quot;*/&quot; }
+    matches
+&quot;4+5&quot;
+&quot;4 + 5&quot;
+&quot;4  +     5&quot;
+&quot;4 /* comment */ + 5&quot;
+</code></pre>
+<p>As you can see, <code>whitespace</code> and <code>comment</code> are run repeatedly, so they need
+only match a single whitespace character or a single comment. The grammar above
+is equivalent to:</p>
+<pre><code>expression = {
+    &quot;4&quot;   ~ (ws | com)*
+    ~ &quot;+&quot; ~ (ws | com)*
+    ~ &quot;5&quot;
+}
+ws = _{ &quot; &quot; }
+com = _{ &quot;/*&quot; ~ (!&quot;*/&quot; ~ any)* ~ &quot;*/&quot; }
+</code></pre>
+<p>Note that implicit whitespace is <em>not</em> inserted at the beginning or end of rules
+— for instance, <code>expression</code> does <em>not</em> match <code>&quot; 4+5 &quot;</code>. If you want to
+include implicit whitespace at the beginning and end of a rule, you will need to
+sandwich it between two empty rules (often <code>soi</code> and <code>eoi</code> <a href="print.html#start-and-end-of-input">as above</a>):</p>
+<pre><code>whitespace = _{ &quot; &quot; }
+expression = { &quot;4&quot; ~ &quot;+&quot; ~ &quot;5&quot; }
+main = { soi ~ expression ~ eoi }
+    matches
+&quot;4+5&quot;
+&quot;  4 + 5   &quot;
+</code></pre>
+<p>(Be sure to mark the <code>whitespace</code> and <code>comment</code> rules as <a href="print.html#silent-and-atomic-rules">silent</a> unless you
+want to see them included inside other rules!)</p>
+<a class="header" href="print.html#silent and atomic rules" id="silent and atomic rules"><h2>Silent and atomic rules</h2></a>
+<p><strong>Silent</strong> rules are just like normal rules — when run, they function the
+same way — except they do not produce <a href="parser_api.html#pairs">pairs</a> or <a href="parser_api.html#tokens">tokens</a>. If a rule is
+silent, it will never appear in a parse result.</p>
+<p>To make a silent rule, precede the left curly bracket <code>{</code> with a low line
+(underscore) <code>_</code>.</p>
+<pre><code>silent = _{ ... }
+</code></pre>
+<a class="header" href="print.html#atomic" id="atomic"><h3>Atomic</h3></a>
+<p><code>pest</code> has two kinds of atomic rules: <strong>atomic</strong> and <strong>compound atomic</strong>. To
+make one, write the sigil before the left curly bracket <code>{</code>.</p>
+<pre><code>atomic = @{ ... }
+compound_atomic = ${ ... }
+</code></pre>
+<p>Both kinds of atomic rule prevent <a href="print.html#implicit-whitespace">implicit whitespace</a>: inside an atomic rule,
+the tilde <code>~</code> means &quot;immediately followed by&quot;, and <a href="print.html#repetition">repetition operators</a>
+(asterisk <code>*</code> and plus sign <code>+</code>) have no implicit separation. In addition, all
+other rules called from an atomic rule are also treated as atomic.</p>
+<p>The difference between the two is how they produce tokens for inner rules. In
+an atomic rule, interior matching rules are <a href="print.html#silent-and-atomic-rules">silent</a>. By contrast, compound
+atomic rules produce inner tokens as normal.</p>
+<p>Atomic rules are useful when the text you are parsing ignores whitespace except
+in a few cases, such as literal strings. In this instance, you can write
+<code>whitespace</code> or <code>comment</code> rules, then make your string-matching rule be atomic.</p>
+<a class="header" href="print.html#non-atomic" id="non-atomic"><h3>Non-atomic</h3></a>
+<p>Sometimes, you'll want to cancel the effects of atomic parsing. For instance,
+you might want to have string interpolation with an expression inside, where
+the inside expression can still have whitespace like normal.</p>
+<pre><code class="language-python">#!/bin/env python3
+print(f&quot;The answer is {2 + 4}.&quot;)
+</code></pre>
+<p>This is where you use a <strong>non-atomic</strong> rule. Write an exclamation mark <code>!</code> in
+front of the defining curly bracket. The rule will run as non-atomic, whether
+it is called from an atomic rule or not.</p>
+<pre><code>fstring = @{ &quot;\&quot;&quot; ~ ... }
+expr = !{ ... }
+</code></pre>
+<a class="header" href="print.html#the stack wip" id="the stack wip"><h2>The stack (WIP)</h2></a>
+<p><code>pest</code> maintains a stack that can be manipulated directly from the grammar. An
+expression can be matched and pushed onto the stack with the keyword <code>push</code>,
+then later matched exactly with the keywords <code>peek</code> and <code>pop</code>.</p>
+<p>Using the stack allows <em>the exact same text</em> to be matched multiple times,
+rather than <em>the same pattern</em>.</p>
+<p>For example,</p>
+<pre><code>same_text = {
+    push( &quot;a&quot; | &quot;b&quot; | &quot;c&quot; )
+    ~ pop
+}
+same_pattern = {
+    (&quot;a&quot; | &quot;b&quot; | &quot;c&quot;)
+    ~ (&quot;a&quot; | &quot;b&quot; | &quot;c&quot;)
+}
+</code></pre>
+<p>In this case, <code>same_pattern</code> will match <code>&quot;ab&quot;</code>, while <code>same_text</code> will not.</p>
+<p>One practical use is in parsing Rust <a href="https://doc.rust-lang.org/book/second-edition/appendix-02-operators.html#standalone-syntax">&quot;raw string literals&quot;</a>, which look like
+this:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+const raw_str: &amp;str = r###&quot;
+    Some number of number signs # followed by a quotation mark &quot;.
+
+    Quotation marks can be used anywhere inside: &quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;,
+    as long as one is not followed by a matching number of number signs,
+    which ends the string: &quot;###;
+#}</code></pre></pre>
+<p>When parsing a raw string, we have to keep track of how many number signs <code>#</code>
+occurred before the quotation mark. We can do this using the stack:</p>
+<pre><code>raw_string = {
+    &quot;r&quot; ~ push(&quot;#&quot;*) ~ &quot;\&quot;&quot;    // push the number signs onto the stack
+    ~ raw_string_interior
+    ~ &quot;\&quot;&quot; ~ pop               // match a quotation mark and the number signs
+}
+raw_string_interior = {
+    (
+        !(&quot;\&quot;&quot; ~ peek)    // unless the next character is a quotation mark
+                          // followed by the correct amount of number signs,
+        ~ any             // consume one character
+    )*
+}
+</code></pre>
+<a class="header" href="print.html#cheat sheet" id="cheat sheet"><h1>Cheat sheet</h1></a>
+<table><thead><tr><th align="center"> Syntax           </th><th align="center"> Meaning                           </th><th align="center"> Syntax                  </th><th align="center"> Meaning              </th></tr></thead><tbody>
+<tr><td align="center"> <code>foo = { ... }</code> </td><td align="center"> <a href="print.html#syntax-of-pest-parsers">regular rule</a>                    </td><td align="center"> <code>baz = @{ ... }</code>        </td><td align="center"> <a href="print.html#atomic">atomic</a>             </td></tr>
+<tr><td align="center"> <code>bar = _{ ... }</code> </td><td align="center"> <a href="print.html#silent-and-atomic-rules">silent</a>                          </td><td align="center"> <code>qux = ${ ... }</code>        </td><td align="center"> <a href="print.html#atomic">compound-atomic</a>    </td></tr>
+<tr><td align="center">                  </td><td align="center">                                   </td><td align="center"> <code>plugh = !{ ... }</code>      </td><td align="center"> <a href="print.html#non-atomic">non-atomic</a>         </td></tr>
+<tr><td align="center"> <code>&quot;abc&quot;</code>          </td><td align="center"> <a href="print.html#terminals">exact string</a>                    </td><td align="center"> <code>^&quot;abc&quot;</code>                </td><td align="center"> <a href="print.html#terminals">case insensitive</a>   </td></tr>
+<tr><td align="center"> <code>'a'..'z'</code>       </td><td align="center"> <a href="print.html#terminals">character range</a>                 </td><td align="center"> <code>any</code>                   </td><td align="center"> <a href="print.html#terminals">any character</a>      </td></tr>
+<tr><td align="center"> <code>foo ~ bar</code>      </td><td align="center"> <a href="print.html#sequence">sequence</a>                        </td><td align="center"> <code>baz | qux</code> </td><td align="center"> <a href="print.html#ordered-choice">ordered choice</a>     </td></tr>
+<tr><td align="center"> <code>foo*</code>           </td><td align="center"> <a href="print.html#repetition">zero or more</a>                    </td><td align="center"> <code>bar+</code>                  </td><td align="center"> <a href="print.html#repetition">one or more</a>        </td></tr>
+<tr><td align="center"> <code>baz?</code>           </td><td align="center"> <a href="print.html#repetition">optional</a>                        </td><td align="center"> <code>qux{n}</code>                </td><td align="center"> <a href="print.html#repetition">exactly <em>n</em></a>        </td></tr>
+<tr><td align="center"> <code>qux{m, n}</code>      </td><td align="center"> <a href="print.html#repetition">between <em>m</em> and <em>n</em> (inclusive)</a> </td><td align="center">                         </td><td align="center">                      </td></tr>
+<tr><td align="center"> <code>&amp;foo</code>           </td><td align="center"> <a href="print.html#predicates">positive predicate</a>              </td><td align="center"> <code>!bar</code>                  </td><td align="center"> <a href="print.html#predicates">negative predicate</a> </td></tr>
+<tr><td align="center"> <code>push(baz)</code>      </td><td align="center"> <a href="print.html#the-stack-wip">match and push</a>                  </td><td align="center">                         </td><td align="center">                      </td></tr>
+<tr><td align="center"> <code>pop</code>            </td><td align="center"> <a href="print.html#the-stack-wip">match and pop</a>                   </td><td align="center"> <code>peek</code>                  </td><td align="center"> <a href="print.html#the-stack-wip">match without pop</a>  </td></tr>
+</tbody></table>
+<a class="header" href="print.html#example json wip" id="example json wip"><h1>Example: JSON (WIP)</h1></a>
+<p>This section will walk through the creation of a <a href="https://json.org/">JSON</a> parser. It will provide
+an example of pattern-matching on <code>as_rule()</code> calls and recursive parse trees.</p>
+<a class="header" href="print.html#operator precedence wip" id="operator precedence wip"><h1>Operator precedence (WIP)</h1></a>
+<p>This chapter will discuss two methods of dealing with operator precedence:
+directly in the PEG grammar, and using a <code>PrecClimber</code>. It will probably also
+include an explanation of how precedence climbing works.</p>
+<a class="header" href="print.html#example calculator wip" id="example calculator wip"><h1>Example: Calculator (WIP)</h1></a>
+<p>This section will walk through the creation of a simple calculator. It will
+provide an example of parsing expressions with operator precedence.</p>
+<a class="header" href="print.html#final project awk clone wip" id="final project awk clone wip"><h1>Final project: Awk clone (WIP)</h1></a>
+<p>This chapter will walk through the creation of a simple variant of <a href="http://pubs.opengroup.org/onlinepubs/9699919799/utilities/awk.html">Awk</a> (only
+loosely following the POSIX specification). It will probably have several
+sections. It will provide an example of a full project based on <code>pest</code> with a
+manageable grammar, a straightforward AST, and a fairly simple interpreter.</p>
+<p>This Awk clone will support regex patterns, string and numeric variables, most
+of the POSIX operators, and some functions. It will not support user-defined
+functions in the interest of avoiding variable scoping.</p>
+<a class="header" href="print.html#setup-1" id="setup-1"><h1>Setup</h1></a>
 <p>Before getting into the more theoretical parts of grammars and APIs, let's first
 make sure we're all set up.</p>
 <a class="header" href="print.html#rust and cargo" id="rust and cargo"><h2>Rust and Cargo</h2></a>
 <p>The easiest way to install Rust and Cargo together is to follow the instructions
 on <a href="https://rustup.rs">rustup.rs</a>. Once that is out of the way, make sure you
 add <em>pest</em> to your <code>Cargo.toml</code>:</p>
-<pre><code class="language-toml">pest = &quot;^1.0.0-beta&quot;
-pest_derive = &quot;^1.0.0-beta&quot;
+<pre><code class="language-toml">pest = &quot;^1.0&quot;
+pest_derive = &quot;^1.0&quot;
 </code></pre>
 <p><em>pest_derive</em> is the part of the parser that analyzes, verifies, optimizes, and
 generates the code that then makes use of the APIs found in the <em>pest</em> crate.
@@ -123,7 +1031,7 @@ you is linked at compile time.</p>
 <a class="header" href="print.html#the pest grammar file" id="the pest grammar file"><h2>The <code>.pest</code> grammar file</h2></a>
 <p>The actual grammar gets saved in separate <code>.pest</code> files, relative to Cargo's
 <code>src</code> directory. They are then used in order to derive an implementation of the
-<a href="https://docs.rs/pest/1.0.0-beta/pest/trait.Parser.html">Parser</a> trait.</p>
+<a href="https://docs.rs/pest/1.0/pest/trait.Parser.html">Parser</a> trait.</p>
 <p>Due to the fact that procedural macro do not offer an API to tell the compiler
 which files are relevant to compilation, it is necessary to provide a small hint
 in the form of a debug-only <code>const</code> in order to make sure that your grammar gets
@@ -148,82 +1056,6 @@ extern crate pest;
 #[macro_use]
 extern crate pest_derive;
 #}</code></pre></pre>
-<a class="header" href="print.html#parsing expression grammar" id="parsing expression grammar"><h1>Parsing expression grammar</h1></a>
-<p>Parsing expression grammar, or PEG, is the formal grammar that <em>pest</em> uses to
-describe the kind of inputs it accepts. This type of grammar is similar in
-concept to regular expressions with named groups with the exception that regex
-is <em>generative</em>, i.e. used to generate strings, while PEG is <em>analytic</em>, i.e.
-used to test whether strings match the grammar.</p>
-<a class="header" href="print.html#generative vs analytics approach" id="generative vs analytics approach"><h2>Generative vs. analytics approach</h2></a>
-<p>Let's take a look at a simple regex example in order to illustrate these
-concepts a bit better:</p>
-<pre><code class="language-javascript">/^(a*)(a)$/
-</code></pre>
-<p>This regex generates a string that starts from the beginning (<code>^</code>), matches zero
-or more <code>'a'</code> (<code>a*</code>), matches one <code>'a'</code> (<code>a</code>), then it makes sure it reached the
-end of its input. Since this a generative definition, we can generate the string
-<code>&quot;aa&quot;</code> by generating one <code>'a'</code> from the first group and the second <code>'a'</code> from
-the second group.</p>
-<p>If we define the same rule in pest, it will look something like this:</p>
-<pre><code>soi ~ &quot;a&quot;* ~ &quot;a&quot; ~ eoi
-</code></pre>
-<p><code>soi</code> and <code>eoi</code> stand for start-of-input and end-of-input respectively and work
-much like their regex counterparts. <code>~</code> is used in order to crate sequences,
-while the rest of the syntax should be straightforward coming from the previous
-example.</p>
-<p>Part of the analytical approach of PEGs is the fact that they run eagerly. If we
-take the example generated by the regex, the PEG variant will eagerly match both
-<code>a</code>s in the <code>&quot;a&quot;*</code> expression, leaving the second <code>&quot;a&quot;</code> unsatisfied. Every
-expression in PEG tries to match as much as it possibly can. And, once it
-matched, it will not backtrack in order to satisfy the next expression. At
-first, this may seem like a bit of a hindrance, but it offer something else in
-exchange.</p>
-<a class="header" href="print.html#non-ambiguity" id="non-ambiguity"><h2>Non-ambiguity</h2></a>
-<p>If a string is accepted by a PEG grammar, it is guaranteed to be matched in one
-single manner. Let's take the following regex example in order to illustrate
-this:</p>
-<pre><code class="language-javascript">/(a*)(a*)/
-</code></pre>
-<p>The string <code>&quot;aaaa&quot;</code> has, theoretically, 5 different ways of being accepted in
-terms of how the groups are split, namely <code>(&quot;aaaa&quot;)()</code>, <code>(&quot;aaa&quot;)(&quot;a&quot;)</code>,
-<code>(&quot;aa&quot;)(&quot;aa&quot;)</code>, <code>(&quot;a&quot;)(&quot;aaa&quot;)</code>, and <code>()(&quot;aaaa&quot;)</code>. The only way the equivalent
-PEG grammar can match this is by eagerly matching the whole string in the first
-expression <code>(&quot;aaaa&quot;)()</code>.</p>
-<a class="header" href="print.html#choice order" id="choice order"><h2>Choice order</h2></a>
-<p>In order to keep the promise of non-ambiguity, choice expressions have to be run
-in a predefined order, from right to left. This has an relevant implication when
-rules have overlapping beginnings. Take the following example:</p>
-<pre><code>(&quot;a&quot; | &quot;ab&quot;) ~ eoi
-</code></pre>
-<p>This may look perfectly correct, but is in fact incapable of accepting the
-string <code>&quot;ab&quot;</code>, since the first choice will match <code>&quot;a&quot;</code>, leaving <code>&quot;b&quot;</code> at the
-hand of the <code>eoi</code> rule which will then fail. And, since there is no way to match
-<code>&quot;ab&quot;</code>, it can be simplified to simply <code>&quot;a&quot; ~ eoi</code>. If, however, we do want to
-match both, we have to make sure that the longer expression comes first:</p>
-<pre><code>(&quot;ab&quot; | &quot;a&quot;) ~ eoi
-</code></pre>
-<p>This way, <code>&quot;ab&quot;</code> will get matched by the first expression, while <code>&quot;a&quot;</code> will fail
-it, making way for the second one to match.</p>
-<a class="header" href="print.html#left-recursion" id="left-recursion"><h2>Left-recursion</h2></a>
-<p>Because of their eager nature, PEGs will always start exploring possible paths
-from the left. This means that, if a rules gets to run itself before making any
-kind of progress, it will result in a stack-overflow. The following examples all
-fail to compile:</p>
-<pre><code>// Rule calls itself right away.
-rule = { rule }
-
-// Rule makes no progress before calling itself. (since &quot;&quot; always matches)
-rule = { &quot;&quot; ~ rule }
-
-// Rules indirectly left-recurse.
-rule_a = { rule_b }
-rule_b = { rule_a }
-
-// Rule still causes a stack-overflow for any other input than &quot;a&quot;.
-rule = { &quot;a&quot; | rule }
-</code></pre>
-<p>All left-recursion use cases can be rewritten in PEG using repetition or layers
-of indirection, as will be seen in later chapters.</p>
 <a class="header" href="print.html#literals" id="literals"><h1>Literals</h1></a>
 <p>A good place to start when writing out the grammar of a language are the
 literals. For our small Rust subset, the literals that we are going to define
@@ -273,7 +1105,7 @@ bool      = { true_lit | false_lit }
 </code></pre>
 <p>This seems to work fine, but before we head on to integers, let's first write a
 couple of tests. <em>pest</em> comes with a handy macro for asserting parse results
-named <a href="https://docs.rs/pest/1.0.0-beta/pest/macro.parses_to.html">parses_to!</a>.</p>
+named <a href="https://docs.rs/pest/1.0/pest/macro.parses_to.html">parses_to!</a>.</p>
 <pre><pre class="playpen"><code class="language-rust">
 # #![allow(unused_variables)]
 #fn main() {
@@ -408,16 +1240,14 @@ digits</li>
 <p>A good place to start is to define the hex digit:</p>
 <pre><code>hex = _{ '0'..'9' | 'a'..'f' | 'A'..'F' }
 </code></pre>
-<p>To define a rule that can have from 1 up to 6 hex digits is to check whether
-you have 6 already, and, if not, to match as many as possible. This way, if you
-have more than 6, the rule will match the 6 and fail later down the path. It you
-have less than 6, the second part of the choice will obviously match less than 6
-as well.</p>
-<pre><code>unicode_hex = { hex ~ hex ~ hex ~ hex ~ hex ~ hex | hex+ }
+<p>To define a rule that can have from 1 up to 6 hex digits, pest offers a convenient
+syntax <code>{m, n}</code>. Limits are inclusive. Note that <code>{n}</code>, <code>{n, }</code>, and <code>{, n}</code> syntaxes
+exist too. Please see <a href="https://docs.rs/pest_derive/1.0/pest_derive/#expressions">non-terminals expressions</a> for more details.</p>
+<pre><code>unicode_hex = { hex{1, 6} }
 </code></pre>
 <p>We now have everything we need to define escapes:</p>
 <pre><code>predefined = { &quot;n&quot; | &quot;r&quot; | &quot;t&quot; | &quot;\\&quot; | &quot;0&quot; | &quot;\&quot;&quot; | &quot;'&quot; }
-byte       = { &quot;x&quot; ~ hex ~ hex }
+byte       = { &quot;x&quot; ~ hex{2} }
 unicode    = { &quot;u&quot; ~ &quot;{&quot; ~ unicode_hex ~ &quot;}&quot; }
 escape     = { &quot;\\&quot; ~ (predefined | byte | unicode) }
 </code></pre>
@@ -498,7 +1328,7 @@ ident      =  {
 syntax of the language. This syntax will only focus on expressions, statements,
 and functions as a subset of Rust. These in turn will not be complete
 definitions.</p>
-<a class="header" href="print.html#expressions" id="expressions"><h2>Expressions</h2></a>
+<a class="header" href="print.html#expressions-1" id="expressions-1"><h2>Expressions</h2></a>
 <p>We will define expressions as a combination of unary and infix operations, and
 method calls. The operators that we will use for this subset are:</p>
 <pre><code>op_unary_minus =  { &quot;-&quot; }
@@ -594,20 +1424,6 @@ combine expression types, but also separate tests for individual behavior.</p>
 
         <!-- Livereload script (if served using the cli tool) -->
         
-    <script type="text/javascript">
-        var socket = new WebSocket("ws://localhost:3001");
-        socket.onmessage = function (event) {
-            if (event.data === "reload") {
-                socket.close();
-                location.reload(true); // force reload from server (not from cache)
-            }
-        };
-
-        window.onbeforeunload = function() {
-            socket.close();
-        }
-    </script>
-
 
         
 

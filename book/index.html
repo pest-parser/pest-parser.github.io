@@ -2,9 +2,9 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Introduction - A thoughtful introduction to the pest parser</title>
+        <title>Introduction - </title>
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <meta name="description" content="An introduction to the pest parser by implementing a Rust grammar subset">
+        <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
 
@@ -65,7 +65,7 @@
         </script>
 
         <div id="sidebar" class="sidebar">
-            <ul class="chapter"><li class="affix"><a href="./intro.html" class="active">Introduction</a></li><li><a href="./setup.html"><strong>1.</strong> Setup</a></li><li><a href="./peg.html"><strong>2.</strong> Parsing expression grammar</a></li><li><a href="./literals.html"><strong>3.</strong> Literals</a></li><li><a href="./syntax.html"><strong>4.</strong> Syntax</a></li></ul>
+            <ul class="chapter"><li><a href="./intro.html" class="active"><strong>1.</strong> Introduction</a></li><li><ul class="section"><li><a href="./examples/csv.html"><strong>1.1.</strong> Example: CSV</a></li></ul></li><li><a href="./parser_api.html"><strong>2.</strong> Parser API</a></li><li><ul class="section"><li><a href="./examples/ini.html"><strong>2.1.</strong> Example: INI (WIP)</a></li></ul></li><li><a href="./grammars/grammars.html"><strong>3.</strong> Grammars</a></li><li><ul class="section"><li><a href="./grammars/peg.html"><strong>3.1.</strong> Parsing expression grammars</a></li><li><a href="./grammars/syntax.html"><strong>3.2.</strong> Syntax of pest parsers</a></li><li><a href="./examples/json.html"><strong>3.3.</strong> Example: JSON (WIP)</a></li></ul></li><li><a href="./precedence.html"><strong>4.</strong> Operator precedence (WIP)</a></li><li><ul class="section"><li><a href="./examples/calculator.html"><strong>4.1.</strong> Example: Calculator (WIP)</a></li></ul></li><li><a href="./examples/awk.html"><strong>5.</strong> Final project: Awk clone (WIP)</a></li><li><a href="./examples/rust/setup.html"><strong>6.</strong> Bonus project: Rust grammar (WIP)</a></li><li><ul class="section"><li><a href="./examples/rust/literals.html"><strong>6.1.</strong> Literals</a></li><li><a href="./examples/rust/syntax.html"><strong>6.2.</strong> Syntax</a></li></ul></li></ul>
         </div>
 
         <div id="page-wrapper" class="page-wrapper">
@@ -77,7 +77,7 @@
                         <i id="theme-toggle" class="fa fa-paint-brush"></i>
                     </div>
 
-                    <h1 class="menu-title">A thoughtful introduction to the pest parser</h1>
+                    <h1 class="menu-title"></h1>
 
                     <div class="right-buttons">
                         <i id="print-button" class="fa fa-print" title="Print this book"></i>
@@ -87,24 +87,72 @@
                 <div id="content" class="content">
                     <a class="header" href="intro.html#introduction" id="introduction"><h1>Introduction</h1></a>
 <p><em>Speed or simplicity? Why not <strong>both</strong>?</em></p>
-<p>The motivation behind <em>pest</em> was to come up with a parser that would maximize
-usability, both when designing the grammar, and when maintaining it after
-prolonged use and development. And, as Rust tradition mandates, this parser had
-to make sure that its use of high-level abstractions would not hinder
-performance. As such, <em>pest</em> is perfectly suited for complete beginners who want
-to learn and experiment with grammars and parsing, but who do not want to be
-constrained in terms of speed.</p>
-<p><em>pest</em> is implemented in Rust and requires some knowledge of the language in
-order to be used. The reason for picking it over other languages is that it
-offers C-like low level access and encourages the use of multi-threaded
-programming, both of great use when writing a compiler or VM to accompany your
-parser. At the same time, Rust's procedural macros and functional APIs provide a
-means to express the problem of parsing in a simple and natural way. It even
-comes with an <a href="https://doc.rust-lang.org/book/">official book</a> to get you
-started.</p>
-<p>This introduction will explore the implementation of a subset of Rust's own
-grammar, from the simplest terminals to the construction of an AST. After
-reading it, you should be comfortable writing parsers with <em>pest</em>.</p>
+<p><code>pest</code> is a library for writing plain-text parsers in Rust.</p>
+<p>Parsers that use <code>pest</code> are <strong>easy to design and maintain</strong> due to the use of
+<a href="./grammars/peg.html">Parsing Expression Grammars</a>, or <em>PEGs</em>. And, because of Rust's zero-cost
+abstractions, <code>pest</code> parsers can be <strong>very fast</strong>.</p>
+<a class="header" href="intro.html#sample" id="sample"><h2>Sample</h2></a>
+<p>Here is the complete grammar for a simple calculator <a href="examples/calculator.html">developed in a (currently
+unwritten) later chapter</a>:</p>
+<pre><code>num = @{ int ~ (&quot;.&quot; ~ digit*)? ~ (^&quot;e&quot; ~ int)? }
+    int = { (&quot;+&quot; | &quot;-&quot;)? ~ digit+ }
+    digit = { '0'..'9' }
+
+operation = _{ add | subtract | multiply | divide | power }
+    add      = { &quot;+&quot; }
+    subtract = { &quot;-&quot; }
+    multiply = { &quot;*&quot; }
+    divide   = { &quot;/&quot; }
+    power    = { &quot;^&quot; }
+
+expr = { term ~ (operation ~ term)* }
+term = _{ num | &quot;(&quot; ~ expr ~ &quot;)&quot; }
+
+calculation = _{ soi ~ expr ~ eoi }
+
+whitespace = _{ &quot; &quot; | &quot;\t&quot; }
+</code></pre>
+<p>And here is the function that uses that parser to calculate answers:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+lazy_static! {
+    static ref PREC_CLIMBER: PrecClimber&lt;Rule&gt; = {
+        use Rule::*;
+        use Assoc::*;
+
+        PrecClimber::new(vec![
+            Operator::new(add, Left) | Operator::new(subtract, Left),
+            Operator::new(multiply, Left) | Operator::new(divide, Left),
+            Operator::new(power, Right)
+        ])
+    };
+}
+
+fn eval(expression: Pairs&lt;Rule&gt;) -&gt; f64 {
+    PREC_CLIMBER.climb(
+        expression,
+        |pair: Pair&lt;Rule&gt;| match pair.as_rule() {
+            Rule::num =&gt; pair.as_str().parse::&lt;f64&gt;().unwrap(),
+            Rule::expr =&gt; eval(pair.into_inner()),
+            _ =&gt; unreachable!(),
+        },
+        |lhs: f64, op: Pair&lt;Rule&gt;, rhs: f64| match op.as_rule() {
+            Rule::add      =&gt; lhs + rhs,
+            Rule::subtract =&gt; lhs - rhs,
+            Rule::multiply =&gt; lhs * rhs,
+            Rule::divide   =&gt; lhs / rhs,
+            Rule::power    =&gt; lhs.powf(rhs),
+            _ =&gt; unreachable!(),
+        },
+    )
+}
+#}</code></pre></pre>
+<a class="header" href="intro.html#about this book" id="about this book"><h2>About this book</h2></a>
+<p>This book provides an overview of <code>pest</code> as well as several example parsers.
+For more details of <code>pest</code>'s API, check <a href="https://docs.rs/pest/">the documentation</a>.</p>
+<p>Note that <code>pest</code> uses some advanced features of the Rust language. For an
+introduction to Rust, consult the <a href="https://doc.rust-lang.org/stable/book/second-edition/">official Rust book</a>.</p>
 
                 </div>
 
@@ -112,7 +160,7 @@ reading it, you should be comfortable writing parsers with <em>pest</em>.</p>
                 
 
                 
-                    <a rel="next" href="./setup.html" class="mobile-nav-chapters next">
+                    <a rel="next" href="./examples/csv.html" class="mobile-nav-chapters next">
                         <i class="fa fa-angle-right"></i>
                     </a>
                 
@@ -122,7 +170,7 @@ reading it, you should be comfortable writing parsers with <em>pest</em>.</p>
             
 
             
-                <a href="./setup.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                <a href="./examples/csv.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
                     <i class="fa fa-angle-right"></i>
                 </a>
             
@@ -139,20 +187,6 @@ reading it, you should be comfortable writing parsers with <em>pest</em>.</p>
 
         <!-- Livereload script (if served using the cli tool) -->
         
-    <script type="text/javascript">
-        var socket = new WebSocket("ws://localhost:3001");
-        socket.onmessage = function (event) {
-            if (event.data === "reload") {
-                socket.close();
-                location.reload(true); // force reload from server (not from cache)
-            }
-        };
-
-        window.onbeforeunload = function() {
-            socket.close();
-        }
-    </script>
-
 
         
 

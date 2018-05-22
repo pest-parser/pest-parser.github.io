@@ -2,12 +2,12 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <title>Literals - A thoughtful introduction to the pest parser</title>
+        <title>Literals - </title>
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <meta name="description" content="An introduction to the pest parser by implementing a Rust grammar subset">
+        <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
-        <base href="">
+        <base href="../../">
 
         <link rel="stylesheet" href="book.css">
         <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
@@ -66,7 +66,7 @@
         </script>
 
         <div id="sidebar" class="sidebar">
-            <ul class="chapter"><li class="affix"><a href="./intro.html">Introduction</a></li><li><a href="./setup.html"><strong>1.</strong> Setup</a></li><li><a href="./peg.html"><strong>2.</strong> Parsing expression grammar</a></li><li><a href="./literals.html" class="active"><strong>3.</strong> Literals</a></li><li><a href="./syntax.html"><strong>4.</strong> Syntax</a></li></ul>
+            <ul class="chapter"><li><a href="./intro.html"><strong>1.</strong> Introduction</a></li><li><ul class="section"><li><a href="./examples/csv.html"><strong>1.1.</strong> Example: CSV</a></li></ul></li><li><a href="./parser_api.html"><strong>2.</strong> Parser API</a></li><li><ul class="section"><li><a href="./examples/ini.html"><strong>2.1.</strong> Example: INI (WIP)</a></li></ul></li><li><a href="./grammars/grammars.html"><strong>3.</strong> Grammars</a></li><li><ul class="section"><li><a href="./grammars/peg.html"><strong>3.1.</strong> Parsing expression grammars</a></li><li><a href="./grammars/syntax.html"><strong>3.2.</strong> Syntax of pest parsers</a></li><li><a href="./examples/json.html"><strong>3.3.</strong> Example: JSON (WIP)</a></li></ul></li><li><a href="./precedence.html"><strong>4.</strong> Operator precedence (WIP)</a></li><li><ul class="section"><li><a href="./examples/calculator.html"><strong>4.1.</strong> Example: Calculator (WIP)</a></li></ul></li><li><a href="./examples/awk.html"><strong>5.</strong> Final project: Awk clone (WIP)</a></li><li><a href="./examples/rust/setup.html"><strong>6.</strong> Bonus project: Rust grammar (WIP)</a></li><li><ul class="section"><li><a href="./examples/rust/literals.html" class="active"><strong>6.1.</strong> Literals</a></li><li><a href="./examples/rust/syntax.html"><strong>6.2.</strong> Syntax</a></li></ul></li></ul>
         </div>
 
         <div id="page-wrapper" class="page-wrapper">
@@ -78,7 +78,7 @@
                         <i id="theme-toggle" class="fa fa-paint-brush"></i>
                     </div>
 
-                    <h1 class="menu-title">A thoughtful introduction to the pest parser</h1>
+                    <h1 class="menu-title"></h1>
 
                     <div class="right-buttons">
                         <i id="print-button" class="fa fa-print" title="Print this book"></i>
@@ -135,7 +135,7 @@ bool      = { true_lit | false_lit }
 </code></pre>
 <p>This seems to work fine, but before we head on to integers, let's first write a
 couple of tests. <em>pest</em> comes with a handy macro for asserting parse results
-named <a href="https://docs.rs/pest/1.0.0-beta/pest/macro.parses_to.html">parses_to!</a>.</p>
+named <a href="https://docs.rs/pest/1.0/pest/macro.parses_to.html">parses_to!</a>.</p>
 <pre><pre class="playpen"><code class="language-rust">
 # #![allow(unused_variables)]
 #fn main() {
@@ -270,16 +270,14 @@ digits</li>
 <p>A good place to start is to define the hex digit:</p>
 <pre><code>hex = _{ '0'..'9' | 'a'..'f' | 'A'..'F' }
 </code></pre>
-<p>To define a rule that can have from 1 up to 6 hex digits is to check whether
-you have 6 already, and, if not, to match as many as possible. This way, if you
-have more than 6, the rule will match the 6 and fail later down the path. It you
-have less than 6, the second part of the choice will obviously match less than 6
-as well.</p>
-<pre><code>unicode_hex = { hex ~ hex ~ hex ~ hex ~ hex ~ hex | hex+ }
+<p>To define a rule that can have from 1 up to 6 hex digits, pest offers a convenient
+syntax <code>{m, n}</code>. Limits are inclusive. Note that <code>{n}</code>, <code>{n, }</code>, and <code>{, n}</code> syntaxes
+exist too. Please see <a href="https://docs.rs/pest_derive/1.0/pest_derive/#expressions">non-terminals expressions</a> for more details.</p>
+<pre><code>unicode_hex = { hex{1, 6} }
 </code></pre>
 <p>We now have everything we need to define escapes:</p>
 <pre><code>predefined = { &quot;n&quot; | &quot;r&quot; | &quot;t&quot; | &quot;\\&quot; | &quot;0&quot; | &quot;\&quot;&quot; | &quot;'&quot; }
-byte       = { &quot;x&quot; ~ hex ~ hex }
+byte       = { &quot;x&quot; ~ hex{2} }
 unicode    = { &quot;u&quot; ~ &quot;{&quot; ~ unicode_hex ~ &quot;}&quot; }
 escape     = { &quot;\\&quot; ~ (predefined | byte | unicode) }
 </code></pre>
@@ -360,13 +358,13 @@ ident      =  {
 
                 <!-- Mobile navigation buttons -->
                 
-                    <a rel="prev" href="./peg.html" class="mobile-nav-chapters previous">
+                    <a rel="prev" href="./examples/rust/setup.html" class="mobile-nav-chapters previous">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
 
                 
-                    <a rel="next" href="./syntax.html" class="mobile-nav-chapters next">
+                    <a rel="next" href="./examples/rust/syntax.html" class="mobile-nav-chapters next">
                         <i class="fa fa-angle-right"></i>
                     </a>
                 
@@ -374,13 +372,13 @@ ident      =  {
             </div>
 
             
-                <a href="./peg.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
+                <a href="./examples/rust/setup.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
                     <i class="fa fa-angle-left"></i>
                 </a>
             
 
             
-                <a href="./syntax.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
+                <a href="./examples/rust/syntax.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
                     <i class="fa fa-angle-right"></i>
                 </a>
             
@@ -397,20 +395,6 @@ ident      =  {
 
         <!-- Livereload script (if served using the cli tool) -->
         
-    <script type="text/javascript">
-        var socket = new WebSocket("ws://localhost:3001");
-        socket.onmessage = function (event) {
-            if (event.data === "reload") {
-                socket.close();
-                location.reload(true); // force reload from server (not from cache)
-            }
-        };
-
-        window.onbeforeunload = function() {
-            socket.close();
-        }
-    </script>
-
 
         
 
