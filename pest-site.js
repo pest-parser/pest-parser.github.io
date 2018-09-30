@@ -13,8 +13,34 @@ if( typeof Rust === "undefined" ) {
         Rust.pest_site = factory();
     }
 }( this, function() {
-    function __initialize( __wasm_module, __load_asynchronously ) {
-    const Module = {};
+    return (function( module_factory ) {
+        var instance = module_factory();
+
+        if( typeof window === "undefined" && typeof process === "object" ) {
+            var fs = require( "fs" );
+            var path = require( "path" );
+            var wasm_path = path.join( __dirname, "pest-site.wasm" );
+            var buffer = fs.readFileSync( wasm_path );
+            var mod = new WebAssembly.Module( buffer );
+            var wasm_instance = new WebAssembly.Instance( mod, instance.imports );
+            return instance.initialize( wasm_instance );
+        } else {
+            return fetch( "pest-site.wasm", {credentials: "same-origin"} )
+                .then( function( response ) { return response.arrayBuffer(); } )
+                .then( function( bytes ) { return WebAssembly.compile( bytes ); } )
+                .then( function( mod ) { return WebAssembly.instantiate( mod, instance.imports ) } )
+                .then( function( wasm_instance ) {
+                    var exports = instance.initialize( wasm_instance );
+                    console.log( "Finished loading Rust wasm module 'pest_site'" );
+                    return exports;
+                })
+                .catch( function( error ) {
+                    console.log( "Error loading Rust wasm module 'pest_site':", error );
+                    throw error;
+                });
+        }
+    }( function() {
+    var Module = {};
 
     Module.STDWEB_PRIVATE = {};
 
@@ -80,7 +106,7 @@ Module.STDWEB_PRIVATE.to_js = function to_js( address ) {
     } else if( kind === 6 ) {
         return true;
     } else if( kind === 7 ) {
-        var pointer = HEAPU32[ address / 4 ];
+        var pointer = Module.STDWEB_PRIVATE.arena + HEAPU32[ address / 4 ];
         var length = HEAPU32[ (address + 4) / 4 ];
         var output = [];
         for( var i = 0; i < length; ++i ) {
@@ -88,9 +114,10 @@ Module.STDWEB_PRIVATE.to_js = function to_js( address ) {
         }
         return output;
     } else if( kind === 8 ) {
-        var value_array_pointer = HEAPU32[ address / 4 ];
+        var arena = Module.STDWEB_PRIVATE.arena;
+        var value_array_pointer = arena + HEAPU32[ address / 4 ];
         var length = HEAPU32[ (address + 4) / 4 ];
-        var key_array_pointer = HEAPU32[ (address + 8) / 4 ];
+        var key_array_pointer = arena + HEAPU32[ (address + 8) / 4 ];
         var output = {};
         for( var i = 0; i < length; ++i ) {
             var key_pointer = HEAPU32[ (key_array_pointer + i * 8) / 4 ];
@@ -392,11 +419,11 @@ Module.STDWEB_PRIVATE.dyncall = function( signature, ptr, args ) {
 
 // This is based on code from Emscripten's preamble.js.
 Module.STDWEB_PRIVATE.utf8_len = function utf8_len( str ) {
-    let len = 0;
-    for( let i = 0; i < str.length; ++i ) {
+    var len = 0;
+    for( var i = 0; i < str.length; ++i ) {
         // Gotcha: charCodeAt returns a 16-bit word that is a UTF-16 encoded code unit, not a Unicode code point of the character! So decode UTF16->UTF32->UTF8.
         // See http://unicode.org/faq/utf_bom.html#utf16-3
-        let u = str.charCodeAt( i ); // possibly a lead surrogate
+        var u = str.charCodeAt( i ); // possibly a lead surrogate
         if( u >= 0xD800 && u <= 0xDFFF ) {
             u = 0x10000 + ((u & 0x3FF) << 10) | (str.charCodeAt( ++i ) & 0x3FF);
         }
@@ -432,195 +459,156 @@ Module.STDWEB_PRIVATE.acquire_tmp = function( dummy ) {
 
 
 
-    let HEAP8 = null;
-    let HEAP16 = null;
-    let HEAP32 = null;
-    let HEAPU8 = null;
-    let HEAPU16 = null;
-    let HEAPU32 = null;
-    let HEAPF32 = null;
-    let HEAPF64 = null;
+    var HEAP8 = null;
+    var HEAP16 = null;
+    var HEAP32 = null;
+    var HEAPU8 = null;
+    var HEAPU16 = null;
+    var HEAPU32 = null;
+    var HEAPF32 = null;
+    var HEAPF64 = null;
 
     Object.defineProperty( Module, 'exports', { value: {} } );
 
-    const __imports = {
-        env: {
-            "__extjs_d53cec18d02fb719364be5a05a90d71e4ef4189b": function($0, $1) {
-                $1 = Module.STDWEB_PRIVATE.to_js($1);Module.STDWEB_PRIVATE.from_js($0, (function(){var callback = ($1); var wrapper = function (){if (! callback.dropped){callback ()}}; var nextTick ; if (typeof MutationObserver ==="function"){var node = document.createTextNode ("0"); var state = false ; new MutationObserver (wrapper). observe (node , {characterData : true}); nextTick = function (){state = ! state ; node.data = (state ? "1" : "0");};}else {var promise = Promise.resolve (null); nextTick = function (){promise.then (wrapper);};}nextTick.drop = function (){callback.dropped = true ; callback.drop ();}; return nextTick ;})());
-            },
-            "__extjs_549e982121a9e76fa0c1295dd69b3084ab9688ff": function($0, $1) {
-                $1 = Module.STDWEB_PRIVATE.to_js($1);Module.STDWEB_PRIVATE.from_js($0, (function(){return ($1). textContent ;})());
-            },
-            "__extjs_3af525622eef089f494fc29d960aedf2b94ab0bb": function($0, $1) {
-                $1 = Module.STDWEB_PRIVATE.to_js($1);Module.STDWEB_PRIVATE.from_js($0, (function(){return ($1). selected ;})());
-            },
-            "__extjs_9f22d4ca7bc938409787341b7db181f8dd41e6df": function($0) {
-                Module.STDWEB_PRIVATE.increment_refcount( $0 );
-            },
-            "__extjs_4f998a6a2e8abfce697424379bb997930abe9f9e": function($0, $1) {
-                $0 = Module.STDWEB_PRIVATE.to_js($0);$1 = Module.STDWEB_PRIVATE.to_js($1);($0). value = ($1);
-            },
-            "__extjs_de2896a7ccf316486788a4d0bc433c25d2f1a12b": function($0) {
-                var r = Module.STDWEB_PRIVATE.acquire_js_reference( $0 );return (r instanceof DOMException) && (r.name === "NotFoundError");
-            },
-            "__extjs_80d6d56760c65e49b7be8b6b01c1ea861b046bf0": function($0) {
+    function __web_on_grow() {
+        var buffer = Module.instance.exports.memory.buffer;
+        HEAP8 = new Int8Array( buffer );
+        HEAP16 = new Int16Array( buffer );
+        HEAP32 = new Int32Array( buffer );
+        HEAPU8 = new Uint8Array( buffer );
+        HEAPU16 = new Uint16Array( buffer );
+        HEAPU32 = new Uint32Array( buffer );
+        HEAPF32 = new Float32Array( buffer );
+        HEAPF64 = new Float64Array( buffer );
+    }
+
+    return {
+        imports: {
+            env: {
+                "__extjs_80d6d56760c65e49b7be8b6b01c1ea861b046bf0": function($0) {
                 Module.STDWEB_PRIVATE.decrement_refcount( $0 );
-            },
-            "__extjs_a3b76c5b7916fd257ee3f362dc672b974e56c476": function($0, $1) {
-                $1 = Module.STDWEB_PRIVATE.to_js($1);Module.STDWEB_PRIVATE.from_js($0, (function(){return ($1). success ;})());
-            },
-            "__extjs_d16972c13e7882e1313d54277c2688b305eebc63": function($0) {
-                return (Module.STDWEB_PRIVATE.acquire_js_reference( $0 ) instanceof HTMLTextAreaElement) | 0;
-            },
-            "__extjs_7c5535365a3df6a4cc1f59c4a957bfce1dbfb8ee": function($0, $1, $2, $3) {
-                $1 = Module.STDWEB_PRIVATE.to_js($1);$2 = Module.STDWEB_PRIVATE.to_js($2);$3 = Module.STDWEB_PRIVATE.to_js($3);Module.STDWEB_PRIVATE.from_js($0, (function(){var listener = ($1); ($2). addEventListener (($3), listener); return listener ;})());
-            },
-            "__extjs_2034053b7b6771271a2dad3e5416b045a74488a1": function($0, $1, $2, $3) {
-                Module.STDWEB_PRIVATE.acquire_js_reference( $0 ).setTimeout( function() {Module.STDWEB_PRIVATE.dyncall( 'vi', $1, [$2] );}, $3 );
-            },
-            "__extjs_222c2fb5a29f68d0c91605a201d353ebe248e0ee": function($0, $1, $2) {
-                $1 = Module.STDWEB_PRIVATE.to_js($1);$2 = Module.STDWEB_PRIVATE.to_js($2);Module.STDWEB_PRIVATE.from_js($0, (function(){return ($1)[($2)];})());
-            },
-            "__extjs_cf32fb39093cd2549f37c2d392ef3198dcaa2ad4": function($0) {
-                return (Module.STDWEB_PRIVATE.acquire_js_reference( $0 ) instanceof Node) | 0;
-            },
-            "__extjs_97495987af1720d8a9a923fa4683a7b683e3acd6": function($0, $1) {
-                console.error( 'Panic error message:', Module.STDWEB_PRIVATE.to_js_string( $0, $1 ) );
-            },
-            "__extjs_84355afea1755aaf0e679669281585900c995537": function($0, $1) {
-                $1 = Module.STDWEB_PRIVATE.to_js($1);Module.STDWEB_PRIVATE.from_js($0, (function(){return ($1). parentNode ;})());
-            },
-            "__extjs_c023351d5bff43ef3dd317b499821cd4e71492f0": function($0) {
-                var r = Module.STDWEB_PRIVATE.acquire_js_reference( $0 );return (r instanceof DOMException) && (r.name === "HierarchyRequestError");
-            },
-            "__extjs_fc52a58ca59f907dd0ac5c3478b1248029ae9b71": function($0) {
-                $0 = Module.STDWEB_PRIVATE.to_js($0);($0). drop ();
-            },
-            "__extjs_a8e1d9cfe0b41d7d61b849811ad1cfba32de989b": function($0, $1, $2) {
-                $1 = Module.STDWEB_PRIVATE.to_js($1);$2 = Module.STDWEB_PRIVATE.to_js($2);Module.STDWEB_PRIVATE.from_js($0, (function(){return ($1). createElement (($2));})());
-            },
-            "__extjs_72fc447820458c720c68d0d8e078ede631edd723": function($0, $1, $2) {
-                console.error( 'Panic location:', Module.STDWEB_PRIVATE.to_js_string( $0, $1 ) + ':' + $2 );
-            },
-            "__extjs_496ebd7b1bc0e6eebd7206e8bee7671ea3b8006f": function($0, $1, $2) {
-                $1 = Module.STDWEB_PRIVATE.to_js($1);$2 = Module.STDWEB_PRIVATE.to_js($2);Module.STDWEB_PRIVATE.from_js($0, (function(){return ($1). querySelector (($2));})());
-            },
-            "__extjs_25647105517f6808bf5f7dbb49e8710d138a1f78": function($0, $1) {
-                $1 = Module.STDWEB_PRIVATE.to_js($1);Module.STDWEB_PRIVATE.from_js($0, (function(){($1). selected = true ;})());
-            },
-            "__extjs_1c8769c3b326d77ceb673ada3dc887cf1d509509": function($0) {
-                Module.STDWEB_PRIVATE.from_js($0, (function(){return document ;})());
-            },
-            "__extjs_4cc2b2ed53586a2bd32ca2206724307e82bb32ff": function($0, $1) {
-                $0 = Module.STDWEB_PRIVATE.to_js($0);$1 = Module.STDWEB_PRIVATE.to_js($1);($0). appendChild (($1));
             },
             "__extjs_0aced9e2351ced72f1ff99645a129132b16c0d3c": function($0) {
                 var value = Module.STDWEB_PRIVATE.get_raw_value( $0 );return Module.STDWEB_PRIVATE.register_raw_value( value );
             },
-            "__extjs_db0226ae1bbecd407e9880ee28ddc70fc3322d9c": function($0) {
-                $0 = Module.STDWEB_PRIVATE.to_js($0);Module.STDWEB_PRIVATE.unregister_raw_value (($0));
+            "__extjs_a342681e5c1e3fb0bdeac6e35d67bf944fcd4102": function($0, $1) {
+                $1 = Module.STDWEB_PRIVATE.to_js($1);Module.STDWEB_PRIVATE.from_js($0, (function(){return ($1). value ;})());
             },
-            "__extjs_a94847da281e0efb983dce68b7315dc4a7731c72": function($0) {
-                $0 = Module.STDWEB_PRIVATE.to_js($0);($0)();
-            },
-            "__extjs_5ecfd7ee5cecc8be26c1e6e3c90ce666901b547c": function($0, $1) {
-                $1 = Module.STDWEB_PRIVATE.to_js($1);Module.STDWEB_PRIVATE.from_js($0, (function(){return ($1). error ;})());
-            },
-            "__extjs_dc4a9844a3da9e83cb7a74b4e08eed6ff1be91f9": function($0, $1, $2) {
-                $1 = Module.STDWEB_PRIVATE.to_js($1);$2 = Module.STDWEB_PRIVATE.to_js($2);Module.STDWEB_PRIVATE.from_js($0, (function(){return ($1). createTextNode (($2));})());
-            },
-            "__extjs_35ac66ef460cae82b609eb14a9d2c220363b16d6": function($0, $1) {
-                $1 = Module.STDWEB_PRIVATE.to_js($1);Module.STDWEB_PRIVATE.from_js($0, (function(){window.lint = function (grammar){var compile_grammar = ($1); return compile_grammar (grammar);}})());
-            },
-            "__extjs_dc2fd915bd92f9e9c6a3bd15174f1414eee3dbaf": function() {
-                console.error( 'Encountered a panic!' );
+            "__extjs_1c8769c3b326d77ceb673ada3dc887cf1d509509": function($0) {
+                Module.STDWEB_PRIVATE.from_js($0, (function(){return document ;})());
             },
             "__extjs_ff5103e6cc179d13b4c7a785bdce2708fd559fc0": function($0) {
                 Module.STDWEB_PRIVATE.tmp = Module.STDWEB_PRIVATE.to_js( $0 );
             },
-            "__extjs_a342681e5c1e3fb0bdeac6e35d67bf944fcd4102": function($0, $1) {
-                $1 = Module.STDWEB_PRIVATE.to_js($1);Module.STDWEB_PRIVATE.from_js($0, (function(){return ($1). value ;})());
+            "__extjs_25647105517f6808bf5f7dbb49e8710d138a1f78": function($0, $1) {
+                $1 = Module.STDWEB_PRIVATE.to_js($1);Module.STDWEB_PRIVATE.from_js($0, (function(){($1). selected = true ;})());
             },
-            "__extjs_02719998c6ece772fc2c8c3dd585272cdb2a127e": function($0, $1) {
-                $0 = Module.STDWEB_PRIVATE.to_js($0);$1 = Module.STDWEB_PRIVATE.to_js($1);($0). add (($1));
+            "__extjs_35ac66ef460cae82b609eb14a9d2c220363b16d6": function($0, $1) {
+                $1 = Module.STDWEB_PRIVATE.to_js($1);Module.STDWEB_PRIVATE.from_js($0, (function(){window.lint = function (grammar){var compile_grammar = ($1); return compile_grammar (grammar);}})());
             },
-            "__extjs_49bb060f28a2d83ee61afa0a7e5cad450c8258d0": function($0, $1) {
-                $1 = Module.STDWEB_PRIVATE.to_js($1);Module.STDWEB_PRIVATE.from_js($0, (function(){return ($1). childNodes ;})());
+            "__extjs_285aac3fba72d67cb459d37d4d21aa4fb62598ba": function($0) {
+                Module.STDWEB_PRIVATE.arena = $0;
             },
-            "__extjs_792ff14631f0ebffafcf6ed24405be73234b64ba": function($0, $1) {
-                $1 = Module.STDWEB_PRIVATE.to_js($1);Module.STDWEB_PRIVATE.from_js($0, (function(){return ($1). classList ;})());
+            "__extjs_496ebd7b1bc0e6eebd7206e8bee7671ea3b8006f": function($0, $1, $2) {
+                $1 = Module.STDWEB_PRIVATE.to_js($1);$2 = Module.STDWEB_PRIVATE.to_js($2);Module.STDWEB_PRIVATE.from_js($0, (function(){return ($1). querySelector (($2));})());
             },
-            "__extjs_5ac38c9ecbb9a6f75e30e71400dabbd8d3562771": function($0) {
-                return (Module.STDWEB_PRIVATE.acquire_js_reference( $0 ) instanceof Event) | 0;
+            "__extjs_7c5535365a3df6a4cc1f59c4a957bfce1dbfb8ee": function($0, $1, $2, $3) {
+                $1 = Module.STDWEB_PRIVATE.to_js($1);$2 = Module.STDWEB_PRIVATE.to_js($2);$3 = Module.STDWEB_PRIVATE.to_js($3);Module.STDWEB_PRIVATE.from_js($0, (function(){var listener = ($1); ($2). addEventListener (($3), listener); return listener ;})());
             },
-            "__extjs_d857eeff4a51f6338e2288d10b603fdbcca2e473": function($0) {
-                Module.STDWEB_PRIVATE.from_js($0, (function(){if (set_current_data)set_current_data ();})());
-            },
-            "__extjs_ca4a2b71ad96ce9e77c3e1ede83d30bf28a87a49": function($0, $1) {
-                $1 = Module.STDWEB_PRIVATE.to_js($1);Module.STDWEB_PRIVATE.from_js($0, (function(){($1). disabled = true ;})());
+            "__extjs_db0226ae1bbecd407e9880ee28ddc70fc3322d9c": function($0) {
+                $0 = Module.STDWEB_PRIVATE.to_js($0);Module.STDWEB_PRIVATE.unregister_raw_value (($0));
             },
             "__extjs_74d5764ddc102a8d3b6252116087a68f2db0c9d4": function($0) {
                 Module.STDWEB_PRIVATE.from_js($0, (function(){return window ;})());
             },
+            "__extjs_222c2fb5a29f68d0c91605a201d353ebe248e0ee": function($0, $1, $2) {
+                $1 = Module.STDWEB_PRIVATE.to_js($1);$2 = Module.STDWEB_PRIVATE.to_js($2);Module.STDWEB_PRIVATE.from_js($0, (function(){return ($1)[($2)];})());
+            },
+            "__extjs_ec28a01a0e33da46726388bff28c564a3ae5afa3": function($0) {
+                var o = Module.STDWEB_PRIVATE.acquire_js_reference( $0 );return (o instanceof Event && o.type === "change") | 0;
+            },
+            "__extjs_2034053b7b6771271a2dad3e5416b045a74488a1": function($0, $1, $2, $3) {
+                Module.STDWEB_PRIVATE.acquire_js_reference( $0 ).setTimeout( function() {Module.STDWEB_PRIVATE.dyncall( 'vi', $1, [$2] );}, $3 );
+            },
+            "__extjs_84355afea1755aaf0e679669281585900c995537": function($0, $1) {
+                $1 = Module.STDWEB_PRIVATE.to_js($1);Module.STDWEB_PRIVATE.from_js($0, (function(){return ($1). parentNode ;})());
+            },
+            "__extjs_a3b76c5b7916fd257ee3f362dc672b974e56c476": function($0, $1) {
+                $1 = Module.STDWEB_PRIVATE.to_js($1);Module.STDWEB_PRIVATE.from_js($0, (function(){return ($1). success ;})());
+            },
+            "__extjs_de2896a7ccf316486788a4d0bc433c25d2f1a12b": function($0) {
+                var r = Module.STDWEB_PRIVATE.acquire_js_reference( $0 );return (r instanceof DOMException) && (r.name === "NotFoundError");
+            },
+            "__extjs_a8e1d9cfe0b41d7d61b849811ad1cfba32de989b": function($0, $1, $2) {
+                $1 = Module.STDWEB_PRIVATE.to_js($1);$2 = Module.STDWEB_PRIVATE.to_js($2);Module.STDWEB_PRIVATE.from_js($0, (function(){return ($1). createElement (($2));})());
+            },
+            "__extjs_351b27505bc97d861c3914c20421b6277babb53b": function($0) {
+                var o = Module.STDWEB_PRIVATE.acquire_js_reference( $0 );return (o instanceof Node) | 0;
+            },
+            "__extjs_02719998c6ece772fc2c8c3dd585272cdb2a127e": function($0, $1) {
+                $0 = Module.STDWEB_PRIVATE.to_js($0);$1 = Module.STDWEB_PRIVATE.to_js($1);($0). add (($1));
+            },
+            "__extjs_9f22d4ca7bc938409787341b7db181f8dd41e6df": function($0) {
+                Module.STDWEB_PRIVATE.increment_refcount( $0 );
+            },
+            "__extjs_c023351d5bff43ef3dd317b499821cd4e71492f0": function($0) {
+                var r = Module.STDWEB_PRIVATE.acquire_js_reference( $0 );return (r instanceof DOMException) && (r.name === "HierarchyRequestError");
+            },
+            "__extjs_8545f3ba2883a49a2afd23c48c5d24ef3f9b0071": function($0) {
+                var o = Module.STDWEB_PRIVATE.acquire_js_reference( $0 );return (o instanceof HTMLTextAreaElement) | 0;
+            },
             "__extjs_55b8bcbe4a00526db0f78f2ed42425f6061a777a": function($0, $1, $2, $3) {
                 $1 = Module.STDWEB_PRIVATE.to_js($1);$2 = Module.STDWEB_PRIVATE.to_js($2);$3 = Module.STDWEB_PRIVATE.to_js($3);Module.STDWEB_PRIVATE.from_js($0, (function(){try {return {value : function (){return ($1). replaceChild (($2), ($3));}(), success : true};}catch (error){return {error : error , success : false};}})());
             },
-            "__web_on_grow": function() {
-                const buffer = Module.instance.exports.memory.buffer;
-                HEAP8 = new Int8Array( buffer );
-                HEAP16 = new Int16Array( buffer );
-                HEAP32 = new Int32Array( buffer );
-                HEAPU8 = new Uint8Array( buffer );
-                HEAPU16 = new Uint16Array( buffer );
-                HEAPU32 = new Uint32Array( buffer );
-                HEAPF32 = new Float32Array( buffer );
-                HEAPF64 = new Float64Array( buffer );
+            "__extjs_513cc5b95412492d529556ccd01ecd4a671a4df8": function($0) {
+                var o = Module.STDWEB_PRIVATE.acquire_js_reference( $0 );return (o instanceof Event && o.type === "input") | 0;
+            },
+            "__extjs_5ecfd7ee5cecc8be26c1e6e3c90ce666901b547c": function($0, $1) {
+                $1 = Module.STDWEB_PRIVATE.to_js($1);Module.STDWEB_PRIVATE.from_js($0, (function(){return ($1). error ;})());
+            },
+            "__extjs_3af525622eef089f494fc29d960aedf2b94ab0bb": function($0, $1) {
+                $1 = Module.STDWEB_PRIVATE.to_js($1);Module.STDWEB_PRIVATE.from_js($0, (function(){return ($1). selected ;})());
+            },
+            "__extjs_549e982121a9e76fa0c1295dd69b3084ab9688ff": function($0, $1) {
+                $1 = Module.STDWEB_PRIVATE.to_js($1);Module.STDWEB_PRIVATE.from_js($0, (function(){return ($1). textContent ;})());
+            },
+            "__extjs_4f998a6a2e8abfce697424379bb997930abe9f9e": function($0, $1) {
+                $0 = Module.STDWEB_PRIVATE.to_js($0);$1 = Module.STDWEB_PRIVATE.to_js($1);($0). value = ($1);
+            },
+            "__extjs_dc4a9844a3da9e83cb7a74b4e08eed6ff1be91f9": function($0, $1, $2) {
+                $1 = Module.STDWEB_PRIVATE.to_js($1);$2 = Module.STDWEB_PRIVATE.to_js($2);Module.STDWEB_PRIVATE.from_js($0, (function(){return ($1). createTextNode (($2));})());
+            },
+            "__extjs_49bb060f28a2d83ee61afa0a7e5cad450c8258d0": function($0, $1) {
+                $1 = Module.STDWEB_PRIVATE.to_js($1);Module.STDWEB_PRIVATE.from_js($0, (function(){return ($1). childNodes ;})());
+            },
+            "__extjs_ca4a2b71ad96ce9e77c3e1ede83d30bf28a87a49": function($0, $1) {
+                $1 = Module.STDWEB_PRIVATE.to_js($1);Module.STDWEB_PRIVATE.from_js($0, (function(){($1). disabled = true ;})());
+            },
+            "__extjs_4cc2b2ed53586a2bd32ca2206724307e82bb32ff": function($0, $1) {
+                $0 = Module.STDWEB_PRIVATE.to_js($0);$1 = Module.STDWEB_PRIVATE.to_js($1);($0). appendChild (($1));
+            },
+            "__extjs_d857eeff4a51f6338e2288d10b603fdbcca2e473": function($0) {
+                Module.STDWEB_PRIVATE.from_js($0, (function(){if (set_current_data)set_current_data ();})());
+            },
+            "__extjs_792ff14631f0ebffafcf6ed24405be73234b64ba": function($0, $1) {
+                $1 = Module.STDWEB_PRIVATE.to_js($1);Module.STDWEB_PRIVATE.from_js($0, (function(){return ($1). classList ;})());
+            },
+                "__web_on_grow": __web_on_grow
             }
+        },
+        initialize: function( instance ) {
+            Object.defineProperty( Module, 'instance', { value: instance } );
+            Object.defineProperty( Module, 'web_malloc', { value: Module.instance.exports.__web_malloc } );
+            Object.defineProperty( Module, 'web_free', { value: Module.instance.exports.__web_free } );
+            Object.defineProperty( Module, 'web_table', { value: Module.instance.exports.__web_table } );
+
+            
+            __web_on_grow();
+            Module.instance.exports.main();
+
+            return Module.exports;
         }
     };
-
-    function __instantiate( instance ) {
-        Object.defineProperty( Module, 'instance', { value: instance } );
-        Object.defineProperty( Module, 'web_malloc', { value: Module.instance.exports.__web_malloc } );
-        Object.defineProperty( Module, 'web_free', { value: Module.instance.exports.__web_free } );
-        Object.defineProperty( Module, 'web_table', { value: Module.instance.exports.__web_table } );
-
-        
-        __imports.env.__web_on_grow();
-        Module.instance.exports.main();
-    }
-
-    if( __load_asynchronously ) {
-        return WebAssembly.instantiate( __wasm_module, __imports )
-            .then( instance => {
-                __instantiate( instance );
-                console.log( "Finished loading Rust wasm module 'pest_site'" );
-                return Module.exports;
-            })
-            .catch( error => {
-                console.log( "Error loading Rust wasm module 'pest_site':", error );
-                throw error;
-            });
-    } else {
-        const instance = new WebAssembly.Instance( __wasm_module, __imports );
-        __instantiate( instance );
-        return Module.exports;
-    }
 }
-
-
-    if( typeof window === "undefined" && typeof process === "object" ) {
-        const fs = require( "fs" );
-        const path = require( "path" );
-        const wasm_path = path.join( __dirname, "pest-site.wasm" );
-        const buffer = fs.readFileSync( wasm_path );
-        const mod = new WebAssembly.Module( buffer );
-
-        return __initialize( mod, false );
-    } else {
-        return fetch( "pest-site.wasm" )
-            .then( response => response.arrayBuffer() )
-            .then( bytes => WebAssembly.compile( bytes ) )
-            .then( mod => __initialize( mod, true ) );
-    }
+ ));
 }));
