@@ -1,142 +1,453 @@
 <!DOCTYPE HTML>
-<html lang="en">
+<html lang="en" class="sidebar-visible no-js">
     <head>
+        <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Example: JSON (WIP) - </title>
+        <title>Example: JSON - A thoughtful introduction to the pest parser</title>
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <meta name="description" content="">
+        <meta name="description" content="An introduction to the pest parser by implementing a Rust grammar subset">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
 
-        <base href="../">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
 
-        <link rel="stylesheet" href="book.css">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
         <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
         <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
 
-        <link rel="shortcut icon" href="favicon.png">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
 
-        <!-- Font Awesome -->
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
-
-        <link rel="stylesheet" href="highlight.css">
-        <link rel="stylesheet" href="tomorrow-night.css">
-        <link rel="stylesheet" href="ayu-highlight.css">
-
-        <!-- Custom theme -->
+        <!-- Custom theme stylesheets -->
         
 
         
-
-        <!-- Fetch Clipboard.js from CDN but have a local fallback -->
-        <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
-        <script>
-            if (typeof Clipboard == 'undefined') {
-                document.write(unescape("%3Cscript src='clipboard.min.js'%3E%3C/script%3E"));
-            }
-        </script>
-
-        <!-- Fetch JQuery from CDN but have a local fallback -->
-        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-        <script>
-            if (typeof jQuery == 'undefined') {
-                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
-            }
-        </script>
-
-        <!-- Fetch store.js from local - TODO add CDN when 2.x.x is available on cdnjs -->
-        <script src="store.js"></script>
-
-        <!-- Custom JS script -->
-        
-
     </head>
     <body class="light">
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">var path_to_root = "../";</script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script type="text/javascript">
-            var theme = store.get('theme');
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { } 
             if (theme === null || theme === undefined) { theme = 'light'; }
-            $('body').removeClass().addClass(theme);
+            document.body.className = theme;
+            document.querySelector('html').className = theme + ' js';
         </script>
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script type="text/javascript">
-            var sidebar = store.get('sidebar');
-            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
-            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
         </script>
 
-        <div id="sidebar" class="sidebar">
-            <ul class="chapter"><li><a href="./intro.html"><strong>1.</strong> Introduction</a></li><li><ul class="section"><li><a href="./examples/csv.html"><strong>1.1.</strong> Example: CSV</a></li></ul></li><li><a href="./parser_api.html"><strong>2.</strong> Parser API</a></li><li><ul class="section"><li><a href="./examples/ini.html"><strong>2.1.</strong> Example: INI (WIP)</a></li></ul></li><li><a href="./grammars/grammars.html"><strong>3.</strong> Grammars</a></li><li><ul class="section"><li><a href="./grammars/peg.html"><strong>3.1.</strong> Parsing expression grammars</a></li><li><a href="./grammars/syntax.html"><strong>3.2.</strong> Syntax of pest parsers</a></li><li><a href="./examples/json.html" class="active"><strong>3.3.</strong> Example: JSON (WIP)</a></li></ul></li><li><a href="./precedence.html"><strong>4.</strong> Operator precedence (WIP)</a></li><li><ul class="section"><li><a href="./examples/calculator.html"><strong>4.1.</strong> Example: Calculator (WIP)</a></li></ul></li><li><a href="./examples/awk.html"><strong>5.</strong> Final project: Awk clone (WIP)</a></li><li><a href="./examples/rust/setup.html"><strong>6.</strong> Bonus project: Rust grammar (WIP)</a></li><li><ul class="section"><li><a href="./examples/rust/literals.html"><strong>6.1.</strong> Literals</a></li><li><a href="./examples/rust/syntax.html"><strong>6.2.</strong> Syntax</a></li></ul></li></ul>
-        </div>
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <ol class="chapter"><li><a href="../intro.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li><a href="../examples/csv.html"><strong aria-hidden="true">1.1.</strong> Example: CSV</a></li></ol></li><li><a href="../parser_api.html"><strong aria-hidden="true">2.</strong> Parser API</a></li><li><ol class="section"><li><a href="../examples/ini.html"><strong aria-hidden="true">2.1.</strong> Example: INI</a></li></ol></li><li><a href="../grammars/grammars.html"><strong aria-hidden="true">3.</strong> Grammars</a></li><li><ol class="section"><li><a href="../grammars/peg.html"><strong aria-hidden="true">3.1.</strong> Parsing expression grammars</a></li><li><a href="../grammars/syntax.html"><strong aria-hidden="true">3.2.</strong> Syntax of pest parsers</a></li><li><a href="../grammars/built-ins.html"><strong aria-hidden="true">3.3.</strong> Built-in rules</a></li><li><a href="../examples/json.html" class="active"><strong aria-hidden="true">3.4.</strong> Example: JSON</a></li></ol></li><li><a href="../precedence.html"><strong aria-hidden="true">4.</strong> Operator precedence (WIP)</a></li><li><ol class="section"><li><a href="../examples/calculator.html"><strong aria-hidden="true">4.1.</strong> Example: Calculator (WIP)</a></li></ol></li><li><a href="../examples/awk.html"><strong aria-hidden="true">5.</strong> Final project: Awk clone (WIP)</a></li></ol>
+        </nav>
 
         <div id="page-wrapper" class="page-wrapper">
 
-            <div class="page" tabindex="-1">
+            <div class="page">
+                
                 <div id="menu-bar" class="menu-bar">
-                    <div class="left-buttons">
-                        <i id="sidebar-toggle" class="fa fa-bars"></i>
-                        <i id="theme-toggle" class="fa fa-paint-brush"></i>
-                    </div>
+                    <div id="menu-bar-sticky-container">
+                        <div class="left-buttons">
+                            <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                            <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                                <i class="fa fa-paint-brush"></i>
+                            </button>
+                            <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                                <li role="none"><button role="menuitem" class="theme" id="light">Light <span class="default">(default)</span></button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                            </ul>
+                            
+                            <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                                <i class="fa fa-search"></i>
+                            </button>
+                            
+                        </div>
 
-                    <h1 class="menu-title"></h1>
+                        <h1 class="menu-title">A thoughtful introduction to the pest parser</h1> 
 
-                    <div class="right-buttons">
-                        <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                        <div class="right-buttons">
+                            <a href="../print.html" title="Print this book" aria-label="Print this book">
+                                <i id="print-button" class="fa fa-print"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
 
                 <div id="content" class="content">
-                    <a class="header" href="json.html#example json wip" id="example json wip"><h1>Example: JSON (WIP)</h1></a>
-<p>This section will walk through the creation of a <a href="https://json.org/">JSON</a> parser. It will provide
-an example of pattern-matching on <code>as_rule()</code> calls and recursive parse trees.</p>
+                    <main>
+                        <a class="header" href="#example-json" id="example-json"><h1>Example: JSON</h1></a>
+<p><a href="https://json.org/">JSON</a> is a popular format for data serialization that is derived from the
+syntax of JavaScript. JSON documents are tree-like and potentially recursive
+— two data types, <em>objects</em> and <em>arrays</em>, can contain other values,
+including other objects and arrays.</p>
+<p>Here is an example JSON document:</p>
+<pre><code class="language-json">{
+    &quot;nesting&quot;: { &quot;inner object&quot;: {} },
+    &quot;an array&quot;: [1.5, true, null, 1e-6],
+    &quot;string with escaped double quotes&quot; : &quot;\&quot;quick brown foxes\&quot;&quot;
+}
+</code></pre>
+<p>Let's write a program that <strong>parses</strong> the JSON to an Rust object, known as an
+<em>abstract syntax tree</em>, then <strong>serializes</strong> the AST back to JSON.</p>
+<a class="header" href="#setup" id="setup"><h2>Setup</h2></a>
+<p>We'll start by defining the AST in Rust. Each JSON data type is represented by
+an enum variant.</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+enum JSONValue&lt;'a&gt; {
+    Object(Vec&lt;(&amp;'a str, JSONValue&lt;'a&gt;)&gt;),
+    Array(Vec&lt;JSONValue&lt;'a&gt;&gt;),
+    String(&amp;'a str),
+    Number(f64),
+    Boolean(bool),
+    Null,
+}
+#}</code></pre></pre>
+<p>To avoid copying when deserializing strings, <code>JSONValue</code> borrows strings from
+the original unparsed JSON. In order for this to work, we cannot interpret
+string escape sequences: the input string <code>&quot;\n&quot;</code> will be represented by
+<code>JSONValue::String(&quot;\\n&quot;)</code>, a Rust string with two characters, even though it
+represents a JSON string with just one character.</p>
+<p>Let's move on to the serializer. For the sake of clarity, it uses allocated
+<code>String</code>s instead of providing an implementation of <a href="https://doc.rust-lang.org/std/fmt/trait.Display.html"><code>std::fmt::Display</code></a>,
+which would be more idiomatic.</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+fn serialize_jsonvalue(val: &amp;JSONValue) -&gt; String {
+    use JSONValue::*;
 
+    match val {
+        Object(o) =&gt; {
+            let contents: Vec&lt;_&gt; = o
+                .iter()
+                .map(|(name, value)|
+                     format!(&quot;\&quot;{}\&quot;:{}&quot;, name, serialize_jsonvalue(value)))
+                .collect();
+            format!(&quot;{{{}}}&quot;, contents.join(&quot;,&quot;))
+        }
+        Array(a) =&gt; {
+            let contents: Vec&lt;_&gt; = a.iter().map(serialize_jsonvalue).collect();
+            format!(&quot;[{}]&quot;, contents.join(&quot;,&quot;))
+        }
+        String(s) =&gt; format!(&quot;\&quot;{}\&quot;&quot;, s),
+        Number(n) =&gt; format!(&quot;{}&quot;, n),
+        Boolean(b) =&gt; format!(&quot;{}&quot;, b),
+        Null =&gt; format!(&quot;null&quot;),
+    }
+}
+#}</code></pre></pre>
+<p>Note that the function invokes itself recursively in the <code>Object</code> and <code>Array</code>
+cases. This pattern appears throughout the parser. The AST creation function
+iterates recursively through the parse result, and the grammar has rules which
+include themselves.</p>
+<a class="header" href="#writing-the-grammar" id="writing-the-grammar"><h2>Writing the grammar</h2></a>
+<p>Let's begin with whitespace. JSON whitespace can appear anywhere, except inside
+strings (where it must be parsed separately) and between digits in numbers
+(where it is not allowed). This makes it a good fit for <code>pest</code>'s <a href="../grammars/syntax.html#implicit-whitespace">implicit
+whitespace</a>. In <code>src/json.pest</code>:</p>
+<pre><code>WHITESPACE = _{ &quot; &quot; | &quot;\t&quot; | &quot;\r&quot; | &quot;\n&quot; }
+</code></pre>
+<p><a href="https://json.org/">The JSON specification</a> includes diagrams for parsing JSON strings. We can
+write the grammar directly from that page. Let's write <code>object</code> as a sequence
+of <code>pair</code>s separated by commas <code>,</code>.</p>
+<pre><code>object = {
+    &quot;{&quot; ~ &quot;}&quot; |
+    &quot;{&quot; ~ pair ~ (&quot;,&quot; ~ pair)* ~ &quot;}&quot;
+}
+pair = { string ~ &quot;:&quot; ~ value }
+
+array = {
+    &quot;[&quot; ~ &quot;]&quot; |
+    &quot;[&quot; ~ value ~ (&quot;,&quot; ~ value)* ~ &quot;]&quot;
+}
+</code></pre>
+<p>The <code>object</code> and <code>array</code> rules show how to parse a potentially empty list with
+separators. There are two cases: one for an empty list, and one for a list with
+at least one element. This is necessary because a trailing comma in an array,
+such as in <code>[0, 1,]</code>, is illegal in JSON.</p>
+<p>Now we can write <code>value</code>, which represents any single data type. We'll mimic
+our AST by writing <code>boolean</code> and <code>null</code> as separate rules.</p>
+<pre><code>value = _{ object | array | string | number | boolean | null }
+
+boolean = { &quot;true&quot; | &quot;false&quot; }
+
+null = { &quot;null&quot; }
+</code></pre>
+<p>Let's separate the logic for strings into three parts. <code>char</code> is a rule
+matching any logical character in the string, including any backslash escape
+sequence. <code>inner</code> represents the contents of the string, without the
+surrounding double quotes. <code>string</code> matches the inner contents of the string,
+including the surrounding double quotes.</p>
+<p>The <code>char</code> rule uses <a href="../grammars/syntax.html#predicates">the idiom <code>!(...) ~ ANY</code></a>, which matches any character
+except the ones given in parentheses. In this case, any character is legal
+inside a string, except for double quote <code>&quot;</code> and backslash <code>\</code>,
+which require separate parsing logic.</p>
+<pre><code>string = ${ &quot;\&quot;&quot; ~ inner ~ &quot;\&quot;&quot; }
+inner = @{ char* }
+char = {
+    !(&quot;\&quot;&quot; | &quot;\\&quot;) ~ ANY
+    | &quot;\\&quot; ~ (&quot;\&quot;&quot; | &quot;\\&quot; | &quot;/&quot; | &quot;b&quot; | &quot;f&quot; | &quot;n&quot; | &quot;r&quot; | &quot;t&quot;)
+    | &quot;\\&quot; ~ (&quot;u&quot; ~ ASCII_HEX_DIGIT{4})
+}
+</code></pre>
+<p>Because <code>string</code> is marked <a href="../grammars/syntax.html#atomic">compound atomic</a>, <code>string</code> <a href="../parser_api.html#pairs">token pairs</a> will also
+contain a single <code>inner</code> pair. Because <code>inner</code> is marked <a href="../grammars/syntax.html#atomic">atomic</a>, no <code>char</code>
+pairs will appear inside <code>inner</code>. Since these rules are atomic, no whitespace
+is permitted between separate tokens.</p>
+<p>Numbers have four logical parts: an optional sign, an integer part, an optional
+fractional part, and an optional exponent. We'll mark <code>number</code> atomic so that
+whitespace cannot appear between its parts.</p>
+<pre><code>number = @{
+    &quot;-&quot;?
+    ~ (&quot;0&quot; | ASCII_NONZERO_DIGIT ~ ASCII_DIGIT*)
+    ~ (&quot;.&quot; ~ ASCII_DIGIT*)?
+    ~ (^&quot;e&quot; ~ (&quot;+&quot; | &quot;-&quot;)? ~ ASCII_DIGIT+)?
+}
+</code></pre>
+<p>We need a final rule to represent an entire JSON file. The only legal contents
+of a JSON file is a single object or array. We'll mark this rule <a href="../grammars/syntax.html#silent-and-atomic-rules">silent</a>, so
+that a parsed JSON file contains only two token pairs: the parsed value itself,
+and <a href="../grammars/syntax.html#start-and-end-of-input">the <code>EOI</code> rule</a>.</p>
+<pre><code>json = _{ SOI ~ (object | array) ~ EOI }
+</code></pre>
+<a class="header" href="#ast-generation" id="ast-generation"><h2>AST generation</h2></a>
+<p>Let's compile the grammar into Rust.</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+extern crate pest;
+#[macro_use]
+extern crate pest_derive;
+
+use pest::Parser;
+
+#[derive(Parser)]
+#[grammar = &quot;json.pest&quot;]
+struct JSONParser;
+#}</code></pre></pre>
+<p>We'll write a function that handles both parsing and AST generation. Users of
+the function can call it on an input string, then use the result returned as
+either a <code>JSONValue</code> or a parse error.</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+use pest::error::Error;
+
+fn parse_json_file(file: &amp;str) -&gt; Result&lt;JSONValue, Error&lt;Rule&gt;&gt; {
+    let json = JSONParser::parse(Rule::json, file)?.next().unwrap();
+
+    // ...
+}
+#}</code></pre></pre>
+<p>Now we need to handle <code>Pair</code>s recursively, depending on the rule. We know that
+<code>json</code> is either an <code>object</code> or an <code>array</code>, but these values might contain an
+<code>object</code> or an <code>array</code> themselves! The most logical way to handle this is to
+write an auxiliary recursive function that parses a <code>Pair</code> into a <code>JSONValue</code>
+directly.</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+fn parse_json_file(file: &amp;str) -&gt; Result&lt;JSONValue, Error&lt;Rule&gt;&gt; {
+    // ...
+
+    use pest::iterators::Pair;
+
+    fn parse_value(pair: Pair&lt;Rule&gt;) -&gt; JSONValue {
+        match pair.as_rule() {
+            Rule::object =&gt; JSONValue::Object(
+                pair.into_inner()
+                    .map(|pair| {
+                        let mut inner_rules = pair.into_inner();
+                        let name = inner_rules
+                            .next()
+                            .unwrap()
+                            .into_inner()
+                            .next()
+                            .unwrap()
+                            .as_str();
+                        let value = parse_value(inner_rules.next().unwrap());
+                        (name, value)
+                    })
+                    .collect(),
+            ),
+            Rule::array =&gt; JSONValue::Array(pair.into_inner().map(parse_value).collect()),
+            Rule::string =&gt; JSONValue::String(pair.into_inner().next().unwrap().as_str()),
+            Rule::number =&gt; JSONValue::Number(pair.as_str().parse().unwrap()),
+            Rule::boolean =&gt; JSONValue::Boolean(pair.as_str().parse().unwrap()),
+            Rule::null =&gt; JSONValue::Null,
+            Rule::json
+            | Rule::EOI
+            | Rule::pair
+            | Rule::value
+            | Rule::inner
+            | Rule::char
+            | Rule::WHITESPACE =&gt; unreachable!(),
+        }
+    }
+
+    // ...
+}
+#}</code></pre></pre>
+<p>The <code>object</code> and <code>array</code> cases deserve special attention. The contents of an
+<code>array</code> token pair is just a sequence of <code>value</code>s. Since we're working with a
+Rust iterator, we can simply map each value to its parsed AST node recursively,
+then collect them into a <code>Vec</code>. For <code>object</code>s, the process is similar, except
+the iterator is over <code>pair</code>s, from which we need to extract names and values
+separately.</p>
+<p>The <code>number</code> and <code>boolean</code> cases use Rust's <code>str::parse</code> method to convert the
+parsed string to the appropriate Rust type. Every legal JSON number can be
+parsed directly into a Rust floating point number!</p>
+<p>We run <code>parse_value</code> on the parse result to finish the conversion.</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+fn parse_json_file(file: &amp;str) -&gt; Result&lt;JSONValue, Error&lt;Rule&gt;&gt; {
+    // ...
+
+    Ok(parse_value(json))
+}
+#}</code></pre></pre>
+<a class="header" href="#finishing" id="finishing"><h2>Finishing</h2></a>
+<p>Our <code>main</code> function is now very simple. First, we read the JSON data from a
+file named <code>data.json</code>. Next, we parse the file contents into a JSON AST.
+Finally, we serialize the AST back into a string and print it.</p>
+<pre><pre class="playpen"><code class="language-rust">use std::fs;
+
+fn main() {
+    let unparsed_file = fs::read_to_string(&quot;data.json&quot;).expect(&quot;cannot read file&quot;);
+
+    let json: JSONValue = parse_json_file(&amp;unparsed_file).expect(&quot;unsuccessful parse&quot;);
+
+    println!(&quot;{}&quot;, serialize_jsonvalue(&amp;json));
+}
+</code></pre></pre>
+<p>Try it out! Copy the example document at the top of this chapter into
+<code>data.json</code>, then run the program! You should see something like this:</p>
+<pre><code class="language-shell">$ cargo run
+  [ ... ]
+{&quot;nesting&quot;:{&quot;inner object&quot;:{}},&quot;an array&quot;:[1.5,true,null,0.000001],&quot;string with escaped double quotes&quot;:&quot;\&quot;quick brown foxes\&quot;&quot;}
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="../grammars/built-ins.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+                            <a rel="next" href="../precedence.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
                 </div>
+            </div>
 
-                <!-- Mobile navigation buttons -->
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
                 
-                    <a rel="prev" href="./grammars/syntax.html" class="mobile-nav-chapters previous">
+                    <a href="../grammars/built-ins.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
 
                 
-                    <a rel="next" href="./precedence.html" class="mobile-nav-chapters next">
+                    <a href="../precedence.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
                 
-
-            </div>
-
-            
-                <a href="./grammars/syntax.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
-                    <i class="fa fa-angle-left"></i>
-                </a>
-            
-
-            
-                <a href="./precedence.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
-                    <i class="fa fa-angle-right"></i>
-                </a>
-            
+            </nav>
 
         </div>
 
-
-        <!-- Local fallback for Font Awesome -->
-        <script>
-            if ($(".fa").css("font-family") !== "FontAwesome") {
-                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
-            }
-        </script>
-
-        <!-- Livereload script (if served using the cli tool) -->
         
 
         
 
         
 
-        <script src="highlight.js"></script>
-        <script src="book.js"></script>
+        
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
     </body>
 </html>

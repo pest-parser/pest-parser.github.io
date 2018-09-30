@@ -1,92 +1,142 @@
 <!DOCTYPE HTML>
-<html lang="en">
+<html lang="en" class="sidebar-visible no-js">
     <head>
+        <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Syntax of pest parsers - </title>
+        <title>Syntax of pest parsers - A thoughtful introduction to the pest parser</title>
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
-        <meta name="description" content="">
+        <meta name="description" content="An introduction to the pest parser by implementing a Rust grammar subset">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
 
-        <base href="../">
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
 
-        <link rel="stylesheet" href="book.css">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
         <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
         <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
 
-        <link rel="shortcut icon" href="favicon.png">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
 
-        <!-- Font Awesome -->
-        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
-
-        <link rel="stylesheet" href="highlight.css">
-        <link rel="stylesheet" href="tomorrow-night.css">
-        <link rel="stylesheet" href="ayu-highlight.css">
-
-        <!-- Custom theme -->
+        <!-- Custom theme stylesheets -->
         
 
         
-
-        <!-- Fetch Clipboard.js from CDN but have a local fallback -->
-        <script src="https://cdn.jsdelivr.net/clipboard.js/1.6.1/clipboard.min.js"></script>
-        <script>
-            if (typeof Clipboard == 'undefined') {
-                document.write(unescape("%3Cscript src='clipboard.min.js'%3E%3C/script%3E"));
-            }
-        </script>
-
-        <!-- Fetch JQuery from CDN but have a local fallback -->
-        <script src="https://code.jquery.com/jquery-2.1.4.min.js"></script>
-        <script>
-            if (typeof jQuery == 'undefined') {
-                document.write(unescape("%3Cscript src='jquery.js'%3E%3C/script%3E"));
-            }
-        </script>
-
-        <!-- Fetch store.js from local - TODO add CDN when 2.x.x is available on cdnjs -->
-        <script src="store.js"></script>
-
-        <!-- Custom JS script -->
-        
-
     </head>
     <body class="light">
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">var path_to_root = "../";</script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script type="text/javascript">
-            var theme = store.get('theme');
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { } 
             if (theme === null || theme === undefined) { theme = 'light'; }
-            $('body').removeClass().addClass(theme);
+            document.body.className = theme;
+            document.querySelector('html').className = theme + ' js';
         </script>
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script type="text/javascript">
-            var sidebar = store.get('sidebar');
-            if (sidebar === "hidden") { $("html").addClass("sidebar-hidden") }
-            else if (sidebar === "visible") { $("html").addClass("sidebar-visible") }
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
         </script>
 
-        <div id="sidebar" class="sidebar">
-            <ul class="chapter"><li><a href="./intro.html"><strong>1.</strong> Introduction</a></li><li><ul class="section"><li><a href="./examples/csv.html"><strong>1.1.</strong> Example: CSV</a></li></ul></li><li><a href="./parser_api.html"><strong>2.</strong> Parser API</a></li><li><ul class="section"><li><a href="./examples/ini.html"><strong>2.1.</strong> Example: INI (WIP)</a></li></ul></li><li><a href="./grammars/grammars.html"><strong>3.</strong> Grammars</a></li><li><ul class="section"><li><a href="./grammars/peg.html"><strong>3.1.</strong> Parsing expression grammars</a></li><li><a href="./grammars/syntax.html" class="active"><strong>3.2.</strong> Syntax of pest parsers</a></li><li><a href="./examples/json.html"><strong>3.3.</strong> Example: JSON (WIP)</a></li></ul></li><li><a href="./precedence.html"><strong>4.</strong> Operator precedence (WIP)</a></li><li><ul class="section"><li><a href="./examples/calculator.html"><strong>4.1.</strong> Example: Calculator (WIP)</a></li></ul></li><li><a href="./examples/awk.html"><strong>5.</strong> Final project: Awk clone (WIP)</a></li><li><a href="./examples/rust/setup.html"><strong>6.</strong> Bonus project: Rust grammar (WIP)</a></li><li><ul class="section"><li><a href="./examples/rust/literals.html"><strong>6.1.</strong> Literals</a></li><li><a href="./examples/rust/syntax.html"><strong>6.2.</strong> Syntax</a></li></ul></li></ul>
-        </div>
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <ol class="chapter"><li><a href="../intro.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li><a href="../examples/csv.html"><strong aria-hidden="true">1.1.</strong> Example: CSV</a></li></ol></li><li><a href="../parser_api.html"><strong aria-hidden="true">2.</strong> Parser API</a></li><li><ol class="section"><li><a href="../examples/ini.html"><strong aria-hidden="true">2.1.</strong> Example: INI</a></li></ol></li><li><a href="../grammars/grammars.html"><strong aria-hidden="true">3.</strong> Grammars</a></li><li><ol class="section"><li><a href="../grammars/peg.html"><strong aria-hidden="true">3.1.</strong> Parsing expression grammars</a></li><li><a href="../grammars/syntax.html" class="active"><strong aria-hidden="true">3.2.</strong> Syntax of pest parsers</a></li><li><a href="../grammars/built-ins.html"><strong aria-hidden="true">3.3.</strong> Built-in rules</a></li><li><a href="../examples/json.html"><strong aria-hidden="true">3.4.</strong> Example: JSON</a></li></ol></li><li><a href="../precedence.html"><strong aria-hidden="true">4.</strong> Operator precedence (WIP)</a></li><li><ol class="section"><li><a href="../examples/calculator.html"><strong aria-hidden="true">4.1.</strong> Example: Calculator (WIP)</a></li></ol></li><li><a href="../examples/awk.html"><strong aria-hidden="true">5.</strong> Final project: Awk clone (WIP)</a></li></ol>
+        </nav>
 
         <div id="page-wrapper" class="page-wrapper">
 
-            <div class="page" tabindex="-1">
+            <div class="page">
+                
                 <div id="menu-bar" class="menu-bar">
-                    <div class="left-buttons">
-                        <i id="sidebar-toggle" class="fa fa-bars"></i>
-                        <i id="theme-toggle" class="fa fa-paint-brush"></i>
-                    </div>
+                    <div id="menu-bar-sticky-container">
+                        <div class="left-buttons">
+                            <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                            <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                                <i class="fa fa-paint-brush"></i>
+                            </button>
+                            <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                                <li role="none"><button role="menuitem" class="theme" id="light">Light <span class="default">(default)</span></button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                            </ul>
+                            
+                            <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                                <i class="fa fa-search"></i>
+                            </button>
+                            
+                        </div>
 
-                    <h1 class="menu-title"></h1>
+                        <h1 class="menu-title">A thoughtful introduction to the pest parser</h1> 
 
-                    <div class="right-buttons">
-                        <i id="print-button" class="fa fa-print" title="Print this book"></i>
+                        <div class="right-buttons">
+                            <a href="../print.html" title="Print this book" aria-label="Print this book">
+                                <i id="print-button" class="fa fa-print"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
 
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
                 <div id="content" class="content">
-                    <a class="header" href="syntax.html#syntax of pest parsers" id="syntax of pest parsers"><h1>Syntax of pest parsers</h1></a>
+                    <main>
+                        <a class="header" href="#syntax-of-pest-parsers" id="syntax-of-pest-parsers"><h1>Syntax of pest parsers</h1></a>
 <p><code>pest</code> grammars are lists of rules. Rules are defined like this:</p>
 <pre><code>my_rule = { ... }
 
@@ -96,12 +146,12 @@ another_rule = {        // comments are preceded by two slashes
 </code></pre>
 <p>Since rule names are translated into Rust enum variants, they are not allowed
 to be Rust keywords.</p>
-<p>The left curly bracket <code>{</code> defining a rule can be preceded by <a href="syntax.html#silent-and-atomic-rules">symbols that
+<p>The left curly bracket <code>{</code> defining a rule can be preceded by <a href="#silent-and-atomic-rules">symbols that
 affect its operation</a>:</p>
 <pre><code>silent_rule = _{ ... }
 atomic_rule = @{ ... }
 </code></pre>
-<a class="header" href="syntax.html#expressions" id="expressions"><h2>Expressions</h2></a>
+<a class="header" href="#expressions" id="expressions"><h2>Expressions</h2></a>
 <p>Grammar rules are built from <em>expressions</em> (hence &quot;parsing expression
 grammar&quot;). These expressions are a terse, formal description of how to parse an
 input string.</p>
@@ -112,19 +162,19 @@ easier to manage).</p>
 <p>PEG expressions are suitable for both high-level meaning, like &quot;a function
 signature, followed by a function body&quot;, and low-level meaning, like &quot;a
 semicolon, followed by a line feed&quot;. The combining form &quot;followed by&quot;,
-the <a href="syntax.html#sequence">sequence operator</a>, is the same in either case.</p>
-<a class="header" href="syntax.html#terminals" id="terminals"><h3>Terminals</h3></a>
+the <a href="#sequence">sequence operator</a>, is the same in either case.</p>
+<a class="header" href="#terminals" id="terminals"><h3>Terminals</h3></a>
 <p>The most basic rule is a <strong>literal string</strong> in double quotes: <code>&quot;text&quot;</code>.</p>
 <p>A string can be <strong>case-insensitive</strong> (for ASCII characters only) if preceded by
 a caret: <code>^&quot;text&quot;</code>.</p>
 <p>A single <strong>character in a range</strong> is written as two single-quoted characters,
 separated by two dots: <code>'0'..'9'</code>.</p>
-<p>You can match <strong>any single character</strong> at all with the special rule <code>any</code>. This
+<p>You can match <strong>any single character</strong> at all with the special rule <code>ANY</code>. This
 is equivalent to <code>'\u{00}'..'\u{10FFFF}'</code>, any single Unicode character.</p>
 <pre><code>&quot;a literal string&quot;
 ^&quot;ASCII case-insensitive string&quot;
 'a'..'z'
-any
+ANY
 </code></pre>
 <p>Finally, you can <strong>refer to other rules</strong> by writing their names directly, and
 even <strong>use rules recursively</strong>:</p>
@@ -132,7 +182,7 @@ even <strong>use rules recursively</strong>:</p>
 other_rule = { &quot;toves&quot; }
 recursive_rule = { &quot;mimsy &quot; ~ recursive_rule }
 </code></pre>
-<a class="header" href="syntax.html#sequence" id="sequence"><h3>Sequence</h3></a>
+<a class="header" href="#sequence" id="sequence"><h3>Sequence</h3></a>
 <p>The sequence operator is written as a tilde <code>~</code>.</p>
 <pre><code>first ~ and_then
 
@@ -143,7 +193,7 @@ successfully, <code>and_then</code> is attempted next. However, if <code>first</
 entire expression fails.</p>
 <p>A list of expressions can be chained together with sequences, which indicates
 that <em>all</em> of the components must occur, in the specified order.</p>
-<a class="header" href="syntax.html#ordered choice" id="ordered choice"><h3>Ordered choice</h3></a>
+<a class="header" href="#ordered-choice" id="ordered-choice"><h3>Ordered choice</h3></a>
 <p>The choice operator is written as a vertical line <code>|</code>.</p>
 <pre><code>first | or_else
 
@@ -168,8 +218,8 @@ creature = {
 </code></pre>
 <p>It is somewhat tempting to borrow terminology and think of this operation as
 &quot;alternation&quot; or simply &quot;OR&quot;, but this is misleading. The word &quot;choice&quot; is used
-specifically because <a href="grammars/peg.html#ordered-choice">the operation is <em>not</em> merely logical &quot;OR&quot;</a>.</p>
-<a class="header" href="syntax.html#repetition" id="repetition"><h3>Repetition</h3></a>
+specifically because <a href="peg.html#ordered-choice">the operation is <em>not</em> merely logical &quot;OR&quot;</a>.</p>
+<a class="header" href="#repetition" id="repetition"><h3>Repetition</h3></a>
 <p>There are two repetition operators: the asterisk <code>*</code> and plus sign <code>+</code>. They
 are placed after an expression. The asterisk <code>*</code> indicates that the preceding
 expression can occur <strong>zero or more</strong> times. The plus sign <code>+</code> indicates that
@@ -181,9 +231,9 @@ expression is <strong>optional</strong> — it can occur zero or one times.</p>
  (&quot;one&quot; | &quot;or&quot; | &quot;more&quot;)+
            (^&quot;optional&quot;)?
 </code></pre>
-<p>Note that <code>expr*</code> will always succeed, because it is allowed to match zero
-times. For example, if followed by a choice, as in <code>expr* | otherwise</code>, the
-rule <code>otherwise</code> will never be reached!</p>
+<p>Note that <code>expr*</code> and <code>expr?</code> will always succeed, because they are allowed to
+match zero times. For example, <code>&quot;a&quot;* ~ &quot;b&quot;?</code> will succeed even on an empty
+input string.</p>
 <p>Other <strong>numbers of repetitions</strong> can be indicated using curly brackets:</p>
 <pre><code>expr{n}           // exactly n repetitions
 expr{m, n}        // between m and n repetitions, inclusive
@@ -192,7 +242,7 @@ expr{, n}         // at most n repetitions
 expr{m, }         // at least m repetitions
 </code></pre>
 <p>Thus <code>expr*</code> is equivalent to <code>expr{0, }</code>; <code>expr+</code> is equivalent to <code>expr{1, }</code>; and <code>expr?</code> is equivalent to <code>expr{0, 1}</code>.</p>
-<a class="header" href="syntax.html#predicates" id="predicates"><h3>Predicates</h3></a>
+<a class="header" href="#predicates" id="predicates"><h3>Predicates</h3></a>
 <p>Preceding an expression with an ampersand <code>&amp;</code> or exclamation mark <code>!</code> turns it
 into a <em>predicate</em> that never consumes any input. You might know these
 operators as &quot;lookahead&quot; or &quot;non-progressing&quot;.</p>
@@ -212,7 +262,7 @@ a kind of &quot;NOT&quot; statement: &quot;the input string must match <code>bar
         &quot; &quot;           //     a space
         | &quot;\t&quot;        //     or a tab
     )
-    ~ any             // then consume one character
+    ~ ANY             // then consume one character
 }
 
 triple_quoted_string = {
@@ -222,10 +272,10 @@ triple_quoted_string = {
 }
 triple_quoted_character = {
     !&quot;'''&quot;        // if the following text is not three apostrophes
-    ~ any         // then consume one character
+    ~ ANY         // then consume one character
 }
 </code></pre>
-<a class="header" href="syntax.html#operator precedence and grouping wip" id="operator precedence and grouping wip"><h2>Operator precedence and grouping (WIP)</h2></a>
+<a class="header" href="#operator-precedence-and-grouping-wip" id="operator-precedence-and-grouping-wip"><h2>Operator precedence and grouping (WIP)</h2></a>
 <p>The repetition operators asterisk <code>*</code>, plus sign <code>+</code>, and question mark <code>?</code>
 apply to the immediately preceding expression.</p>
 <pre><code>&quot;One &quot; ~ &quot;or &quot; ~ &quot;more. &quot;+
@@ -247,38 +297,38 @@ operators, the sequence operator, and finally ordered choice.</p>
     equivalent to
 my_rule = {
       ( (&quot;a&quot;*) ~ (&quot;b&quot;?) )
-    | ( (&amp;(&quot;b&quot;+&quot;)) ~ &quot;a&quot; )
+    | ( (&amp;(&quot;b&quot;+)) ~ &quot;a&quot; )
 }
 </code></pre>
-<a class="header" href="syntax.html#start and end of input" id="start and end of input"><h2>Start and end of input</h2></a>
-<p>The rules <code>soi</code> and <code>eoi</code> match the <em>start</em> and <em>end</em> of the input string,
+<a class="header" href="#start-and-end-of-input" id="start-and-end-of-input"><h2>Start and end of input</h2></a>
+<p>The rules <code>SOI</code> and <code>EOI</code> match the <em>start</em> and <em>end</em> of the input string,
 respectively. Neither consumes any text. They only indicate whether the parser
 is currently at one edge of the input.</p>
 <p>For example, to ensure that a rule matches the entire input, where any syntax
 error results in a failed parse (rather than a successful but incomplete
 parse):</p>
 <pre><code>main = {
-    soi
+    SOI
     ~ (...)
-    ~ eoi
+    ~ EOI
 }
 </code></pre>
-<a class="header" href="syntax.html#implicit whitespace" id="implicit whitespace"><h2>Implicit whitespace</h2></a>
+<a class="header" href="#implicit-whitespace" id="implicit-whitespace"><h2>Implicit whitespace</h2></a>
 <p>Many languages and text formats allow arbitrary whitespace and comments between
 logical tokens. For instance, Rust considers <code>4+5</code> equivalent to <code>4 + 5</code> and <code>4 /* comment */ + 5</code>.</p>
-<p>The <strong>optional rules <code>whitespace</code> and <code>comment</code></strong> implement this behaviour. If
+<p>The <strong>optional rules <code>WHITESPACE</code> and <code>COMMENT</code></strong> implement this behaviour. If
 either (or both) are defined, they will be implicitly inserted at every
-<a href="syntax.html#sequence">sequence</a> and between every <a href="syntax.html#repetition">repetition</a> (except in <a href="syntax.html#atomic">atomic rules</a>).</p>
+<a href="#sequence">sequence</a> and between every <a href="#repetition">repetition</a> (except in <a href="#atomic">atomic rules</a>).</p>
 <pre><code>expression = { &quot;4&quot; ~ &quot;+&quot; ~ &quot;5&quot; }
-whitespace = _{ &quot; &quot; }
-comment = _{ &quot;/*&quot; ~ (!&quot;*/&quot; ~ any)* ~ &quot;*/&quot; }
+WHITESPACE = _{ &quot; &quot; }
+COMMENT = _{ &quot;/*&quot; ~ (!&quot;*/&quot; ~ ANY)* ~ &quot;*/&quot; }
     matches
 &quot;4+5&quot;
 &quot;4 + 5&quot;
 &quot;4  +     5&quot;
 &quot;4 /* comment */ + 5&quot;
 </code></pre>
-<p>As you can see, <code>whitespace</code> and <code>comment</code> are run repeatedly, so they need
+<p>As you can see, <code>WHITESPACE</code> and <code>COMMENT</code> are run repeatedly, so they need
 only match a single whitespace character or a single comment. The grammar above
 is equivalent to:</p>
 <pre><code>expression = {
@@ -287,46 +337,46 @@ is equivalent to:</p>
     ~ &quot;5&quot;
 }
 ws = _{ &quot; &quot; }
-com = _{ &quot;/*&quot; ~ (!&quot;*/&quot; ~ any)* ~ &quot;*/&quot; }
+com = _{ &quot;/*&quot; ~ (!&quot;*/&quot; ~ ANY)* ~ &quot;*/&quot; }
 </code></pre>
 <p>Note that implicit whitespace is <em>not</em> inserted at the beginning or end of rules
 — for instance, <code>expression</code> does <em>not</em> match <code>&quot; 4+5 &quot;</code>. If you want to
 include implicit whitespace at the beginning and end of a rule, you will need to
-sandwich it between two empty rules (often <code>soi</code> and <code>eoi</code> <a href="syntax.html#start-and-end-of-input">as above</a>):</p>
-<pre><code>whitespace = _{ &quot; &quot; }
+sandwich it between two empty rules (often <code>SOI</code> and <code>EOI</code> <a href="#start-and-end-of-input">as above</a>):</p>
+<pre><code>WHITESPACE = _{ &quot; &quot; }
 expression = { &quot;4&quot; ~ &quot;+&quot; ~ &quot;5&quot; }
-main = { soi ~ expression ~ eoi }
+main = { SOI ~ expression ~ EOI }
     matches
 &quot;4+5&quot;
 &quot;  4 + 5   &quot;
 </code></pre>
-<p>(Be sure to mark the <code>whitespace</code> and <code>comment</code> rules as <a href="syntax.html#silent-and-atomic-rules">silent</a> unless you
+<p>(Be sure to mark the <code>WHITESPACE</code> and <code>COMMENT</code> rules as <a href="#silent-and-atomic-rules">silent</a> unless you
 want to see them included inside other rules!)</p>
-<a class="header" href="syntax.html#silent and atomic rules" id="silent and atomic rules"><h2>Silent and atomic rules</h2></a>
+<a class="header" href="#silent-and-atomic-rules" id="silent-and-atomic-rules"><h2>Silent and atomic rules</h2></a>
 <p><strong>Silent</strong> rules are just like normal rules — when run, they function the
-same way — except they do not produce <a href="parser_api.html#pairs">pairs</a> or <a href="parser_api.html#tokens">tokens</a>. If a rule is
+same way — except they do not produce <a href="../parser_api.html#pairs">pairs</a> or <a href="../parser_api.html#tokens">tokens</a>. If a rule is
 silent, it will never appear in a parse result.</p>
 <p>To make a silent rule, precede the left curly bracket <code>{</code> with a low line
 (underscore) <code>_</code>.</p>
 <pre><code>silent = _{ ... }
 </code></pre>
-<a class="header" href="syntax.html#atomic" id="atomic"><h3>Atomic</h3></a>
+<a class="header" href="#atomic" id="atomic"><h3>Atomic</h3></a>
 <p><code>pest</code> has two kinds of atomic rules: <strong>atomic</strong> and <strong>compound atomic</strong>. To
 make one, write the sigil before the left curly bracket <code>{</code>.</p>
 <pre><code>atomic = @{ ... }
 compound_atomic = ${ ... }
 </code></pre>
-<p>Both kinds of atomic rule prevent <a href="syntax.html#implicit-whitespace">implicit whitespace</a>: inside an atomic rule,
-the tilde <code>~</code> means &quot;immediately followed by&quot;, and <a href="syntax.html#repetition">repetition operators</a>
+<p>Both kinds of atomic rule prevent <a href="#implicit-whitespace">implicit whitespace</a>: inside an atomic rule,
+the tilde <code>~</code> means &quot;immediately followed by&quot;, and <a href="#repetition">repetition operators</a>
 (asterisk <code>*</code> and plus sign <code>+</code>) have no implicit separation. In addition, all
 other rules called from an atomic rule are also treated as atomic.</p>
 <p>The difference between the two is how they produce tokens for inner rules. In
-an atomic rule, interior matching rules are <a href="syntax.html#silent-and-atomic-rules">silent</a>. By contrast, compound
+an atomic rule, interior matching rules are <a href="#silent-and-atomic-rules">silent</a>. By contrast, compound
 atomic rules produce inner tokens as normal.</p>
 <p>Atomic rules are useful when the text you are parsing ignores whitespace except
 in a few cases, such as literal strings. In this instance, you can write
-<code>whitespace</code> or <code>comment</code> rules, then make your string-matching rule be atomic.</p>
-<a class="header" href="syntax.html#non-atomic" id="non-atomic"><h3>Non-atomic</h3></a>
+<code>WHITESPACE</code> or <code>COMMENT</code> rules, then make your string-matching rule be atomic.</p>
+<a class="header" href="#non-atomic" id="non-atomic"><h3>Non-atomic</h3></a>
 <p>Sometimes, you'll want to cancel the effects of atomic parsing. For instance,
 you might want to have string interpolation with an expression inside, where
 the inside expression can still have whitespace like normal.</p>
@@ -339,16 +389,16 @@ it is called from an atomic rule or not.</p>
 <pre><code>fstring = @{ &quot;\&quot;&quot; ~ ... }
 expr = !{ ... }
 </code></pre>
-<a class="header" href="syntax.html#the stack wip" id="the stack wip"><h2>The stack (WIP)</h2></a>
+<a class="header" href="#the-stack-wip" id="the-stack-wip"><h2>The stack (WIP)</h2></a>
 <p><code>pest</code> maintains a stack that can be manipulated directly from the grammar. An
-expression can be matched and pushed onto the stack with the keyword <code>push</code>,
-then later matched exactly with the keywords <code>peek</code> and <code>pop</code>.</p>
+expression can be matched and pushed onto the stack with the keyword <code>PUSH</code>,
+then later matched exactly with the keywords <code>PEEK</code> and <code>POP</code>.</p>
 <p>Using the stack allows <em>the exact same text</em> to be matched multiple times,
 rather than <em>the same pattern</em>.</p>
 <p>For example,</p>
 <pre><code>same_text = {
-    push( &quot;a&quot; | &quot;b&quot; | &quot;c&quot; )
-    ~ pop
+    PUSH( &quot;a&quot; | &quot;b&quot; | &quot;c&quot; )
+    ~ POP
 }
 same_pattern = {
     (&quot;a&quot; | &quot;b&quot; | &quot;c&quot;)
@@ -356,7 +406,7 @@ same_pattern = {
 }
 </code></pre>
 <p>In this case, <code>same_pattern</code> will match <code>&quot;ab&quot;</code>, while <code>same_text</code> will not.</p>
-<p>One practical use is in parsing Rust <a href="https://doc.rust-lang.org/book/second-edition/appendix-02-operators.html#standalone-syntax">&quot;raw string literals&quot;</a>, which look like
+<p>One practical use is in parsing Rust <a href="https://doc.rust-lang.org/book/second-edition/appendix-02-operators.html#non-operator-symbols">&quot;raw string literals&quot;</a>, which look like
 this:</p>
 <pre><pre class="playpen"><code class="language-rust">
 # #![allow(unused_variables)]
@@ -371,81 +421,91 @@ const raw_str: &amp;str = r###&quot;
 <p>When parsing a raw string, we have to keep track of how many number signs <code>#</code>
 occurred before the quotation mark. We can do this using the stack:</p>
 <pre><code>raw_string = {
-    &quot;r&quot; ~ push(&quot;#&quot;*) ~ &quot;\&quot;&quot;    // push the number signs onto the stack
+    &quot;r&quot; ~ PUSH(&quot;#&quot;*) ~ &quot;\&quot;&quot;    // push the number signs onto the stack
     ~ raw_string_interior
-    ~ &quot;\&quot;&quot; ~ pop               // match a quotation mark and the number signs
+    ~ &quot;\&quot;&quot; ~ POP               // match a quotation mark and the number signs
 }
 raw_string_interior = {
     (
-        !(&quot;\&quot;&quot; ~ peek)    // unless the next character is a quotation mark
+        !(&quot;\&quot;&quot; ~ PEEK)    // unless the next character is a quotation mark
                           // followed by the correct amount of number signs,
-        ~ any             // consume one character
+        ~ ANY             // consume one character
     )*
 }
 </code></pre>
-<a class="header" href="syntax.html#cheat sheet" id="cheat sheet"><h1>Cheat sheet</h1></a>
+<a class="header" href="#cheat-sheet" id="cheat-sheet"><h1>Cheat sheet</h1></a>
 <table><thead><tr><th align="center"> Syntax           </th><th align="center"> Meaning                           </th><th align="center"> Syntax                  </th><th align="center"> Meaning              </th></tr></thead><tbody>
-<tr><td align="center"> <code>foo = { ... }</code> </td><td align="center"> <a href="syntax.html#syntax-of-pest-parsers">regular rule</a>                    </td><td align="center"> <code>baz = @{ ... }</code>        </td><td align="center"> <a href="syntax.html#atomic">atomic</a>             </td></tr>
-<tr><td align="center"> <code>bar = _{ ... }</code> </td><td align="center"> <a href="syntax.html#silent-and-atomic-rules">silent</a>                          </td><td align="center"> <code>qux = ${ ... }</code>        </td><td align="center"> <a href="syntax.html#atomic">compound-atomic</a>    </td></tr>
-<tr><td align="center">                  </td><td align="center">                                   </td><td align="center"> <code>plugh = !{ ... }</code>      </td><td align="center"> <a href="syntax.html#non-atomic">non-atomic</a>         </td></tr>
-<tr><td align="center"> <code>&quot;abc&quot;</code>          </td><td align="center"> <a href="syntax.html#terminals">exact string</a>                    </td><td align="center"> <code>^&quot;abc&quot;</code>                </td><td align="center"> <a href="syntax.html#terminals">case insensitive</a>   </td></tr>
-<tr><td align="center"> <code>'a'..'z'</code>       </td><td align="center"> <a href="syntax.html#terminals">character range</a>                 </td><td align="center"> <code>any</code>                   </td><td align="center"> <a href="syntax.html#terminals">any character</a>      </td></tr>
-<tr><td align="center"> <code>foo ~ bar</code>      </td><td align="center"> <a href="syntax.html#sequence">sequence</a>                        </td><td align="center"> <code>baz | qux</code> </td><td align="center"> <a href="syntax.html#ordered-choice">ordered choice</a>     </td></tr>
-<tr><td align="center"> <code>foo*</code>           </td><td align="center"> <a href="syntax.html#repetition">zero or more</a>                    </td><td align="center"> <code>bar+</code>                  </td><td align="center"> <a href="syntax.html#repetition">one or more</a>        </td></tr>
-<tr><td align="center"> <code>baz?</code>           </td><td align="center"> <a href="syntax.html#repetition">optional</a>                        </td><td align="center"> <code>qux{n}</code>                </td><td align="center"> <a href="syntax.html#repetition">exactly <em>n</em></a>        </td></tr>
-<tr><td align="center"> <code>qux{m, n}</code>      </td><td align="center"> <a href="syntax.html#repetition">between <em>m</em> and <em>n</em> (inclusive)</a> </td><td align="center">                         </td><td align="center">                      </td></tr>
-<tr><td align="center"> <code>&amp;foo</code>           </td><td align="center"> <a href="syntax.html#predicates">positive predicate</a>              </td><td align="center"> <code>!bar</code>                  </td><td align="center"> <a href="syntax.html#predicates">negative predicate</a> </td></tr>
-<tr><td align="center"> <code>push(baz)</code>      </td><td align="center"> <a href="syntax.html#the-stack-wip">match and push</a>                  </td><td align="center">                         </td><td align="center">                      </td></tr>
-<tr><td align="center"> <code>pop</code>            </td><td align="center"> <a href="syntax.html#the-stack-wip">match and pop</a>                   </td><td align="center"> <code>peek</code>                  </td><td align="center"> <a href="syntax.html#the-stack-wip">match without pop</a>  </td></tr>
+<tr><td align="center"> <code>foo = { ... }</code> </td><td align="center"> <a href="#syntax-of-pest-parsers">regular rule</a>                    </td><td align="center"> <code>baz = @{ ... }</code>        </td><td align="center"> <a href="#atomic">atomic</a>             </td></tr>
+<tr><td align="center"> <code>bar = _{ ... }</code> </td><td align="center"> <a href="#silent-and-atomic-rules">silent</a>                          </td><td align="center"> <code>qux = ${ ... }</code>        </td><td align="center"> <a href="#atomic">compound-atomic</a>    </td></tr>
+<tr><td align="center">                  </td><td align="center">                                   </td><td align="center"> <code>plugh = !{ ... }</code>      </td><td align="center"> <a href="#non-atomic">non-atomic</a>         </td></tr>
+<tr><td align="center"> <code>&quot;abc&quot;</code>          </td><td align="center"> <a href="#terminals">exact string</a>                    </td><td align="center"> <code>^&quot;abc&quot;</code>                </td><td align="center"> <a href="#terminals">case insensitive</a>   </td></tr>
+<tr><td align="center"> <code>'a'..'z'</code>       </td><td align="center"> <a href="#terminals">character range</a>                 </td><td align="center"> <code>ANY</code>                   </td><td align="center"> <a href="#terminals">any character</a>      </td></tr>
+<tr><td align="center"> <code>foo ~ bar</code>      </td><td align="center"> <a href="#sequence">sequence</a>                        </td><td align="center"> <code>baz | qux</code> </td><td align="center"> <a href="#ordered-choice">ordered choice</a>     </td></tr>
+<tr><td align="center"> <code>foo*</code>           </td><td align="center"> <a href="#repetition">zero or more</a>                    </td><td align="center"> <code>bar+</code>                  </td><td align="center"> <a href="#repetition">one or more</a>        </td></tr>
+<tr><td align="center"> <code>baz?</code>           </td><td align="center"> <a href="#repetition">optional</a>                        </td><td align="center"> <code>qux{n}</code>                </td><td align="center"> <a href="#repetition">exactly <em>n</em></a>        </td></tr>
+<tr><td align="center"> <code>qux{m, n}</code>      </td><td align="center"> <a href="#repetition">between <em>m</em> and <em>n</em> (inclusive)</a> </td><td align="center">                         </td><td align="center">                      </td></tr>
+<tr><td align="center"> <code>&amp;foo</code>           </td><td align="center"> <a href="#predicates">positive predicate</a>              </td><td align="center"> <code>!bar</code>                  </td><td align="center"> <a href="#predicates">negative predicate</a> </td></tr>
+<tr><td align="center"> <code>PUSH(baz)</code>      </td><td align="center"> <a href="#the-stack-wip">match and push</a>                  </td><td align="center">                         </td><td align="center">                      </td></tr>
+<tr><td align="center"> <code>POP</code>            </td><td align="center"> <a href="#the-stack-wip">match and pop</a>                   </td><td align="center"> <code>PEEK</code>                  </td><td align="center"> <a href="#the-stack-wip">match without pop</a>  </td></tr>
 </tbody></table>
 
-                </div>
+                    </main>
 
-                <!-- Mobile navigation buttons -->
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="../grammars/peg.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+                            <a rel="next" href="../grammars/built-ins.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
                 
-                    <a rel="prev" href="./grammars/peg.html" class="mobile-nav-chapters previous">
+                    <a href="../grammars/peg.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
 
                 
-                    <a rel="next" href="./examples/json.html" class="mobile-nav-chapters next">
+                    <a href="../grammars/built-ins.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
                 
-
-            </div>
-
-            
-                <a href="./grammars/peg.html" class="nav-chapters previous" title="You can navigate through the chapters using the arrow keys">
-                    <i class="fa fa-angle-left"></i>
-                </a>
-            
-
-            
-                <a href="./examples/json.html" class="nav-chapters next" title="You can navigate through the chapters using the arrow keys">
-                    <i class="fa fa-angle-right"></i>
-                </a>
-            
+            </nav>
 
         </div>
 
-
-        <!-- Local fallback for Font Awesome -->
-        <script>
-            if ($(".fa").css("font-family") !== "FontAwesome") {
-                $('<link rel="stylesheet" type="text/css" href="_FontAwesome/css/font-awesome.css">').prependTo('head');
-            }
-        </script>
-
-        <!-- Livereload script (if served using the cli tool) -->
         
 
         
 
         
 
-        <script src="highlight.js"></script>
-        <script src="book.js"></script>
+        
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
     </body>
 </html>

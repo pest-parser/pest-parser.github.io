@@ -1,0 +1,375 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Built-in rules - A thoughtful introduction to the pest parser</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="An introduction to the pest parser by implementing a Rust grammar subset">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body class="light">
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">var path_to_root = "../";</script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { } 
+            if (theme === null || theme === undefined) { theme = 'light'; }
+            document.body.className = theme;
+            document.querySelector('html').className = theme + ' js';
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <ol class="chapter"><li><a href="../intro.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li><a href="../examples/csv.html"><strong aria-hidden="true">1.1.</strong> Example: CSV</a></li></ol></li><li><a href="../parser_api.html"><strong aria-hidden="true">2.</strong> Parser API</a></li><li><ol class="section"><li><a href="../examples/ini.html"><strong aria-hidden="true">2.1.</strong> Example: INI</a></li></ol></li><li><a href="../grammars/grammars.html"><strong aria-hidden="true">3.</strong> Grammars</a></li><li><ol class="section"><li><a href="../grammars/peg.html"><strong aria-hidden="true">3.1.</strong> Parsing expression grammars</a></li><li><a href="../grammars/syntax.html"><strong aria-hidden="true">3.2.</strong> Syntax of pest parsers</a></li><li><a href="../grammars/built-ins.html" class="active"><strong aria-hidden="true">3.3.</strong> Built-in rules</a></li><li><a href="../examples/json.html"><strong aria-hidden="true">3.4.</strong> Example: JSON</a></li></ol></li><li><a href="../precedence.html"><strong aria-hidden="true">4.</strong> Operator precedence (WIP)</a></li><li><ol class="section"><li><a href="../examples/calculator.html"><strong aria-hidden="true">4.1.</strong> Example: Calculator (WIP)</a></li></ol></li><li><a href="../examples/awk.html"><strong aria-hidden="true">5.</strong> Final project: Awk clone (WIP)</a></li></ol>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar" class="menu-bar">
+                    <div id="menu-bar-sticky-container">
+                        <div class="left-buttons">
+                            <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                            <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                                <i class="fa fa-paint-brush"></i>
+                            </button>
+                            <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                                <li role="none"><button role="menuitem" class="theme" id="light">Light <span class="default">(default)</span></button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                            </ul>
+                            
+                            <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                                <i class="fa fa-search"></i>
+                            </button>
+                            
+                        </div>
+
+                        <h1 class="menu-title">A thoughtful introduction to the pest parser</h1> 
+
+                        <div class="right-buttons">
+                            <a href="../print.html" title="Print this book" aria-label="Print this book">
+                                <i id="print-button" class="fa fa-print"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <a class="header" href="#built-in-rules" id="built-in-rules"><h1>Built-in rules</h1></a>
+<p>Besides <code>ANY</code>, matching any single Unicode character, <code>pest</code> provides several
+rules to make parsing text more convenient.</p>
+<a class="header" href="#ascii-rules" id="ascii-rules"><h2>ASCII rules</h2></a>
+<p>Among the printable ASCII characters, it is often useful to match alphabetic
+characters and numbers. For <strong>numbers</strong>, <code>pest</code> provides digits in common
+radixes (bases):</p>
+<table><thead><tr><th align="center"> Built-in rule         </th><th align="center"> Equivalent                                    </th></tr></thead><tbody>
+<tr><td align="center"> <code>ASCII_DIGIT</code>         </td><td align="center"> <code>'0'..'9'</code>                                    </td></tr>
+<tr><td align="center"> <code>ASCII_NONZERO_DIGIT</code> </td><td align="center"> <code>'1'..'9'</code>                                    </td></tr>
+<tr><td align="center"> <code>ASCII_BIN_DIGIT</code>     </td><td align="center"> <code>'0'..'1'</code>                                    </td></tr>
+<tr><td align="center"> <code>ASCII_OCT_DIGIT</code>     </td><td align="center"> <code>'0'..'7'</code>                                    </td></tr>
+<tr><td align="center"> <code>ASCII_HEX_DIGIT</code>     </td><td align="center"> <code>'0'..'9' | 'a'..'f' | 'A'..'F'</code> </td></tr>
+</tbody></table>
+<p>For <strong>alphabetic</strong> characters, distinguishing between uppercase and lowercase:</p>
+<table><thead><tr><th> Built-in rule       </th><th> Equivalent                        </th></tr></thead><tbody>
+<tr><td align="center"> <code>ASCII_ALPHA_LOWER</code> </td><td align="center"> <code>'a'..'z'</code>                        </td></tr>
+<tr><td align="center"> <code>ASCII_ALPHA_UPPER</code> </td><td align="center"> <code>'A'..'Z'</code>                        </td></tr>
+<tr><td align="center"> <code>ASCII_ALPHA</code>       </td><td align="center"> <code>'a'..'z' | 'A'..'Z'</code> </td></tr>
+</tbody></table>
+<p>And for <strong>miscellaneous</strong> use:</p>
+<table><thead><tr><th align="center"> Built-in rule        </th><th> Meaning              </th><th> Equivalent                              </th></tr></thead><tbody>
+<tr><td align="center"> <code>ASCII_ALPHANUMERIC</code> </td><td align="center"> any digit or letter  </td><td align="center"> <code>ASCII_DIGIT | ASCII_ALPHA</code> </td></tr>
+<tr><td align="center"> <code>NEWLINE</code>            </td><td align="center"> any line feed format </td><td align="center"> <code>&quot;\n&quot; | &quot;\r\n&quot; | &quot;\r&quot;</code>     </td></tr>
+</tbody></table>
+<a class="header" href="#unicode-rules" id="unicode-rules"><h2>Unicode rules</h2></a>
+<p>To make it easier to correctly parse arbitrary Unicode text, <code>pest</code> includes a
+large number of rules corresponding to Unicode character properties. These
+rules are divided into <strong>general category</strong> and <strong>binary property</strong> rules.</p>
+<p>Unicode characters are partitioned into categories based on their general
+purpose. Every character belongs to a single category, in the same way that
+every ASCII character is a control character, a digit, a letter, a symbol, or a
+space.</p>
+<p>In addition, every Unicode character has a list of binary properties (true or
+false) that it does or does not satisfy. Characters can belong to any number of
+these properties, depending on their meaning.</p>
+<p>For example, the character &quot;A&quot;, &quot;Latin capital letter A&quot;, is in the general
+category &quot;Uppercase Letter&quot; because its general purpose is being a letter. It
+has the binary property &quot;Uppercase&quot; but not &quot;Emoji&quot;. By contrast, the character
+&quot;🅰&quot;, &quot;negative squared Latin capital letter A&quot;, is in the general
+category &quot;Other Symbol&quot; because it does not generally occur as a letter in
+text. It has both the binary properties &quot;Uppercase&quot; and &quot;Emoji&quot;.</p>
+<p>For more details, consult Chapter 4 of <a href="https://www.unicode.org/versions/latest/">The Unicode Standard</a>.</p>
+<a class="header" href="#general-categories" id="general-categories"><h3>General categories</h3></a>
+<p>Formally, categories are non-overlapping: each Unicode character belongs to
+exactly one category, and no category contains another. However, since certain
+groups of categories are often useful together, <code>pest</code> exposes the hierarchy of
+categories below. For example, the rule <code>CASED_LETTER</code> is not technically a
+Unicode general category; it instead matches characters that are
+<code>UPPERCASE_LETTER</code> or <code>LOWERCASE_LETTER</code>, which <em>are</em> general categories.</p>
+<ul>
+<li><code>LETTER</code>
+<ul>
+<li><code>CASED_LETTER</code>
+<ul>
+<li><code>UPPERCASE_LETTER</code></li>
+<li><code>LOWERCASE_LETTER</code></li>
+</ul>
+</li>
+<li><code>TITLECASE_LETTER</code></li>
+<li><code>MODIFIER_LETTER</code></li>
+<li><code>OTHER_LETTER</code></li>
+</ul>
+</li>
+<li><code>MARK</code>
+<ul>
+<li><code>NONSPACING_MARK</code></li>
+<li><code>SPACING_MARK</code></li>
+<li><code>ENCLOSING_MARK</code></li>
+</ul>
+</li>
+<li><code>NUMBER</code>
+<ul>
+<li><code>DECIMAL_NUMBER</code></li>
+<li><code>LETTER_NUMBER</code></li>
+<li><code>OTHER_NUMBER</code></li>
+</ul>
+</li>
+<li><code>PUNCTUATION</code>
+<ul>
+<li><code>CONNECTOR_PUNCTUATION</code></li>
+<li><code>DASH_PUNCTUATION</code></li>
+<li><code>OPEN_PUNCTUATION</code></li>
+<li><code>CLOSE_PUNCTUATION</code></li>
+<li><code>INITIAL_PUNCTUATION</code></li>
+<li><code>FINAL_PUNCTUATION</code></li>
+<li><code>OTHER_PUNCTUATION</code></li>
+</ul>
+</li>
+<li><code>SYMBOL</code>
+<ul>
+<li><code>MATH_SYMBOL</code></li>
+<li><code>CURRENCY_SYMBOL</code></li>
+<li><code>MODIFIER_SYMBOL</code></li>
+<li><code>OTHER_SYMBOL</code></li>
+</ul>
+</li>
+<li><code>SEPARATOR</code>
+<ul>
+<li><code>SPACE_SEPARATOR</code></li>
+<li><code>LINE_SEPARATOR</code></li>
+<li><code>PARAGRAPH_SEPARATOR</code></li>
+</ul>
+</li>
+<li><code>OTHER</code>
+<ul>
+<li><code>CONTROL</code></li>
+<li><code>FORMAT</code></li>
+<li><code>SURROGATE</code></li>
+<li><code>PRIVATE_USE</code></li>
+<li><code>UNASSIGNED</code></li>
+</ul>
+</li>
+</ul>
+<a class="header" href="#binary-properties" id="binary-properties"><h3>Binary properties</h3></a>
+<p>Many of these properties are used to define Unicode text algorithms, such as
+<a href="https://www.unicode.org/reports/tr9/">the bidirectional algorithm</a> and <a href="https://www.unicode.org/reports/tr29/">the text segmentation algorithm</a>. Such
+properties are not likely to be useful for most parsers.</p>
+<p>However, the properties <code>XID_START</code> and <code>XID_CONTINUE</code> are particularly notable
+because they are defined &quot;to assist in the standard treatment of identifiers&quot;,
+&quot;such as programming language variables&quot;. See <a href="https://www.unicode.org/reports/tr31/">Technical Report 31</a> for more
+details.</p>
+<ul>
+<li><code>ALPHABETIC</code></li>
+<li><code>BIDI_CONTROL</code></li>
+<li><code>CASE_IGNORABLE</code></li>
+<li><code>CASED</code></li>
+<li><code>CHANGES_WHEN_CASEFOLDED</code></li>
+<li><code>CHANGES_WHEN_CASEMAPPED</code></li>
+<li><code>CHANGES_WHEN_LOWERCASED</code></li>
+<li><code>CHANGES_WHEN_TITLECASED</code></li>
+<li><code>CHANGES_WHEN_UPPERCASED</code></li>
+<li><code>DASH</code></li>
+<li><code>DEFAULT_IGNORABLE_CODE_POINT</code></li>
+<li><code>DEPRECATED</code></li>
+<li><code>DIACRITIC</code></li>
+<li><code>EXTENDER</code></li>
+<li><code>GRAPHEME_BASE</code></li>
+<li><code>GRAPHEME_EXTEND</code></li>
+<li><code>GRAPHEME_LINK</code></li>
+<li><code>HEX_DIGIT</code></li>
+<li><code>HYPHEN</code></li>
+<li><code>IDS_BINARY_OPERATOR</code></li>
+<li><code>IDS_TRINARY_OPERATOR</code></li>
+<li><code>ID_CONTINUE</code></li>
+<li><code>ID_START</code></li>
+<li><code>IDEOGRAPHIC</code></li>
+<li><code>JOIN_CONTROL</code></li>
+<li><code>LOGICAL_ORDER_EXCEPTION</code></li>
+<li><code>LOWERCASE</code></li>
+<li><code>MATH</code></li>
+<li><code>NONCHARACTER_CODE_POINT</code></li>
+<li><code>OTHER_ALPHABETIC</code></li>
+<li><code>OTHER_DEFAULT_IGNORABLE_CODE_POINT</code></li>
+<li><code>OTHER_GRAPHEME_EXTEND</code></li>
+<li><code>OTHER_ID_CONTINUE</code></li>
+<li><code>OTHER_ID_START</code></li>
+<li><code>OTHER_LOWERCASE</code></li>
+<li><code>OTHER_MATH</code></li>
+<li><code>OTHER_UPPERCASE</code></li>
+<li><code>PATTERN_SYNTAX</code></li>
+<li><code>PATTERN_WHITE_SPACE</code></li>
+<li><code>PREPENDED_CONCATENATION_MARK</code></li>
+<li><code>QUOTATION_MARK</code></li>
+<li><code>RADICAL</code></li>
+<li><code>REGIONAL_INDICATOR</code></li>
+<li><code>SENTENCE_TERMINAL</code></li>
+<li><code>SOFT_DOTTED</code></li>
+<li><code>TERMINAL_PUNCTUATION</code></li>
+<li><code>UNIFIED_IDEOGRAPH</code></li>
+<li><code>UPPERCASE</code></li>
+<li><code>VARIATION_SELECTOR</code></li>
+<li><code>WHITE_SPACE</code></li>
+<li><code>XID_CONTINUE</code></li>
+<li><code>XID_START</code></li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="../grammars/syntax.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+                            <a rel="next" href="../examples/json.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a href="../grammars/syntax.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a href="../examples/json.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>
