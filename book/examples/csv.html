@@ -174,7 +174,7 @@ code! This is a very important attribute.</p>
 <p><code>pest</code> works by compiling a description of a file format, called a <em>grammar</em>,
 into Rust code. Let's write a grammar for a CSV file that contains numbers.
 Create a new file named <code>src/csv.pest</code> with a single line:</p>
-<pre><code>field = { (ASCII_DIGIT | &quot;.&quot; | &quot;-&quot;)+ }
+<pre><code class="language-pest">field = { (ASCII_DIGIT | &quot;.&quot; | &quot;-&quot;)+ }
 </code></pre>
 <p>This is a description of every number field: each character is either an ASCII
 digit <code>0</code> through <code>9</code>, a full stop <code>.</code>, or a hyphen–minus <code>-</code>. The plus
@@ -209,7 +209,7 @@ Err(Error { variant: ParsingError { positives: [field], negatives: [] }, locatio
 <p>Yikes! That's a complicated type! But you can see that the successful parse was
 <code>Ok</code>, while the failed parse was <code>Err</code>. We'll get into the details later.</p>
 <p>For now, let's complete the grammar:</p>
-<pre><code>field = { (ASCII_DIGIT | &quot;.&quot; | &quot;-&quot;)+ }
+<pre><code class="language-pest">field = { (ASCII_DIGIT | &quot;.&quot; | &quot;-&quot;)+ }
 record = { field ~ (&quot;,&quot; ~ field)* }
 file = { SOI ~ (record ~ (&quot;\r\n&quot; | &quot;\n&quot;))* ~ EOI }
 </code></pre>
@@ -346,6 +346,8 @@ Number of records: 5
         <script src="../book.js" type="text/javascript" charset="utf-8"></script>
 
         <!-- Custom JS scripts -->
+        
+        <script type="text/javascript" src="../highlight-pest.js"></script>
         
 
         

@@ -208,12 +208,12 @@ include themselves.</p>
 strings (where it must be parsed separately) and between digits in numbers
 (where it is not allowed). This makes it a good fit for <code>pest</code>'s <a href="../grammars/syntax.html#implicit-whitespace">implicit
 whitespace</a>. In <code>src/json.pest</code>:</p>
-<pre><code>WHITESPACE = _{ &quot; &quot; | &quot;\t&quot; | &quot;\r&quot; | &quot;\n&quot; }
+<pre><code class="language-pest">WHITESPACE = _{ &quot; &quot; | &quot;\t&quot; | &quot;\r&quot; | &quot;\n&quot; }
 </code></pre>
 <p><a href="https://json.org/">The JSON specification</a> includes diagrams for parsing JSON strings. We can
 write the grammar directly from that page. Let's write <code>object</code> as a sequence
 of <code>pair</code>s separated by commas <code>,</code>.</p>
-<pre><code>object = {
+<pre><code class="language-pest">object = {
     &quot;{&quot; ~ &quot;}&quot; |
     &quot;{&quot; ~ pair ~ (&quot;,&quot; ~ pair)* ~ &quot;}&quot;
 }
@@ -230,7 +230,7 @@ at least one element. This is necessary because a trailing comma in an array,
 such as in <code>[0, 1,]</code>, is illegal in JSON.</p>
 <p>Now we can write <code>value</code>, which represents any single data type. We'll mimic
 our AST by writing <code>boolean</code> and <code>null</code> as separate rules.</p>
-<pre><code>value = _{ object | array | string | number | boolean | null }
+<pre><code class="language-pest">value = _{ object | array | string | number | boolean | null }
 
 boolean = { &quot;true&quot; | &quot;false&quot; }
 
@@ -245,7 +245,7 @@ including the surrounding double quotes.</p>
 except the ones given in parentheses. In this case, any character is legal
 inside a string, except for double quote <code>&quot;</code> and backslash <code>\</code>,
 which require separate parsing logic.</p>
-<pre><code>string = ${ &quot;\&quot;&quot; ~ inner ~ &quot;\&quot;&quot; }
+<pre><code class="language-pest">string = ${ &quot;\&quot;&quot; ~ inner ~ &quot;\&quot;&quot; }
 inner = @{ char* }
 char = {
     !(&quot;\&quot;&quot; | &quot;\\&quot;) ~ ANY
@@ -260,7 +260,7 @@ is permitted between separate tokens.</p>
 <p>Numbers have four logical parts: an optional sign, an integer part, an optional
 fractional part, and an optional exponent. We'll mark <code>number</code> atomic so that
 whitespace cannot appear between its parts.</p>
-<pre><code>number = @{
+<pre><code class="language-pest">number = @{
     &quot;-&quot;?
     ~ (&quot;0&quot; | ASCII_NONZERO_DIGIT ~ ASCII_DIGIT*)
     ~ (&quot;.&quot; ~ ASCII_DIGIT*)?
@@ -271,7 +271,7 @@ whitespace cannot appear between its parts.</p>
 of a JSON file is a single object or array. We'll mark this rule <a href="../grammars/syntax.html#silent-and-atomic-rules">silent</a>, so
 that a parsed JSON file contains only two token pairs: the parsed value itself,
 and <a href="../grammars/syntax.html#start-and-end-of-input">the <code>EOI</code> rule</a>.</p>
-<pre><code>json = _{ SOI ~ (object | array) ~ EOI }
+<pre><code class="language-pest">json = _{ SOI ~ (object | array) ~ EOI }
 </code></pre>
 <a class="header" href="#ast-generation" id="ast-generation"><h2>AST generation</h2></a>
 <p>Let's compile the grammar into Rust.</p>
@@ -445,6 +445,8 @@ fn main() {
         <script src="../book.js" type="text/javascript" charset="utf-8"></script>
 
         <!-- Custom JS scripts -->
+        
+        <script type="text/javascript" src="../highlight-pest.js"></script>
         
 
         

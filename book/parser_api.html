@@ -139,7 +139,7 @@
                         <a class="header" href="#parser-api" id="parser-api"><h1>Parser API</h1></a>
 <p><code>pest</code> provides several ways of accessing the results of a successful parse.
 The examples below use the following grammar:</p>
-<pre><code>number = { ASCII_DIGIT+ }                // one or more decimal digits
+<pre><code class="language-pest">number = { ASCII_DIGIT+ }                // one or more decimal digits
 enclosed = { &quot;(..&quot; ~ number ~ &quot;..)&quot; }    // for instance, &quot;(..6472..)&quot;
 sum = { number ~ &quot; + &quot; ~ number }        // for instance, &quot;1362 + 12&quot;
 </code></pre>
@@ -269,7 +269,7 @@ assert_eq!(match2.as_str(), &quot;1362&quot;);
 #}</code></pre></pre>
 <p>Sometimes rules will not have a known number of sub-rules, such as when a
 sub-rule is repeated with an asterisk <code>*</code>:</p>
-<pre><code>list = { number* }
+<pre><code class="language-pest">list = { number* }
 </code></pre>
 <p>In cases like these it is not possible to call <code>.next().unwrap()</code>, because the
 number of sub-rules depends on the input string — it cannot be known at
@@ -305,7 +305,7 @@ rule.</p>
 <p>While the <code>Result</code> from <code>Parser::parse(...)</code> might very well be an error on
 invalid input, <code>Pair</code> and <code>Pairs</code> often have more subtle behavior. For
 instance, with this grammar:</p>
-<pre><code>number = { ASCII_DIGIT+ }
+<pre><code class="language-pest">number = { ASCII_DIGIT+ }
 sum = { number ~ &quot; + &quot; ~ number }
 </code></pre>
 <p>this function will <em>never</em> panic:</p>
@@ -403,6 +403,8 @@ pattern matching to turn a <code>Token</code> into its component <code>Rule</cod
         <script src="book.js" type="text/javascript" charset="utf-8"></script>
 
         <!-- Custom JS scripts -->
+        
+        <script type="text/javascript" src="highlight-pest.js"></script>
         
 
         

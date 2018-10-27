@@ -145,7 +145,7 @@ abstractions, <code>pest</code> parsers can be <strong>very fast</strong>.</p>
 <a class="header" href="#sample" id="sample"><h2>Sample</h2></a>
 <p>Here is the complete grammar for a simple calculator <a href="examples/calculator.html">developed in a (currently
 unwritten) later chapter</a>:</p>
-<pre><code>num = @{ int ~ (&quot;.&quot; ~ ASCII_DIGIT*)? ~ (^&quot;e&quot; ~ int)? }
+<pre><code class="language-pest">num = @{ int ~ (&quot;.&quot; ~ ASCII_DIGIT*)? ~ (^&quot;e&quot; ~ int)? }
     int = { (&quot;+&quot; | &quot;-&quot;)? ~ ASCII_DIGIT+ }
 
 operation = _{ add | subtract | multiply | divide | power }
@@ -241,7 +241,7 @@ code! This is a very important attribute.</p>
 <p><code>pest</code> works by compiling a description of a file format, called a <em>grammar</em>,
 into Rust code. Let's write a grammar for a CSV file that contains numbers.
 Create a new file named <code>src/csv.pest</code> with a single line:</p>
-<pre><code>field = { (ASCII_DIGIT | &quot;.&quot; | &quot;-&quot;)+ }
+<pre><code class="language-pest">field = { (ASCII_DIGIT | &quot;.&quot; | &quot;-&quot;)+ }
 </code></pre>
 <p>This is a description of every number field: each character is either an ASCII
 digit <code>0</code> through <code>9</code>, a full stop <code>.</code>, or a hyphen–minus <code>-</code>. The plus
@@ -276,7 +276,7 @@ Err(Error { variant: ParsingError { positives: [field], negatives: [] }, locatio
 <p>Yikes! That's a complicated type! But you can see that the successful parse was
 <code>Ok</code>, while the failed parse was <code>Err</code>. We'll get into the details later.</p>
 <p>For now, let's complete the grammar:</p>
-<pre><code>field = { (ASCII_DIGIT | &quot;.&quot; | &quot;-&quot;)+ }
+<pre><code class="language-pest">field = { (ASCII_DIGIT | &quot;.&quot; | &quot;-&quot;)+ }
 record = { field ~ (&quot;,&quot; ~ field)* }
 file = { SOI ~ (record ~ (&quot;\r\n&quot; | &quot;\n&quot;))* ~ EOI }
 </code></pre>
@@ -361,7 +361,7 @@ Number of records: 5
 <a class="header" href="#parser-api" id="parser-api"><h1>Parser API</h1></a>
 <p><code>pest</code> provides several ways of accessing the results of a successful parse.
 The examples below use the following grammar:</p>
-<pre><code>number = { ASCII_DIGIT+ }                // one or more decimal digits
+<pre><code class="language-pest">number = { ASCII_DIGIT+ }                // one or more decimal digits
 enclosed = { &quot;(..&quot; ~ number ~ &quot;..)&quot; }    // for instance, &quot;(..6472..)&quot;
 sum = { number ~ &quot; + &quot; ~ number }        // for instance, &quot;1362 + 12&quot;
 </code></pre>
@@ -491,7 +491,7 @@ assert_eq!(match2.as_str(), &quot;1362&quot;);
 #}</code></pre></pre>
 <p>Sometimes rules will not have a known number of sub-rules, such as when a
 sub-rule is repeated with an asterisk <code>*</code>:</p>
-<pre><code>list = { number* }
+<pre><code class="language-pest">list = { number* }
 </code></pre>
 <p>In cases like these it is not possible to call <code>.next().unwrap()</code>, because the
 number of sub-rules depends on the input string — it cannot be known at
@@ -527,7 +527,7 @@ rule.</p>
 <p>While the <code>Result</code> from <code>Parser::parse(...)</code> might very well be an error on
 invalid input, <code>Pair</code> and <code>Pairs</code> often have more subtle behavior. For
 instance, with this grammar:</p>
-<pre><code>number = { ASCII_DIGIT+ }
+<pre><code class="language-pest">number = { ASCII_DIGIT+ }
 sum = { number ~ &quot; + &quot; ~ number }
 </code></pre>
 <p>this function will <em>never</em> panic:</p>
@@ -605,23 +605,23 @@ hold the grammar.</p>
 recognize a single character in that set. The built-in rule
 <code>ASCII_ALPHANUMERIC</code> is a shortcut to represent any uppercase or lowercase
 ASCII letter, or any digit.</p>
-<pre><code>char = { ASCII_ALPHANUMERIC | &quot;.&quot; | &quot;_&quot; | &quot;/&quot; }
+<pre><code class="language-pest">char = { ASCII_ALPHANUMERIC | &quot;.&quot; | &quot;_&quot; | &quot;/&quot; }
 </code></pre>
 <p>Section names and property keys <em>must not</em> be empty, but property values <em>may</em>
 be empty (as in the line <code>ip=</code> above). That is, the former consist of one or
 more characters, <code>char+</code>; and the latter consist of zero or more characters,
 <code>char*</code>. We separate the meaning into two rules:</p>
-<pre><code>name = { char+ }
+<pre><code class="language-pest">name = { char+ }
 value = { char* }
 </code></pre>
 <p>Now it's easy to express the two kinds of input lines.</p>
-<pre><code>section = { &quot;[&quot; ~ name ~ &quot;]&quot; }
+<pre><code class="language-pest">section = { &quot;[&quot; ~ name ~ &quot;]&quot; }
 property = { name ~ &quot;=&quot; ~ value }
 </code></pre>
 <p>Finally, we need a rule to represent an entire input file. The expression
 <code>(section | property)?</code> matches <code>section</code>, <code>property</code>, or else nothing. Using
 the built-in rule <code>NEWLINE</code> to match line endings:</p>
-<pre><code>file = {
+<pre><code class="language-pest">file = {
     SOI ~
     ((section | property)? ~ NEWLINE)* ~
     EOI
@@ -730,7 +730,7 @@ and modify. <code>pest</code> provides a solution using <a href="../grammars/syn
 If defined, it will be implicitly run, as many times as possible, at every
 tilde <code>~</code> and between every repetition (for example, <code>*</code> and <code>+</code>). For our INI
 parser, only spaces are legal whitespace.</p>
-<pre><code>WHITESPACE = _{ &quot; &quot; }
+<pre><code class="language-pest">WHITESPACE = _{ &quot; &quot; }
 </code></pre>
 <p>We mark the <code>WHITESPACE</code> rule <a href="../grammars/syntax.html#silent-and-atomic-rules"><em>silent</em></a> with a leading low line (underscore)
 <code>_{ ... }</code>. This way, even if it matches, it won't show up inside other rules.
@@ -741,7 +741,7 @@ the desired next regular rule.</p>
 Currently, whitespace is automatically inserted between characters in <code>name = { char+ }</code>. Rules that <em>are</em> whitespace-sensitive need to be marked <a href="../grammars/syntax.html#atomic"><em>atomic</em></a>
 with a leading at sign <code>@{ ... }</code>. In atomic rules, automatic whitespace
 handling is disabled, and interior rules are silent.</p>
-<pre><code>name = @{ char+ }
+<pre><code class="language-pest">name = @{ char+ }
 value = @{ char* }
 </code></pre>
 <a class="header" href="#done-1" id="done-1"><h2>Done</h2></a>
@@ -815,7 +815,7 @@ carefully. We'll mention some common mistakes regarding PEGs.</p>
 <p>Parsing expression grammars (PEGs) are simply a strict representation of the
 simple imperative code that you would write if you were writing a parser by
 hand.</p>
-<pre><code>number = {            // To recognize a number...
+<pre><code class="language-pest">number = {            // To recognize a number...
     ASCII_DIGIT+      //   take as many ASCII digits as possible (at least one).
 }
 expression = {        // To recognize an expression...
@@ -827,7 +827,7 @@ expression = {        // To recognize an expression...
 comments above.</p>
 <a class="header" href="#eagerness" id="eagerness"><h2>Eagerness</h2></a>
 <p>When a <a href="syntax.html#repetition">repetition</a> PEG expression is run on an input string,</p>
-<pre><code>ASCII_DIGIT+      // one or more characters from '0' to '9'
+<pre><code class="language-pest">ASCII_DIGIT+      // one or more characters from '0' to '9'
 </code></pre>
 <p>it runs that expression as many times as it can (matching &quot;eagerly&quot;, or
 &quot;greedily&quot;). It either succeeds, consuming whatever it matched and passing the
@@ -871,7 +871,7 @@ specific choice first, and the shortest or most general choice last.</p>
 next step is performed as usual. But if it fails, the whole expression fails.
 The engine will not back up and try again.</p>
 <p>Consider this grammar, matching on the string <code>&quot;frumious&quot;</code>:</p>
-<pre><code>word = {     // to recognize an word...
+<pre><code class="language-pest">word = {     // to recognize a word...
     ANY*     //   take any character, zero or more times...
     ~ ANY    //   followed by any character
 }
@@ -919,7 +919,7 @@ the execution of any PEG expression.</p>
 <p>These rules together make PEGs very pleasant tools for writing a parser.</p>
 <a class="header" href="#syntax-of-pest-parsers" id="syntax-of-pest-parsers"><h1>Syntax of pest parsers</h1></a>
 <p><code>pest</code> grammars are lists of rules. Rules are defined like this:</p>
-<pre><code>my_rule = { ... }
+<pre><code class="language-pest">my_rule = { ... }
 
 another_rule = {        // comments are preceded by two slashes
     ...                 // whitespace goes anywhere
@@ -929,7 +929,7 @@ another_rule = {        // comments are preceded by two slashes
 to be Rust keywords.</p>
 <p>The left curly bracket <code>{</code> defining a rule can be preceded by <a href="#silent-and-atomic-rules">symbols that
 affect its operation</a>:</p>
-<pre><code>silent_rule = _{ ... }
+<pre><code class="language-pest">silent_rule = _{ ... }
 atomic_rule = @{ ... }
 </code></pre>
 <a class="header" href="#expressions" id="expressions"><h2>Expressions</h2></a>
@@ -959,7 +959,7 @@ ANY
 </code></pre>
 <p>Finally, you can <strong>refer to other rules</strong> by writing their names directly, and
 even <strong>use rules recursively</strong>:</p>
-<pre><code>my_rule = { &quot;slithy &quot; ~ other_rule }
+<pre><code class="language-pest">my_rule = { &quot;slithy &quot; ~ other_rule }
 other_rule = { &quot;toves&quot; }
 recursive_rule = { &quot;mimsy &quot; ~ recursive_rule }
 </code></pre>
@@ -987,13 +987,13 @@ fails, <code>or_else</code> is attempted next.</p>
 if <code>first</code> matched some input before it failed. When encountering a parse
 failure, the engine will try the next ordered choice as though no input had
 been matched. Failed parses never consume any input.</p>
-<pre><code>start = { &quot;Beware &quot; ~ creature }
+<pre><code class="language-pest">start = { &quot;Beware &quot; ~ creature }
 creature = {
     (&quot;the &quot; ~ &quot;Jabberwock&quot;)
     | (&quot;the &quot; ~ &quot;Jubjub bird&quot;)
 }
-
-&quot;Beware the Jubjub bird&quot;
+</code></pre>
+<pre><code>&quot;Beware the Jubjub bird&quot;
  ^ (start) Parses via the second choice of `creature`,
            even though the first choice matched &quot;the &quot; successfully.
 </code></pre>
@@ -1038,7 +1038,7 @@ match its inner expression. If the inner expression <em>fails</em>, the predicat
 inner expression <em>succeeds</em>, the predicate <em>fails</em> — <code>!foo ~ bar</code> is thus
 a kind of &quot;NOT&quot; statement: &quot;the input string must match <code>bar</code> but NOT <code>foo</code>&quot;.</p>
 <p>This leads to the common idiom meaning &quot;any character but&quot;:</p>
-<pre><code>not_space_or_tab = {
+<pre><code class="language-pest">not_space_or_tab = {
     !(                // if the following text is not
         &quot; &quot;           //     a space
         | &quot;\t&quot;        //     or a tab
@@ -1071,11 +1071,13 @@ apply to the immediately preceding expression.</p>
 </code></pre>
 <p>Repetition operators have the highest precedence, followed by predicate
 operators, the sequence operator, and finally ordered choice.</p>
-<pre><code>my_rule = {
+<pre><code class="language-pest">my_rule = {
     &quot;a&quot;* ~ &quot;b&quot;?
     | &amp;&quot;b&quot;+ ~ &quot;a&quot;
 }
-    equivalent to
+
+// equivalent to
+
 my_rule = {
       ( (&quot;a&quot;*) ~ (&quot;b&quot;?) )
     | ( (&amp;(&quot;b&quot;+)) ~ &quot;a&quot; )
@@ -1088,7 +1090,7 @@ is currently at one edge of the input.</p>
 <p>For example, to ensure that a rule matches the entire input, where any syntax
 error results in a failed parse (rather than a successful but incomplete
 parse):</p>
-<pre><code>main = {
+<pre><code class="language-pest">main = {
     SOI
     ~ (...)
     ~ EOI
@@ -1100,11 +1102,11 @@ logical tokens. For instance, Rust considers <code>4+5</code> equivalent to <cod
 <p>The <strong>optional rules <code>WHITESPACE</code> and <code>COMMENT</code></strong> implement this behaviour. If
 either (or both) are defined, they will be implicitly inserted at every
 <a href="#sequence">sequence</a> and between every <a href="#repetition">repetition</a> (except in <a href="#atomic">atomic rules</a>).</p>
-<pre><code>expression = { &quot;4&quot; ~ &quot;+&quot; ~ &quot;5&quot; }
+<pre><code class="language-pest">expression = { &quot;4&quot; ~ &quot;+&quot; ~ &quot;5&quot; }
 WHITESPACE = _{ &quot; &quot; }
 COMMENT = _{ &quot;/*&quot; ~ (!&quot;*/&quot; ~ ANY)* ~ &quot;*/&quot; }
-    matches
-&quot;4+5&quot;
+</code></pre>
+<pre><code>&quot;4+5&quot;
 &quot;4 + 5&quot;
 &quot;4  +     5&quot;
 &quot;4 /* comment */ + 5&quot;
@@ -1112,7 +1114,7 @@ COMMENT = _{ &quot;/*&quot; ~ (!&quot;*/&quot; ~ ANY)* ~ &quot;*/&quot; }
 <p>As you can see, <code>WHITESPACE</code> and <code>COMMENT</code> are run repeatedly, so they need
 only match a single whitespace character or a single comment. The grammar above
 is equivalent to:</p>
-<pre><code>expression = {
+<pre><code class="language-pest">expression = {
     &quot;4&quot;   ~ (ws | com)*
     ~ &quot;+&quot; ~ (ws | com)*
     ~ &quot;5&quot;
@@ -1124,11 +1126,11 @@ com = _{ &quot;/*&quot; ~ (!&quot;*/&quot; ~ ANY)* ~ &quot;*/&quot; }
 — for instance, <code>expression</code> does <em>not</em> match <code>&quot; 4+5 &quot;</code>. If you want to
 include implicit whitespace at the beginning and end of a rule, you will need to
 sandwich it between two empty rules (often <code>SOI</code> and <code>EOI</code> <a href="#start-and-end-of-input">as above</a>):</p>
-<pre><code>WHITESPACE = _{ &quot; &quot; }
+<pre><code class="language-pest">WHITESPACE = _{ &quot; &quot; }
 expression = { &quot;4&quot; ~ &quot;+&quot; ~ &quot;5&quot; }
 main = { SOI ~ expression ~ EOI }
-    matches
-&quot;4+5&quot;
+</code></pre>
+<pre><code>&quot;4+5&quot;
 &quot;  4 + 5   &quot;
 </code></pre>
 <p>(Be sure to mark the <code>WHITESPACE</code> and <code>COMMENT</code> rules as <a href="#silent-and-atomic-rules">silent</a> unless you
@@ -1139,12 +1141,12 @@ same way — except they do not produce <a href="../parser_api.html#pairs">pairs
 silent, it will never appear in a parse result.</p>
 <p>To make a silent rule, precede the left curly bracket <code>{</code> with a low line
 (underscore) <code>_</code>.</p>
-<pre><code>silent = _{ ... }
+<pre><code class="language-pest">silent = _{ ... }
 </code></pre>
 <a class="header" href="#atomic" id="atomic"><h3>Atomic</h3></a>
 <p><code>pest</code> has two kinds of atomic rules: <strong>atomic</strong> and <strong>compound atomic</strong>. To
 make one, write the sigil before the left curly bracket <code>{</code>.</p>
-<pre><code>atomic = @{ ... }
+<pre><code class="language-pest">atomic = @{ ... }
 compound_atomic = ${ ... }
 </code></pre>
 <p>Both kinds of atomic rule prevent <a href="#implicit-whitespace">implicit whitespace</a>: inside an atomic rule,
@@ -1167,7 +1169,7 @@ print(f&quot;The answer is {2 + 4}.&quot;)
 <p>This is where you use a <strong>non-atomic</strong> rule. Write an exclamation mark <code>!</code> in
 front of the defining curly bracket. The rule will run as non-atomic, whether
 it is called from an atomic rule or not.</p>
-<pre><code>fstring = @{ &quot;\&quot;&quot; ~ ... }
+<pre><code class="language-pest">fstring = @{ &quot;\&quot;&quot; ~ ... }
 expr = !{ ... }
 </code></pre>
 <a class="header" href="#the-stack-wip" id="the-stack-wip"><h2>The stack (WIP)</h2></a>
@@ -1177,7 +1179,7 @@ then later matched exactly with the keywords <code>PEEK</code> and <code>POP</co
 <p>Using the stack allows <em>the exact same text</em> to be matched multiple times,
 rather than <em>the same pattern</em>.</p>
 <p>For example,</p>
-<pre><code>same_text = {
+<pre><code class="language-pest">same_text = {
     PUSH( &quot;a&quot; | &quot;b&quot; | &quot;c&quot; )
     ~ POP
 }
@@ -1201,7 +1203,7 @@ const raw_str: &amp;str = r###&quot;
 #}</code></pre></pre>
 <p>When parsing a raw string, we have to keep track of how many number signs <code>#</code>
 occurred before the quotation mark. We can do this using the stack:</p>
-<pre><code>raw_string = {
+<pre><code class="language-pest">raw_string = {
     &quot;r&quot; ~ PUSH(&quot;#&quot;*) ~ &quot;\&quot;&quot;    // push the number signs onto the stack
     ~ raw_string_interior
     ~ &quot;\&quot;&quot; ~ POP               // match a quotation mark and the number signs
@@ -1477,12 +1479,12 @@ include themselves.</p>
 strings (where it must be parsed separately) and between digits in numbers
 (where it is not allowed). This makes it a good fit for <code>pest</code>'s <a href="../grammars/syntax.html#implicit-whitespace">implicit
 whitespace</a>. In <code>src/json.pest</code>:</p>
-<pre><code>WHITESPACE = _{ &quot; &quot; | &quot;\t&quot; | &quot;\r&quot; | &quot;\n&quot; }
+<pre><code class="language-pest">WHITESPACE = _{ &quot; &quot; | &quot;\t&quot; | &quot;\r&quot; | &quot;\n&quot; }
 </code></pre>
 <p><a href="https://json.org/">The JSON specification</a> includes diagrams for parsing JSON strings. We can
 write the grammar directly from that page. Let's write <code>object</code> as a sequence
 of <code>pair</code>s separated by commas <code>,</code>.</p>
-<pre><code>object = {
+<pre><code class="language-pest">object = {
     &quot;{&quot; ~ &quot;}&quot; |
     &quot;{&quot; ~ pair ~ (&quot;,&quot; ~ pair)* ~ &quot;}&quot;
 }
@@ -1499,7 +1501,7 @@ at least one element. This is necessary because a trailing comma in an array,
 such as in <code>[0, 1,]</code>, is illegal in JSON.</p>
 <p>Now we can write <code>value</code>, which represents any single data type. We'll mimic
 our AST by writing <code>boolean</code> and <code>null</code> as separate rules.</p>
-<pre><code>value = _{ object | array | string | number | boolean | null }
+<pre><code class="language-pest">value = _{ object | array | string | number | boolean | null }
 
 boolean = { &quot;true&quot; | &quot;false&quot; }
 
@@ -1514,7 +1516,7 @@ including the surrounding double quotes.</p>
 except the ones given in parentheses. In this case, any character is legal
 inside a string, except for double quote <code>&quot;</code> and backslash <code>\</code>,
 which require separate parsing logic.</p>
-<pre><code>string = ${ &quot;\&quot;&quot; ~ inner ~ &quot;\&quot;&quot; }
+<pre><code class="language-pest">string = ${ &quot;\&quot;&quot; ~ inner ~ &quot;\&quot;&quot; }
 inner = @{ char* }
 char = {
     !(&quot;\&quot;&quot; | &quot;\\&quot;) ~ ANY
@@ -1529,7 +1531,7 @@ is permitted between separate tokens.</p>
 <p>Numbers have four logical parts: an optional sign, an integer part, an optional
 fractional part, and an optional exponent. We'll mark <code>number</code> atomic so that
 whitespace cannot appear between its parts.</p>
-<pre><code>number = @{
+<pre><code class="language-pest">number = @{
     &quot;-&quot;?
     ~ (&quot;0&quot; | ASCII_NONZERO_DIGIT ~ ASCII_DIGIT*)
     ~ (&quot;.&quot; ~ ASCII_DIGIT*)?
@@ -1540,7 +1542,7 @@ whitespace cannot appear between its parts.</p>
 of a JSON file is a single object or array. We'll mark this rule <a href="../grammars/syntax.html#silent-and-atomic-rules">silent</a>, so
 that a parsed JSON file contains only two token pairs: the parsed value itself,
 and <a href="../grammars/syntax.html#start-and-end-of-input">the <code>EOI</code> rule</a>.</p>
-<pre><code>json = _{ SOI ~ (object | array) ~ EOI }
+<pre><code class="language-pest">json = _{ SOI ~ (object | array) ~ EOI }
 </code></pre>
 <a class="header" href="#ast-generation" id="ast-generation"><h2>AST generation</h2></a>
 <p>Let's compile the grammar into Rust.</p>
@@ -1713,6 +1715,8 @@ functions in the interest of avoiding variable scoping.</p>
         <script src="book.js" type="text/javascript" charset="utf-8"></script>
 
         <!-- Custom JS scripts -->
+        
+        <script type="text/javascript" src="highlight-pest.js"></script>
         
 
         

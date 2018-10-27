@@ -145,7 +145,7 @@ abstractions, <code>pest</code> parsers can be <strong>very fast</strong>.</p>
 <a class="header" href="#sample" id="sample"><h2>Sample</h2></a>
 <p>Here is the complete grammar for a simple calculator <a href="examples/calculator.html">developed in a (currently
 unwritten) later chapter</a>:</p>
-<pre><code>num = @{ int ~ (&quot;.&quot; ~ ASCII_DIGIT*)? ~ (^&quot;e&quot; ~ int)? }
+<pre><code class="language-pest">num = @{ int ~ (&quot;.&quot; ~ ASCII_DIGIT*)? ~ (^&quot;e&quot; ~ int)? }
     int = { (&quot;+&quot; | &quot;-&quot;)? ~ ASCII_DIGIT+ }
 
 operation = _{ add | subtract | multiply | divide | power }
@@ -250,6 +250,8 @@ introduction to Rust, consult the <a href="https://doc.rust-lang.org/stable/book
         <script src="book.js" type="text/javascript" charset="utf-8"></script>
 
         <!-- Custom JS scripts -->
+        
+        <script type="text/javascript" src="highlight-pest.js"></script>
         
 
         
