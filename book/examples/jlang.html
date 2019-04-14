@@ -1,0 +1,585 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Example: The J language - A thoughtful introduction to the pest parser</title>
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="An introduction to the pest parser by implementing a Rust grammar subset">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="shortcut icon" href="../favicon.png">
+        <link rel="stylesheet" href="../css/variables.css">
+        <link rel="stylesheet" href="../css/general.css">
+        <link rel="stylesheet" href="../css/chrome.css">
+        <link rel="stylesheet" href="../css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="../highlight.css">
+        <link rel="stylesheet" href="../tomorrow-night.css">
+        <link rel="stylesheet" href="../ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body class="light">
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "../";
+            var default_theme = "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { } 
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            document.body.className = theme;
+            document.querySelector('html').className = theme + ' js';
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <ol class="chapter"><li><a href="../intro.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li><a href="../examples/csv.html"><strong aria-hidden="true">1.1.</strong> Example: CSV</a></li></ol></li><li><a href="../parser_api.html"><strong aria-hidden="true">2.</strong> Parser API</a></li><li><ol class="section"><li><a href="../examples/ini.html"><strong aria-hidden="true">2.1.</strong> Example: INI</a></li></ol></li><li><a href="../grammars/grammars.html"><strong aria-hidden="true">3.</strong> Grammars</a></li><li><ol class="section"><li><a href="../grammars/peg.html"><strong aria-hidden="true">3.1.</strong> Parsing expression grammars</a></li><li><a href="../grammars/syntax.html"><strong aria-hidden="true">3.2.</strong> Syntax of pest parsers</a></li><li><a href="../grammars/built-ins.html"><strong aria-hidden="true">3.3.</strong> Built-in rules</a></li><li><a href="../examples/json.html"><strong aria-hidden="true">3.4.</strong> Example: JSON</a></li><li><a href="../examples/jlang.html" class="active"><strong aria-hidden="true">3.5.</strong> Example: The J language</a></li></ol></li><li><a href="../precedence.html"><strong aria-hidden="true">4.</strong> Operator precedence (WIP)</a></li><li><ol class="section"><li><a href="../examples/calculator.html"><strong aria-hidden="true">4.1.</strong> Example: Calculator (WIP)</a></li></ol></li><li><a href="../examples/awk.html"><strong aria-hidden="true">5.</strong> Final project: Awk clone (WIP)</a></li></ol>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar" class="menu-bar">
+                    <div id="menu-bar-sticky-container">
+                        <div class="left-buttons">
+                            <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                            <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                                <i class="fa fa-paint-brush"></i>
+                            </button>
+                            <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                                <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                            </ul>
+                            
+                            <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                                <i class="fa fa-search"></i>
+                            </button>
+                            
+                        </div>
+
+                        <h1 class="menu-title">A thoughtful introduction to the pest parser</h1> 
+
+                        <div class="right-buttons">
+                            <a href="../print.html" title="Print this book" aria-label="Print this book">
+                                <i id="print-button" class="fa fa-print"></i>
+                            </a>
+                            
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <a class="header" href="#example-the-j-language" id="example-the-j-language"><h1>Example: The J language</h1></a>
+<p>The J language is an array programming language influenced by APL.
+In J, operations on individual numbers (<code>2 * 3</code>) can just as easily
+be applied to entire lists of numbers (<code>2 * 3 4 5</code>, returning <code>6 8 10</code>).</p>
+<p>Operators in J are referred to as <em>verbs</em>.
+Verbs are either <em>monadic</em> (taking a single argument, such as <code>*: 3</code>, &quot;3 squared&quot;)
+or <em>dyadic</em> (taking two arguments, one on either side, such as <code>5 - 4</code>, &quot;5 minus 4&quot;).</p>
+<p>Here's an example of a J program:</p>
+<pre><code class="language-j">'A string'
+
+*: 1 2 3 4
+
+matrix =: 2 3 $ 5 + 2 3 4 5 6 7
+10 * matrix
+
+1 + 10 20 30
+1 2 3 + 10
+
+residues =: 2 | 0 1 2 3 4 5 6 7
+residues
+</code></pre>
+<p>Using J's <a href="https://jsoftware.com/">interpreter</a> to run the above program
+yields the following on standard out:</p>
+<pre><code>A string
+
+1 4 9 16
+
+ 70  80  90
+100 110 120
+
+11 21 31
+11 12 13
+
+0 1 0 1 0 1 0 1
+</code></pre>
+<p>In this section we'll write a grammar for a subset of J. We'll then walk
+through a parser that builds an AST by iterating over the rules that
+<code>pest</code> gives us. You can find the full source code
+<a href="https://github.com/pest-parser/book/tree/master/examples/jlang-parser">within this book's repository</a>.</p>
+<a class="header" href="#the-grammar" id="the-grammar"><h2>The grammar</h2></a>
+<p>We'll build up a grammar section by section, starting with
+the program rule:</p>
+<pre><code class="language-pest">program = _{ SOI ~ &quot;\n&quot;* ~ (stmt ~ &quot;\n&quot;+) * ~ stmt? ~ EOI }
+</code></pre>
+<p>Each J program contains statements delimited by one or more newlines.
+Notice the leading underscore, which tells <code>pest</code> to <a href="../grammars/syntax.html#silent-and-atomic-rules">silence</a> the <code>program</code>
+rule — we don't want <code>program</code> to appear as a token in the parse stream,
+we want the underlying statements instead.</p>
+<p>A statement is simply an expression, and since there's only one such
+possibility, we also <a href="../grammars/syntax.html#silent-and-atomic-rules">silence</a> this <code>stmt</code> rule as well, and thus our
+parser will receive an iterator of underlying <code>expr</code>s:</p>
+<pre><code class="language-pest">stmt = _{ expr }
+</code></pre>
+<p>An expression can be an assignment to a variable identifier, a monadic
+expression, a dyadic expression, a single string, or an array of terms:</p>
+<pre><code class="language-pest">expr = {
+      assgmtExpr
+    | monadicExpr
+    | dyadicExpr
+    | string
+    | terms
+}
+</code></pre>
+<p>A monadic expression consists of a verb with its sole operand on the right;
+a dyadic expression has operands on either side of the verb.
+Assignment expressions associate identifiers with expressions.</p>
+<p>In J, there is no operator precedence — evaluation is right-associative
+(proceeding from right to left), with parenthesized expressions evaluated
+first.</p>
+<pre><code class="language-pest">monadicExpr = { verb ~ expr }
+
+dyadicExpr = { (monadicExpr | terms) ~ verb ~ expr }
+
+assgmtExpr = { ident ~ &quot;=:&quot; ~ expr }
+</code></pre>
+<p>A list of terms should contain at least one decimal, integer,
+identifier, or parenthesized expression; we care only about those
+underlying values, so we make the <code>term</code> rule <a href="../grammars/syntax.html#silent-and-atomic-rules">silent</a> with a leading
+underscore:</p>
+<pre><code class="language-pest">terms = { term+ }
+
+term = _{ decimal | integer | ident | &quot;(&quot; ~ expr ~ &quot;)&quot; }
+</code></pre>
+<p>A few of J's verbs are defined in this grammar;
+J's <a href="https://code.jsoftware.com/wiki/NuVoc">full vocabulary</a> is much more extensive.</p>
+<pre><code class="language-pest">verb = {
+    &quot;&gt;:&quot; | &quot;*:&quot; | &quot;-&quot;  | &quot;%&quot; | &quot;#&quot; | &quot;&gt;.&quot;
+  | &quot;+&quot;  | &quot;*&quot;  | &quot;&lt;&quot;  | &quot;=&quot; | &quot;^&quot; | &quot;|&quot;
+  | &quot;&gt;&quot;  | &quot;$&quot;
+}
+</code></pre>
+<p>Now we can get into lexing rules. Numbers in J are represented as
+usual, with the exception that negatives are represented using a
+leading <code>_</code> underscore (because <code>-</code> is a verb that performs negation
+as a monad and subtraction as a dyad).  Identifiers in J must start
+with a letter, but can contain numbers thereafter. Strings are
+surrounded by single quotes; quotes themselves can be embedded by
+escaping them with an additional quote.</p>
+<p>Notice how we use <code>pest</code>'s <code>@</code> modifier to make each of these rules <a href="../grammars/syntax.html#atomic">atomic</a>,
+meaning <a href="../grammars/syntax.html#implicit-whitespace">implicit whitespace</a> is forbidden, and
+that interior rules (i.e., <code>ASCII_ALPHA</code> in <code>ident</code>) become <a href="../grammars/syntax.html#silent-and-atomic-rules">silent</a> —
+when our parser receives any of these tokens, they will be terminal:</p>
+<pre><code class="language-pest">integer = @{ &quot;_&quot;? ~ ASCII_DIGIT+ }
+
+decimal = @{ &quot;_&quot;? ~ ASCII_DIGIT+ ~ &quot;.&quot; ~ ASCII_DIGIT* }
+
+ident = @{ ASCII_ALPHA ~ (ASCII_ALPHANUMERIC | &quot;_&quot;)* }
+
+string = @{ &quot;'&quot; ~ ( &quot;''&quot; | (!&quot;'&quot; ~ ANY) )* ~ &quot;'&quot; }
+</code></pre>
+<p>Whitespace in J consists solely of spaces and tabs. Newlines are
+significant because they delimit statements, so they are excluded
+from this rule:</p>
+<pre><code class="language-pest">WHITESPACE = _{ &quot; &quot; | &quot;\t&quot; }
+</code></pre>
+<p>Finally, we must handle comments. Comments in J start with <code>NB.</code> and
+continue to the end of the line on which they are found. Critically, we must
+not consume the newline at the end of the comment line; this is needed
+to separate any statement that might precede the comment from the statement
+on the succeeding line.</p>
+<pre><code class="language-pest">COMMENT = _{ &quot;NB.&quot; ~ (!&quot;\n&quot; ~ ANY)* }
+</code></pre>
+<a class="header" href="#parsing-and-ast-generation" id="parsing-and-ast-generation"><h2>Parsing and AST generation</h2></a>
+<p>This section will walk through a parser that uses the grammar above.
+Library includes and self-explanatory code are omitted here; you can find
+the parser in its entirety <a href="https://github.com/pest-parser/book/tree/master/examples/jlang-parser">within this book's repository</a>.</p>
+<p>First we'll enumerate the verbs defined in our grammar, distinguishing between
+monadic and dyadic verbs. These enumerations will be be used as labels
+in our AST:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+pub enum MonadicVerb {
+    Increment,
+    Square,
+    Negate,
+    Reciprocal,
+    Tally,
+    Ceiling,
+    ShapeOf,
+}
+
+pub enum DyadicVerb {
+    Plus,
+    Times,
+    LessThan,
+    LargerThan,
+    Equal,
+    Minus,
+    Divide,
+    Power,
+    Residue,
+    Copy,
+    LargerOf,
+    LargerOrEqual,
+    Shape,
+}
+#}</code></pre></pre>
+<p>Then we'll enumerate the various kinds of AST nodes:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+pub enum AstNode {
+    Print(Box&lt;AstNode&gt;),
+    Integer(i32),
+    DoublePrecisionFloat(f64),
+    MonadicOp {
+        verb: MonadicVerb,
+        expr: Box&lt;AstNode&gt;,
+    },
+    DyadicOp {
+        verb: DyadicVerb,
+        lhs: Box&lt;AstNode&gt;,
+        rhs: Box&lt;AstNode&gt;,
+    },
+    Terms(Vec&lt;AstNode&gt;),
+    IsGlobal {
+        ident: String,
+        expr: Box&lt;AstNode&gt;,
+    },
+    Ident(String),
+    Str(CString),
+}
+#}</code></pre></pre>
+<p>To parse top-level statements in a J program, we have the following
+<code>parse</code> function that accepts a J program in string form and passes it
+to <code>pest</code> for parsing. We get back a sequence of <a href="../parser_api.html#pairs"><code>Pair</code></a>s. As specified
+in the grammar, a statement can only consist of an expression, so the <code>match</code>
+below parses each of those top-level expressions and wraps them in a <code>Print</code>
+AST node in keeping with the J interpreter's REPL behavior:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+pub fn parse(source: &amp;str) -&gt; Result&lt;Vec&lt;AstNode&gt;, Error&lt;Rule&gt;&gt; {
+    let mut ast = vec![];
+
+    let pairs = JParser::parse(Rule::program, source)?;
+    for pair in pairs {
+        match pair.as_rule() {
+            Rule::expr =&gt; {
+                ast.push(Print(Box::new(build_ast_from_expr(pair))));
+            }
+            _ =&gt; {}
+        }
+    }
+
+    Ok(ast)
+}
+#}</code></pre></pre>
+<p>AST nodes are built from expressions by walking the <a href="../parser_api.html#pairs"><code>Pair</code></a> iterator in
+lockstep with the expectations set out in our grammar file. Common behaviors
+are abstracted out into separate functions, such as <code>parse_monadic_verb</code>
+and <code>parse_dyadic_verb</code>, and <a href="../parser_api.html#pairs"><code>Pair</code></a>s representing expressions themselves are
+passed in recursive calls to <code>build_ast_from_expr</code>:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+fn build_ast_from_expr(pair: pest::iterators::Pair&lt;Rule&gt;) -&gt; AstNode {
+    match pair.as_rule() {
+        Rule::expr =&gt; build_ast_from_expr(pair.into_inner().next().unwrap()),
+        Rule::monadicExpr =&gt; {
+            let mut pair = pair.into_inner();
+            let verb = pair.next().unwrap();
+            let expr = pair.next().unwrap();
+            let expr = build_ast_from_expr(expr);
+            parse_monadic_verb(verb, expr)
+        }
+        // ... other cases elided here ...
+    }
+}
+#}</code></pre></pre>
+<p>Dyadic verbs are mapped from their string representations to AST nodes in
+a straightforward way:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+fn parse_dyadic_verb(pair: pest::iterators::Pair&lt;Rule&gt;, lhs: AstNode, rhs: AstNode) -&gt; AstNode {
+    AstNode::DyadicOp {
+        lhs: Box::new(lhs),
+        rhs: Box::new(rhs),
+        verb: match pair.as_str() {
+            &quot;+&quot; =&gt; DyadicVerb::Plus,
+            &quot;*&quot; =&gt; DyadicVerb::Times,
+            &quot;-&quot; =&gt; DyadicVerb::Minus,
+            &quot;&lt;&quot; =&gt; DyadicVerb::LessThan,
+            &quot;=&quot; =&gt; DyadicVerb::Equal,
+            &quot;&gt;&quot; =&gt; DyadicVerb::LargerThan,
+            &quot;%&quot; =&gt; DyadicVerb::Divide,
+            &quot;^&quot; =&gt; DyadicVerb::Power,
+            &quot;|&quot; =&gt; DyadicVerb::Residue,
+            &quot;#&quot; =&gt; DyadicVerb::Copy,
+            &quot;&gt;.&quot; =&gt; DyadicVerb::LargerOf,
+            &quot;&gt;:&quot; =&gt; DyadicVerb::LargerOrEqual,
+            &quot;$&quot; =&gt; DyadicVerb::Shape,
+            _ =&gt; panic!(&quot;Unexpected dyadic verb: {}&quot;, pair.as_str()),
+        },
+    }
+}
+#}</code></pre></pre>
+<p>As are monadic verbs:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+fn parse_monadic_verb(pair: pest::iterators::Pair&lt;Rule&gt;, expr: AstNode) -&gt; AstNode {
+    AstNode::MonadicOp {
+        verb: match pair.as_str() {
+            &quot;&gt;:&quot; =&gt; MonadicVerb::Increment,
+            &quot;*:&quot; =&gt; MonadicVerb::Square,
+            &quot;-&quot; =&gt; MonadicVerb::Negate,
+            &quot;%&quot; =&gt; MonadicVerb::Reciprocal,
+            &quot;#&quot; =&gt; MonadicVerb::Tally,
+            &quot;&gt;.&quot; =&gt; MonadicVerb::Ceiling,
+            &quot;$&quot; =&gt; MonadicVerb::ShapeOf,
+            _ =&gt; panic!(&quot;Unsupported monadic verb: {}&quot;, pair.as_str()),
+        },
+        expr: Box::new(expr),
+    }
+}
+#}</code></pre></pre>
+<p>Finally, we define a function to process terms such as numbers and strings.
+Numbers require some manuevering to handle J's leading underscores
+representing negation, but other than that the process is typical:</p>
+<pre><pre class="playpen"><code class="language-rust">
+# #![allow(unused_variables)]
+#fn main() {
+fn build_ast_from_term(pair: pest::iterators::Pair&lt;Rule&gt;) -&gt; AstNode {
+    match pair.as_rule() {
+        Rule::integer =&gt; {
+            let istr = pair.as_str();
+            let (sign, istr) = match &amp;istr[..1] {
+                &quot;_&quot; =&gt; (-1, &amp;istr[1..]),
+                _ =&gt; (1, &amp;istr[..]),
+            };
+            let integer: i32 = istr.parse().unwrap();
+            AstNode::Integer(sign * integer)
+        }
+        Rule::decimal =&gt; {
+            let dstr = pair.as_str();
+            let (sign, dstr) = match &amp;dstr[..1] {
+                &quot;_&quot; =&gt; (-1.0, &amp;dstr[1..]),
+                _ =&gt; (1.0, &amp;dstr[..]),
+            };
+            let mut flt: f64 = dstr.parse().unwrap();
+            if flt != 0.0 {
+                // Avoid negative zeroes; only multiply sign by nonzeroes.
+                flt *= sign;
+            }
+            AstNode::DoublePrecisionFloat(flt)
+        }
+        Rule::expr =&gt; build_ast_from_expr(pair),
+        Rule::ident =&gt; AstNode::Ident(String::from(pair.as_str())),
+        unknown_term =&gt; panic!(&quot;Unexpected term: {:?}&quot;, unknown_term),
+    }
+}
+#}</code></pre></pre>
+<a class="header" href="#running-the-parser" id="running-the-parser"><h2>Running the Parser</h2></a>
+<p>We can now define a <code>main</code> function to pass J programs to our
+<code>pest</code>-enabled parser:</p>
+<pre><pre class="playpen"><code class="language-rust">fn main() {
+    let unparsed_file = std::fs::read_to_string(&quot;example.ijs&quot;)
+      .expect(&quot;cannot read ijs file&quot;);
+    let astnode = parse(&amp;unparsed_file).expect(&quot;unsuccessful parse&quot;);
+    println!(&quot;{:?}&quot;, &amp;astnode);
+}
+</code></pre></pre>
+<p>Using this code in <code>example.ijs</code>:</p>
+<pre><code class="language-j">_2.5 ^ 3
+*: 4.8
+title =: 'Spinning at the Boundary'
+*: _1 2 _3 4
+1 2 3 + 10 20 30
+1 + 10 20 30
+1 2 3 + 10
+2 | 0 1 2 3 4 5 6 7
+another =: 'It''s Escaped'
+3 | 0 1 2 3 4 5 6 7
+(2+1)*(2+2)
+3 * 2 + 1
+1 + 3 % 4
+x =: 100
+x - 1
+y =: x - 1
+y
+</code></pre>
+<p>We'll get the following abstract syntax tree on stdout when we run
+the parser:</p>
+<pre><code class="language-shell">$ cargo run
+  [ ... ]
+[Print(DyadicOp { verb: Power, lhs: DoublePrecisionFloat(-2.5),
+    rhs: Integer(3) }),
+Print(MonadicOp { verb: Square, expr: DoublePrecisionFloat(4.8) }),
+Print(IsGlobal { ident: &quot;title&quot;, expr: Str(&quot;Spinning at the Boundary&quot;) }),
+Print(MonadicOp { verb: Square, expr: Terms([Integer(-1), Integer(2),
+    Integer(-3), Integer(4)]) }),
+Print(DyadicOp { verb: Plus, lhs: Terms([Integer(1), Integer(2), Integer(3)]),
+    rhs: Terms([Integer(10), Integer(20), Integer(30)]) }),
+Print(DyadicOp { verb: Plus, lhs: Integer(1), rhs: Terms([Integer(10),
+    Integer(20), Integer(30)]) }),
+Print(DyadicOp { verb: Plus, lhs: Terms([Integer(1), Integer(2), Integer(3)]),
+    rhs: Integer(10) }),
+Print(DyadicOp { verb: Residue, lhs: Integer(2),
+    rhs: Terms([Integer(0), Integer(1), Integer(2), Integer(3), Integer(4),
+    Integer(5), Integer(6), Integer(7)]) }),
+Print(IsGlobal { ident: &quot;another&quot;, expr: Str(&quot;It\'s Escaped&quot;) }),
+Print(DyadicOp { verb: Residue, lhs: Integer(3), rhs: Terms([Integer(0),
+    Integer(1), Integer(2), Integer(3), Integer(4), Integer(5),
+    Integer(6), Integer(7)]) }),
+Print(DyadicOp { verb: Times, lhs: DyadicOp { verb: Plus, lhs: Integer(2),
+    rhs: Integer(1) }, rhs: DyadicOp { verb: Plus, lhs: Integer(2),
+        rhs: Integer(2) } }),
+Print(DyadicOp { verb: Times, lhs: Integer(3), rhs: DyadicOp { verb: Plus,
+    lhs: Integer(2), rhs: Integer(1) } }),
+Print(DyadicOp { verb: Plus, lhs: Integer(1), rhs: DyadicOp { verb: Divide,
+    lhs: Integer(3), rhs: Integer(4) } }),
+Print(IsGlobal { ident: &quot;x&quot;, expr: Integer(100) }),
+Print(DyadicOp { verb: Minus, lhs: Ident(&quot;x&quot;), rhs: Integer(1) }),
+Print(IsGlobal { ident: &quot;y&quot;, expr: DyadicOp { verb: Minus, lhs: Ident(&quot;x&quot;),
+    rhs: Integer(1) } }),
+Print(Ident(&quot;y&quot;))]
+</code></pre>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="../examples/json.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+                            <a rel="next" href="../precedence.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a href="../examples/json.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a href="../precedence.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+        <script type="text/javascript" src="../highlight-pest.js"></script>
+        
+
+        
+
+    </body>
+</html>
