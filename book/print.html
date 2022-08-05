@@ -1,40 +1,37 @@
 <!DOCTYPE HTML>
-<html lang="en" class="sidebar-visible no-js">
+<html lang="en" class="sidebar-visible no-js light">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
         <title>A thoughtful introduction to the pest parser</title>
+        <meta name="robots" content="noindex" />
+        <!-- Custom HTML head -->
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="An introduction to the pest parser by implementing a Rust grammar subset">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff" />
 
+        <link rel="icon" href="favicon.svg">
         <link rel="shortcut icon" href="favicon.png">
         <link rel="stylesheet" href="css/variables.css">
         <link rel="stylesheet" href="css/general.css">
         <link rel="stylesheet" href="css/chrome.css">
         <link rel="stylesheet" href="css/print.css" media="print">
-
         <!-- Fonts -->
         <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
-        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
-        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
-
+        <link rel="stylesheet" href="fonts/fonts.css">
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="highlight.css">
         <link rel="stylesheet" href="tomorrow-night.css">
         <link rel="stylesheet" href="ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
-        
-
-        
     </head>
-    <body class="light">
+    <body>
         <!-- Provide site root to javascript -->
         <script type="text/javascript">
             var path_to_root = "";
-            var default_theme = "light";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
         </script>
 
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
@@ -56,10 +53,13 @@
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script type="text/javascript">
             var theme;
-            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { } 
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
-            document.body.className = theme;
-            document.querySelector('html').className = theme + ' js';
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
         </script>
 
         <!-- Hide / unhide sidebar before it is displayed -->
@@ -75,51 +75,48 @@
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
-            <ol class="chapter"><li><a href="intro.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li><a href="examples/csv.html"><strong aria-hidden="true">1.1.</strong> Example: CSV</a></li></ol></li><li><a href="parser_api.html"><strong aria-hidden="true">2.</strong> Parser API</a></li><li><ol class="section"><li><a href="examples/ini.html"><strong aria-hidden="true">2.1.</strong> Example: INI</a></li></ol></li><li><a href="grammars/grammars.html"><strong aria-hidden="true">3.</strong> Grammars</a></li><li><ol class="section"><li><a href="grammars/peg.html"><strong aria-hidden="true">3.1.</strong> Parsing expression grammars</a></li><li><a href="grammars/syntax.html"><strong aria-hidden="true">3.2.</strong> Syntax of pest parsers</a></li><li><a href="grammars/built-ins.html"><strong aria-hidden="true">3.3.</strong> Built-in rules</a></li><li><a href="examples/json.html"><strong aria-hidden="true">3.4.</strong> Example: JSON</a></li><li><a href="examples/jlang.html"><strong aria-hidden="true">3.5.</strong> Example: The J language</a></li></ol></li><li><a href="precedence.html"><strong aria-hidden="true">4.</strong> Operator precedence (WIP)</a></li><li><ol class="section"><li><a href="examples/calculator.html"><strong aria-hidden="true">4.1.</strong> Example: Calculator (WIP)</a></li></ol></li><li><a href="examples/awk.html"><strong aria-hidden="true">5.</strong> Final project: Awk clone (WIP)</a></li></ol>
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="intro.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/csv.html"><strong aria-hidden="true">1.1.</strong> Example: CSV</a></li></ol></li><li class="chapter-item expanded "><a href="parser_api.html"><strong aria-hidden="true">2.</strong> Parser API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/ini.html"><strong aria-hidden="true">2.1.</strong> Example: INI</a></li></ol></li><li class="chapter-item expanded "><a href="grammars/grammars.html"><strong aria-hidden="true">3.</strong> Grammars</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="grammars/peg.html"><strong aria-hidden="true">3.1.</strong> Parsing expression grammars</a></li><li class="chapter-item expanded "><a href="grammars/syntax.html"><strong aria-hidden="true">3.2.</strong> Syntax of pest parsers</a></li><li class="chapter-item expanded "><a href="grammars/built-ins.html"><strong aria-hidden="true">3.3.</strong> Built-in rules</a></li><li class="chapter-item expanded "><a href="examples/json.html"><strong aria-hidden="true">3.4.</strong> Example: JSON</a></li><li class="chapter-item expanded "><a href="examples/jlang.html"><strong aria-hidden="true">3.5.</strong> Example: The J language</a></li></ol></li><li class="chapter-item expanded "><a href="precedence.html"><strong aria-hidden="true">4.</strong> Operator precedence (WIP)</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/calculator.html"><strong aria-hidden="true">4.1.</strong> Example: Calculator (WIP)</a></li></ol></li><li class="chapter-item expanded "><a href="examples/awk.html"><strong aria-hidden="true">5.</strong> Final project: Awk clone (WIP)</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
         <div id="page-wrapper" class="page-wrapper">
 
             <div class="page">
-                
-                <div id="menu-bar" class="menu-bar">
-                    <div id="menu-bar-sticky-container">
-                        <div class="left-buttons">
-                            <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
-                                <i class="fa fa-bars"></i>
-                            </button>
-                            <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
-                                <i class="fa fa-paint-brush"></i>
-                            </button>
-                            <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
-                                <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
-                                <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
-                                <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
-                                <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
-                                <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
-                            </ul>
-                            
-                            <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
-                                <i class="fa fa-search"></i>
-                            </button>
-                            
-                        </div>
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
 
-                        <h1 class="menu-title">A thoughtful introduction to the pest parser</h1> 
+                    <h1 class="menu-title">A thoughtful introduction to the pest parser</h1>
 
-                        <div class="right-buttons">
-                            <a href="print.html" title="Print this book" aria-label="Print this book">
-                                <i id="print-button" class="fa fa-print"></i>
-                            </a>
-                            
-                        </div>
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
                     </div>
                 </div>
 
-                
                 <div id="search-wrapper" class="hidden">
                     <form id="searchbar-outer" class="searchbar-outer">
-                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
                     </form>
                     <div id="searchresults-outer" class="searchresults-outer hidden">
                         <div id="searchresults-header" class="searchresults-header"></div>
@@ -127,8 +124,6 @@
                         </ul>
                     </div>
                 </div>
-                
-
                 <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
                 <script type="text/javascript">
                     document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
@@ -140,13 +135,13 @@
 
                 <div id="content" class="content">
                     <main>
-                        <a class="header" href="#introduction" id="introduction"><h1>Introduction</h1></a>
+                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
 <p><em>Speed or simplicity? Why not <strong>both</strong>?</em></p>
 <p><code>pest</code> is a library for writing plain-text parsers in Rust.</p>
 <p>Parsers that use <code>pest</code> are <strong>easy to design and maintain</strong> due to the use of
 <a href="grammars/peg.html">Parsing Expression Grammars</a>, or <em>PEGs</em>. And, because of Rust's zero-cost
 abstractions, <code>pest</code> parsers can be <strong>very fast</strong>.</p>
-<a class="header" href="#sample" id="sample"><h2>Sample</h2></a>
+<h2 id="sample"><a class="header" href="#sample">Sample</a></h2>
 <p>Here is the complete grammar for a simple calculator <a href="examples/calculator.html">developed in a (currently
 unwritten) later chapter</a>:</p>
 <pre><code class="language-pest">num = @{ int ~ (&quot;.&quot; ~ ASCII_DIGIT*)? ~ (^&quot;e&quot; ~ int)? }
@@ -167,10 +162,9 @@ calculation = _{ SOI ~ expr ~ EOI }
 WHITESPACE = _{ &quot; &quot; | &quot;\t&quot; }
 </code></pre>
 <p>And here is the function that uses that parser to calculate answers:</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-lazy_static! {
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>lazy_static! {
     static ref PREC_CLIMBER: PrecClimber&lt;Rule&gt; = {
         use Rule::*;
         use Assoc::*;
@@ -201,13 +195,14 @@ fn eval(expression: Pairs&lt;Rule&gt;) -&gt; f64 {
         },
     )
 }
-#}</code></pre></pre>
-<a class="header" href="#about-this-book" id="about-this-book"><h2>About this book</h2></a>
+<span class="boring">}
+</span></code></pre></pre>
+<h2 id="about-this-book"><a class="header" href="#about-this-book">About this book</a></h2>
 <p>This book provides an overview of <code>pest</code> as well as several example parsers.
 For more details of <code>pest</code>'s API, check <a href="https://docs.rs/pest/">the documentation</a>.</p>
 <p>Note that <code>pest</code> uses some advanced features of the Rust language. For an
 introduction to Rust, consult the <a href="https://doc.rust-lang.org/stable/book/second-edition/">official Rust book</a>.</p>
-<a class="header" href="#example-csv" id="example-csv"><h1>Example: CSV</h1></a>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="example-csv"><a class="header" href="#example-csv">Example: CSV</a></h1>
 <p>Comma-Separated Values is a very simple text format. CSV files consist of a
 list of <em>records</em>, each on a separate line. Each record is a list of <em>fields</em>
 separated by commas.</p>
@@ -220,7 +215,7 @@ separated by commas.</p>
 </code></pre>
 <p>Let's write a program that computes the <strong>sum of these fields</strong> and counts the
 <strong>number of records</strong>.</p>
-<a class="header" href="#setup" id="setup"><h2>Setup</h2></a>
+<h2 id="setup"><a class="header" href="#setup">Setup</a></h2>
 <p>Start by initializing a new project using <a href="https://doc.rust-lang.org/cargo/">Cargo</a>:</p>
 <pre><code class="language-shell">$ cargo init --bin csv-tool
      Created binary (application) project
@@ -232,16 +227,16 @@ pest = &quot;2.0&quot;
 pest_derive = &quot;2.0&quot;
 </code></pre>
 <p>And finally bring <code>pest</code> and <code>pest_derive</code> into scope in <code>src/main.rs</code>:</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-extern crate pest;
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>extern crate pest;
 #[macro_use]
 extern crate pest_derive;
-#}</code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>The <code>#[macro_use]</code> attribute is necessary to use <code>pest</code> to generate parsing
 code! This is a very important attribute.</p>
-<a class="header" href="#writing-the-parser" id="writing-the-parser"><h2>Writing the parser</h2></a>
+<h2 id="writing-the-parser"><a class="header" href="#writing-the-parser">Writing the parser</a></h2>
 <p><code>pest</code> works by compiling a description of a file format, called a <em>grammar</em>,
 into Rust code. Let's write a grammar for a CSV file that contains numbers.
 Create a new file named <code>src/csv.pest</code> with a single line:</p>
@@ -251,20 +246,20 @@ Create a new file named <code>src/csv.pest</code> with a single line:</p>
 digit <code>0</code> through <code>9</code>, a full stop <code>.</code>, or a hyphen–minus <code>-</code>. The plus
 sign <code>+</code> indicates that the pattern can occur one or more times.</p>
 <p>Rust needs to know to compile this file using <code>pest</code>:</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-use pest::Parser;
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use pest::Parser;
 
 #[derive(Parser)]
 #[grammar = &quot;csv.pest&quot;]
 pub struct CSVParser;
-#}</code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>If you run <code>cargo doc</code>, you will see that <code>pest</code> has created the function
 <code>CSVParser::parse</code> and an enum called <code>Rule</code> with a single variant
 <code>Rule::field</code>.</p>
 <p>Let's test it out! Rewrite <code>main</code>:</p>
-<pre><pre class="playpen"><code class="language-rust">fn main() {
+<pre><pre class="playground"><code class="language-rust">fn main() {
     let successful_parse = CSVParser::parse(Rule::field, &quot;-273.15&quot;);
     println!(&quot;{:?}&quot;, successful_parse);
 
@@ -286,7 +281,7 @@ file = { SOI ~ (record ~ (&quot;\r\n&quot; | &quot;\n&quot;))* ~ EOI }
 </code></pre>
 <p>The tilde <code>~</code> means &quot;and then&quot;, so that <code>&quot;abc&quot; ~ &quot;def&quot;</code> matches <code>abc</code> followed
 by <code>def</code>. (For this grammar, <code>&quot;abc&quot; ~ &quot;def&quot;</code> is exactly the same as <code>&quot;abcdef&quot;</code>,
-although this is not true in general; see <a href="../grammars/syntax.html">a later chapter about
+although this is not true in general; see <a href="examples/../grammars/syntax.html">a later chapter about
 <code>WHITESPACE</code></a>.)</p>
 <p>In addition to literal strings (<code>&quot;\r\n&quot;</code>) and built-ins (<code>ASCII_DIGIT</code>), rules
 can contain other rules. For instance, a <code>record</code> is a <code>field</code>, and optionally
@@ -298,10 +293,10 @@ special rules that match, respectively, the <em>start of input</em> and the <em>
 input</em>. Without <code>EOI</code>, the <code>file</code> rule would gladly parse an invalid file! It
 would just stop as soon as it found the first invalid character and report a
 successful parse, possibly consisting of nothing at all!</p>
-<a class="header" href="#the-main-program-loop" id="the-main-program-loop"><h2>The main program loop</h2></a>
+<h2 id="the-main-program-loop"><a class="header" href="#the-main-program-loop">The main program loop</a></h2>
 <p>Now we're ready to finish the program. We will use <a href="https://doc.rust-lang.org/std/fs/struct.File.html"><code>File</code></a> to read the CSV
 file into memory. We'll also be messy and use <a href="https://doc.rust-lang.org/std/option/enum.Option.html#method.expect"><code>expect</code></a> everywhere.</p>
-<pre><pre class="playpen"><code class="language-rust">use std::fs;
+<pre><pre class="playground"><code class="language-rust">use std::fs;
 
 fn main() {
     let unparsed_file = fs::read_to_string(&quot;numbers.csv&quot;).expect(&quot;cannot read file&quot;);
@@ -312,7 +307,7 @@ fn main() {
 <p>Next we invoke the parser on the file. Don't worry about the specific types for
 now. Just know that we're producing a <a href="https://docs.rs/pest/2.0/pest/iterators/struct.Pair.html"><code>pest::iterators::Pair</code></a> that represents
 the <code>file</code> rule in our grammar.</p>
-<pre><pre class="playpen"><code class="language-rust">fn main() {
+<pre><pre class="playground"><code class="language-rust">fn main() {
     // ...
 
     let file = CSVParser::parse(Rule::file, &amp;unparsed_file)
@@ -324,7 +319,7 @@ the <code>file</code> rule in our grammar.</p>
 </code></pre></pre>
 <p>Finally, we iterate over the <code>record</code>s and <code>field</code>s, while keeping track of the
 count and sum, then print those numbers out.</p>
-<pre><pre class="playpen"><code class="language-rust">fn main() {
+<pre><pre class="playground"><code class="language-rust">fn main() {
     // ...
 
     let mut field_sum: f64 = 0.0;
@@ -354,7 +349,7 @@ For instance, since the <code>file</code> rule in our grammar has <code>record</
 <code>file.into_inner()</code> returns an iterator over each parsed <code>record</code>. Similarly,
 since a <code>record</code> contains <code>field</code> sub-rules, <code>record.into_inner()</code> returns an
 iterator over each parsed <code>field</code>.</p>
-<a class="header" href="#done" id="done"><h2>Done</h2></a>
+<h2 id="done"><a class="header" href="#done">Done</a></h2>
 <p>Try it out! Copy the sample CSV at the top of this chapter into a file called
 <code>numbers.csv</code>, then run the program! You should see something like this:</p>
 <pre><code class="language-shell">$ cargo run
@@ -362,14 +357,14 @@ iterator over each parsed <code>field</code>.</p>
 Sum of fields: 2643429302.327908
 Number of records: 5
 </code></pre>
-<a class="header" href="#parser-api" id="parser-api"><h1>Parser API</h1></a>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="parser-api"><a class="header" href="#parser-api">Parser API</a></h1>
 <p><code>pest</code> provides several ways of accessing the results of a successful parse.
 The examples below use the following grammar:</p>
 <pre><code class="language-pest">number = { ASCII_DIGIT+ }                // one or more decimal digits
 enclosed = { &quot;(..&quot; ~ number ~ &quot;..)&quot; }    // for instance, &quot;(..6472..)&quot;
 sum = { number ~ &quot; + &quot; ~ number }        // for instance, &quot;1362 + 12&quot;
 </code></pre>
-<a class="header" href="#tokens" id="tokens"><h2>Tokens</h2></a>
+<h2 id="tokens"><a class="header" href="#tokens">Tokens</a></h2>
 <p><code>pest</code> represents successful parses using <em>tokens</em>. Whenever a rule matches,
 two tokens are produced: one at the <em>start</em> of the text that the rule matched,
 and one at the <em>end</em>. For example, the rule <code>number</code> applied to the string
@@ -382,7 +377,7 @@ and one at the <em>end</em>. For example, the rule <code>number</code> applied t
 text as possible, then stops if successful.</p>
 <p>A token is like a cursor in the input string. It has a character position in
 the string, as well as a reference to the rule that created it.</p>
-<a class="header" href="#nested-rules" id="nested-rules"><h3>Nested rules</h3></a>
+<h3 id="nested-rules"><a class="header" href="#nested-rules">Nested rules</a></h3>
 <p>If a named rule contains another named rule, tokens will be produced for <em>both</em>
 rules. For instance, the rule <code>enclosed</code> applied to the string <code>&quot;(..6472..)&quot;</code>
 would match and produce these four tokens:</p>
@@ -405,19 +400,19 @@ positions:</p>
 </code></pre>
 <p>In fact, for a rule that matches empty input, the start and end tokens will be
 at the same position!</p>
-<a class="header" href="#interface" id="interface"><h3>Interface</h3></a>
+<h3 id="interface"><a class="header" href="#interface">Interface</a></h3>
 <p>Tokens are exposed as the <a href="https://docs.rs/pest/2.0/pest/enum.Token.html"><code>Token</code></a> enum, which has <code>Start</code> and <code>End</code> variants.
 You can get an iterator of <code>Token</code>s by calling <code>tokens</code> on a parse result:</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-let parse_result = Parser::parse(Rule::sum, &quot;1773 + 1362&quot;).unwrap();
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let parse_result = Parser::parse(Rule::sum, &quot;1773 + 1362&quot;).unwrap();
 let tokens = parse_result.tokens();
 
 for token in tokens {
     println!(&quot;{:?}&quot;, token);
 }
-#}</code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>After a successful parse, tokens will occur as nested pairs of matching <code>Start</code>
 and <code>End</code>. Both kinds of tokens have two fields:</p>
 <ul>
@@ -429,7 +424,7 @@ token's position is the first character that the rule did not match —
 that is, an end token refers to a position <em>after</em> the match. If a rule matched
 the entire input string, the end token points to an imaginary position <em>after</em>
 the string.</p>
-<a class="header" href="#pairs" id="pairs"><h2>Pairs</h2></a>
+<h2 id="pairs"><a class="header" href="#pairs">Pairs</a></h2>
 <p>Tokens are not the most convenient interface, however. Usually you will want to
 explore the parse tree by considering matching pairs of tokens. For this
 purpose, <code>pest</code> provides the <a href="https://docs.rs/pest/2.0/pest/iterators/struct.Pair.html"><code>Pair</code></a> type.</p>
@@ -441,10 +436,9 @@ ways:</p>
 <li>Using the <code>Pair</code> as a raw <code>&amp;str</code></li>
 <li>Inspecting the inner named sub-rules that produced the <code>Pair</code></li>
 </ul>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-let pair = Parser::parse(Rule::enclosed, &quot;(..6472..) and more text&quot;)
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let pair = Parser::parse(Rule::enclosed, &quot;(..6472..) and more text&quot;)
     .unwrap().next().unwrap();
 
 assert_eq!(pair.as_rule(), Rule::enclosed);
@@ -452,16 +446,16 @@ assert_eq!(pair.as_str(), &quot;(..6472..)&quot;);
 
 let inner_rules = pair.into_inner();
 println!(&quot;{}&quot;, inner_rules); // --&gt; [number(3, 7)]
-#}</code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>In general, a <code>Pair</code> might have any number of inner rules: zero, one, or more.
 For maximum flexibility, <code>Pair::into_inner()</code> returns <code>Pairs</code>, which is an
 iterator over each pair.</p>
 <p>This means that you can use <code>for</code> loops on parse results, as well as iterator
 methods such as <code>map</code>, <code>filter</code>, and <code>collect</code>.</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-let pairs = Parser::parse(Rule::sum, &quot;1773 + 1362&quot;)
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let pairs = Parser::parse(Rule::sum, &quot;1773 + 1362&quot;)
     .unwrap().next().unwrap()
     .into_inner();
 
@@ -475,15 +469,15 @@ for (found, expected) in pairs.zip(vec![&quot;1773&quot;, &quot;1362&quot;]) {
     assert_eq!(Rule::number, found.as_rule());
     assert_eq!(expected, found.as_str());
 }
-#}</code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p><code>Pairs</code> iterators are also commonly used via the <code>next</code> method directly. If a
 rule consists of a known number of sub-rules (for instance, the rule <code>sum</code> has
 exactly two sub-rules), the sub-matches can be extracted with <code>next</code> and
 <code>unwrap</code>:</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-let parse_result = Parser::parse(Rule::sum, &quot;1773 + 1362&quot;)
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let parse_result = Parser::parse(Rule::sum, &quot;1773 + 1362&quot;)
     .unwrap().next().unwrap();
 let mut inner_rules = parse_result.into_inner();
 
@@ -492,7 +486,8 @@ let match2 = inner_rules.next().unwrap();
 
 assert_eq!(match1.as_str(), &quot;1773&quot;);
 assert_eq!(match2.as_str(), &quot;1362&quot;);
-#}</code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>Sometimes rules will not have a known number of sub-rules, such as when a
 sub-rule is repeated with an asterisk <code>*</code>:</p>
 <pre><code class="language-pest">list = { number* }
@@ -500,14 +495,13 @@ sub-rule is repeated with an asterisk <code>*</code>:</p>
 <p>In cases like these it is not possible to call <code>.next().unwrap()</code>, because the
 number of sub-rules depends on the input string — it cannot be known at
 compile time.</p>
-<a class="header" href="#the-parse-method" id="the-parse-method"><h2>The <code>parse</code> method</h2></a>
+<h2 id="the-parse-method"><a class="header" href="#the-parse-method">The <code>parse</code> method</a></h2>
 <p>A <code>pest</code>-derived <a href="https://docs.rs/pest/2.0/pest/trait.Parser.html"><code>Parser</code></a> has a single method <code>parse</code> which returns a
 <code>Result&lt; Pairs, Error &gt;</code>. To access the underlying parse tree, it is necessary
 to <code>match</code> on or <code>unwrap</code> the result:</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-// check whether parse was successful
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// check whether parse was successful
 match Parser::parse(Rule::enclosed, &quot;(..6472..)&quot;) {
     Ok(mut pairs) =&gt; {
         let enclosed = pairs.next().unwrap();
@@ -517,7 +511,8 @@ match Parser::parse(Rule::enclosed, &quot;(..6472..)&quot;) {
         // ...
     }
 }
-#}</code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>Our examples so far have included the calls
 <code>Parser::parse(...).unwrap().next().unwrap()</code>. The first <code>unwrap</code> turns the
 result into a <code>Pairs</code>. If parsing had failed, the program would panic! We only
@@ -527,7 +522,7 @@ successfully.</p>
 <code>Pairs</code>, we use the iterator interface. The <code>next()</code> call returns an
 <code>Option&lt;Pair&gt;</code>, which we finally <code>unwrap</code> to get the <code>Pair</code> for the <code>enclosed</code>
 rule.</p>
-<a class="header" href="#using-pair-and-pairs-with-a-grammar" id="using-pair-and-pairs-with-a-grammar"><h3>Using <code>Pair</code> and <code>Pairs</code> with a grammar</h3></a>
+<h3 id="using-pair-and-pairs-with-a-grammar"><a class="header" href="#using-pair-and-pairs-with-a-grammar">Using <code>Pair</code> and <code>Pairs</code> with a grammar</a></h3>
 <p>While the <code>Result</code> from <code>Parser::parse(...)</code> might very well be an error on
 invalid input, <code>Pair</code> and <code>Pairs</code> often have more subtle behavior. For
 instance, with this grammar:</p>
@@ -535,10 +530,9 @@ instance, with this grammar:</p>
 sum = { number ~ &quot; + &quot; ~ number }
 </code></pre>
 <p>this function will <em>never</em> panic:</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-fn process(pair: Pair&lt;Rule&gt;) -&gt; f64 {
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn process(pair: Pair&lt;Rule&gt;) -&gt; f64 {
     match pair.as_rule() {
         Rule::number =&gt; str::parse(pair.as_str()).unwrap(),
         Rule::sum =&gt; {
@@ -551,7 +545,8 @@ fn process(pair: Pair&lt;Rule&gt;) -&gt; f64 {
         }
     }
 }
-#}</code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p><code>str::parse(...).unwrap()</code> is safe because the <code>number</code> rule only ever matches
 digits, which <code>str::parse(...)</code> can handle. And <code>pairs.next().unwrap()</code> is safe
 to call twice because a <code>sum</code> match <em>always</em> has two sub-matches, which is
@@ -561,7 +556,7 @@ only provides a few high-level types to represent parse trees. Nevertheless,
 you <em>should</em> rely on the meaning of your grammar for properties such as
 &quot;contains <em>n</em> sub-rules&quot;, &quot;is safe to <code>parse</code> to <code>f32</code>&quot;, and &quot;never fails to
 match&quot;. Idiomatic <code>pest</code> code uses <code>unwrap</code> and <code>unreachable!</code>.</p>
-<a class="header" href="#spans-and-positions" id="spans-and-positions"><h2>Spans and positions</h2></a>
+<h2 id="spans-and-positions"><a class="header" href="#spans-and-positions">Spans and positions</a></h2>
 <p>Occasionally, you will want to refer to a matching rule in the context of the
 raw source text, rather than the interior text alone. For example, you might
 want to print the entire line that contained the match. For this you can use
@@ -574,7 +569,7 @@ useful methods for examining the string around that position. For example,
 <code>Position::line_col()</code> finds out the line and column number of a position.</p>
 <p>Essentially, a <code>Position</code> is a <code>Token</code> without a rule. In fact, you can use
 pattern matching to turn a <code>Token</code> into its component <code>Rule</code> and <code>Position</code>.</p>
-<a class="header" href="#example-ini" id="example-ini"><h1>Example: INI</h1></a>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="example-ini"><a class="header" href="#example-ini">Example: INI</a></h1>
 <p>INI (short for <em>initialization</em>) files are simple configuration files. Since
 there is no standard for the format, we'll write a program that is able to
 parse this example file:</p>
@@ -600,7 +595,7 @@ no meaning.</p>
 <p>Whenever a section name appears, the following keys and values belong to that
 section, until the next section name. The key–value pairs at the
 beginning of the file belong to an implicit &quot;empty&quot; section.</p>
-<a class="header" href="#writing-the-grammar" id="writing-the-grammar"><h2>Writing the grammar</h2></a>
+<h2 id="writing-the-grammar"><a class="header" href="#writing-the-grammar">Writing the grammar</a></h2>
 <p>Start by <a href="examples/csv.html#setup">initializing a new project</a> using Cargo, adding the dependencies
 <code>pest = &quot;2.0&quot;</code> and <code>pest_derive = &quot;2.0&quot;</code>. Make a new file, <code>src/ini.pest</code>, to
 hold the grammar.</p>
@@ -632,10 +627,9 @@ the built-in rule <code>NEWLINE</code> to match line endings:</p>
 }
 </code></pre>
 <p>To compile the parser into Rust, we need to add the following to <code>src/main.rs</code>:</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-extern crate pest;
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>extern crate pest;
 #[macro_use]
 extern crate pest_derive;
 
@@ -644,10 +638,11 @@ use pest::Parser;
 #[derive(Parser)]
 #[grammar = &quot;ini.pest&quot;]
 pub struct INIParser;
-#}</code></pre></pre>
-<a class="header" href="#program-initialization" id="program-initialization"><h2>Program initialization</h2></a>
+<span class="boring">}
+</span></code></pre></pre>
+<h2 id="program-initialization"><a class="header" href="#program-initialization">Program initialization</a></h2>
 <p>Now we can read the file and parse it with <code>pest</code>:</p>
-<pre><pre class="playpen"><code class="language-rust">use std::collections::HashMap;
+<pre><pre class="playground"><code class="language-rust">use std::collections::HashMap;
 use std::fs;
 
 fn main() {
@@ -667,7 +662,7 @@ example, to access the <code>document_root</code> of <code>server_1</code>, we c
 <code>properties[&quot;server_1&quot;][&quot;document_root&quot;]</code>. The implicit &quot;empty&quot; section will be
 represented by a regular section with an empty string <code>&quot;&quot;</code> for the name, so
 that <code>properties[&quot;&quot;][&quot;salt&quot;]</code> is valid.</p>
-<pre><pre class="playpen"><code class="language-rust">fn main() {
+<pre><pre class="playground"><code class="language-rust">fn main() {
     // ...
 
     let mut properties: HashMap&lt;&amp;str, HashMap&lt;&amp;str, &amp;str&gt;&gt; = HashMap::new();
@@ -679,16 +674,15 @@ that <code>properties[&quot;&quot;][&quot;salt&quot;]</code> is valid.</p>
 parsers do not copy the input they parse; they borrow it. All methods for
 inspecting a parse result return strings which are borrowed from the original
 parsed string.</p>
-<a class="header" href="#the-main-loop" id="the-main-loop"><h2>The main loop</h2></a>
+<h2 id="the-main-loop"><a class="header" href="#the-main-loop">The main loop</a></h2>
 <p>Now we interpret the parse result. We loop through each line of the file, which
 is either a section name or a key–value property pair. If we encounter a
 section name, we update a variable. If we encounter a property pair, we obtain
 a reference to the hash map for the current section, then insert the pair into
 that hash map.</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-    // ...
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>    // ...
 
     let mut current_section_name = &quot;&quot;;
 
@@ -715,16 +709,17 @@ that hash map.</p>
     }
 
     // ...
-#}</code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>For output, let's simply dump the hash map using <a href="https://doc.rust-lang.org/std/fmt/index.html#sign0">the pretty-printed <code>Debug</code>
 format</a>.</p>
-<pre><pre class="playpen"><code class="language-rust">fn main() {
+<pre><pre class="playground"><code class="language-rust">fn main() {
     // ...
 
     println!(&quot;{:#?}&quot;, properties);
 }
 </code></pre></pre>
-<a class="header" href="#whitespace" id="whitespace"><h2>Whitespace</h2></a>
+<h2 id="whitespace"><a class="header" href="#whitespace">Whitespace</a></h2>
 <p>If you copy the example INI file at the top of this chapter into a file
 <code>config.ini</code> and run the program, it will not parse. We have forgotten about
 the optional spaces around equals signs!</p>
@@ -748,7 +743,7 @@ handling is disabled, and interior rules are silent.</p>
 <pre><code class="language-pest">name = @{ char+ }
 value = @{ char* }
 </code></pre>
-<a class="header" href="#done-1" id="done-1"><h2>Done</h2></a>
+<h2 id="done-1"><a class="header" href="#done-1">Done</a></h2>
 <p>Try it out! Make sure that the file <code>config.ini</code> exists, then run the program!
 You should see something like this:</p>
 <pre><code class="language-shell">$ cargo run
@@ -771,51 +766,51 @@ You should see something like this:</p>
     }
 }
 </code></pre>
-<a class="header" href="#grammars" id="grammars"><h1>Grammars</h1></a>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="grammars"><a class="header" href="#grammars">Grammars</a></h1>
 <p>Like many parsing tools, <code>pest</code> operates using a <em>formal grammar</em> that is
 distinct from your Rust code. The format that <code>pest</code> uses is called a <em>parsing
 expression grammar</em>, or <em>PEG</em>. When building a project, <code>pest</code> automatically
 compiles the PEG, located in a separate file, into a plain Rust function that
 you can call.</p>
-<a class="header" href="#how-to-activate-pest" id="how-to-activate-pest"><h2>How to activate <code>pest</code></h2></a>
+<h2 id="how-to-activate-pest"><a class="header" href="#how-to-activate-pest">How to activate <code>pest</code></a></h2>
 <p>Most projects will have at least two files that use <code>pest</code>: the parser (say,
 <code>src/parser/mod.rs</code>) and the grammar (<code>src/parser/grammar.pest</code>). Assuming that
 they are in the same directory:</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-use pest::Parser;
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use pest::Parser;
 
 #[derive(Parser)]
 #[grammar = &quot;parser/grammar.pest&quot;] // relative to project `src`
 struct MyParser;
-#}</code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>Whenever you compile this file, <code>pest</code> will automatically use the grammar file
 to generate items like this:</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-pub enum Rules { /* ... */ }
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub enum Rules { /* ... */ }
 
 impl Parser for MyParser {
     pub fn parse(Rules, &amp;str) -&gt; pest::Pairs { /* ... */ }
 }
-#}</code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>You will never see <code>enum Rules</code> or <code>impl Parser</code> as plain text! The code only
 exists during compilation. However, you can use <code>Rules</code> just like any other
 enum, and you can use <code>parse(...)</code> through the <a href="https://docs.rs/pest/2.0/pest/iterators/struct.Pairs.html"><code>Pairs</code></a> interface described in
-the <a href="../parser_api.html">Parser API chapter</a>.</p>
-<a class="header" href="#warning-about-pegs" id="warning-about-pegs"><h2>Warning about PEGs!</h2></a>
+the <a href="grammars/../parser_api.html">Parser API chapter</a>.</p>
+<h2 id="warning-about-pegs"><a class="header" href="#warning-about-pegs">Warning about PEGs!</a></h2>
 <p>Parsing expression grammars look quite similar to other parsing tools you might
 be used to, like regular expressions, BNF grammars, and others (Yacc/Bison,
-LALR, CFG). However, PEGs behave subtly differently: PEGs are <a href="peg.html#eagerness">eager</a>,
-<a href="peg.html#non-backtracking">non-backtracking</a>, <a href="peg.html#ordered-choice">ordered</a>, and <a href="peg.html#unambiguous">unambiguous</a>.</p>
+LALR, CFG). However, PEGs behave subtly differently: PEGs are <a href="grammars/peg.html#eagerness">eager</a>,
+<a href="grammars/peg.html#non-backtracking">non-backtracking</a>, <a href="grammars/peg.html#ordered-choice">ordered</a>, and <a href="grammars/peg.html#unambiguous">unambiguous</a>.</p>
 <p>Don't be scared if you don't recognize any of the above names! You're already a
 step ahead of people who do — when you use <code>pest</code>'s PEGs, you won't be
 tripped up by comparisons to other tools.</p>
 <p>If you have used other parsing tools before, be sure to read the next section
 carefully. We'll mention some common mistakes regarding PEGs.</p>
-<a class="header" href="#parsing-expression-grammar" id="parsing-expression-grammar"><h1>Parsing expression grammar</h1></a>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="parsing-expression-grammar"><a class="header" href="#parsing-expression-grammar">Parsing expression grammar</a></h1>
 <p>Parsing expression grammars (PEGs) are simply a strict representation of the
 simple imperative code that you would write if you were writing a parser by
 hand.</p>
@@ -829,8 +824,8 @@ expression = {        // To recognize an expression...
 </code></pre>
 <p>In fact, <code>pest</code> produces code that is quite similar to the pseudo-code in the
 comments above.</p>
-<a class="header" href="#eagerness" id="eagerness"><h2>Eagerness</h2></a>
-<p>When a <a href="syntax.html#repetition">repetition</a> PEG expression is run on an input string,</p>
+<h2 id="eagerness"><a class="header" href="#eagerness">Eagerness</a></h2>
+<p>When a <a href="grammars/syntax.html#repetition">repetition</a> PEG expression is run on an input string,</p>
 <pre><code class="language-pest">ASCII_DIGIT+      // one or more characters from '0' to '9'
 </code></pre>
 <p>it runs that expression as many times as it can (matching &quot;eagerly&quot;, or
@@ -856,8 +851,8 @@ remaining input on to the next step in the parser,</p>
 <p>If an expression fails to match, the failure propagates upwards, eventually
 leading to a failed parse, unless the failure is &quot;caught&quot; somewhere in the
 grammar. The <em>choice operator</em> is one way to &quot;catch&quot; such failures.</p>
-<a class="header" href="#ordered-choice" id="ordered-choice"><h2>Ordered choice</h2></a>
-<p>The <a href="syntax.html#ordered-choice">choice operator</a>, written as a vertical line <code>|</code>, is <em>ordered</em>. The PEG
+<h2 id="ordered-choice"><a class="header" href="#ordered-choice">Ordered choice</a></h2>
+<p>The <a href="grammars/syntax.html#ordered-choice">choice operator</a>, written as a vertical line <code>|</code>, is <em>ordered</em>. The PEG
 expression <code>first | second</code> means &quot;try <code>first</code>; but if it fails, try <code>second</code>
 instead&quot;.</p>
 <p>In many cases, the ordering does not matter. For instance, <code>&quot;true&quot; | &quot;false&quot;</code>
@@ -870,7 +865,7 @@ fails, try <code>&quot;ab&quot;</code> instead&quot;. If you are matching on the
 <code>&quot;bc&quot;</code> unparsed!</p>
 <p>In general, when writing a parser with choices, put the longest or most
 specific choice first, and the shortest or most general choice last.</p>
-<a class="header" href="#non-backtracking" id="non-backtracking"><h2>Non-backtracking</h2></a>
+<h2 id="non-backtracking"><a class="header" href="#non-backtracking">Non-backtracking</a></h2>
 <p>During parsing, a PEG expression either succeeds or fails. If it succeeds, the
 next step is performed as usual. But if it fails, the whole expression fails.
 The engine will not back up and try again.</p>
@@ -898,7 +893,7 @@ step, &quot;un-eating&quot; a character, and then try again. But PEGs do not do 
 the rule <code>first ~ second</code>, once <code>first</code> parses successfully, it has consumed
 some characters that will never come back. <code>second</code> can only run on the input
 that <code>first</code> did not consume.</p>
-<a class="header" href="#unambiguous" id="unambiguous"><h2>Unambiguous</h2></a>
+<h2 id="unambiguous"><a class="header" href="#unambiguous">Unambiguous</a></h2>
 <p>These rules form an elegant and simple system. Every PEG rule is run on the
 remainder of the input string, consuming as much input as necessary. Once a
 rule is done, the rest of the input is passed on to the rest of the parser.</p>
@@ -909,7 +904,7 @@ unintuitive and nonlocal way.</p>
 <p>This contrasts with other parsing tools, such as regular expressions and CFGs,
 where the results of a rule often depend on code some distance away. Indeed,
 the famous &quot;shift/reduce conflict&quot; in LR parsers is not a problem in PEGs.</p>
-<a class="header" href="#dont-panic" id="dont-panic"><h1>Don't panic</h1></a>
+<h1 id="dont-panic"><a class="header" href="#dont-panic">Don't panic</a></h1>
 <p>This all might be a bit counterintuitive at first. But as you can see, the
 basic logic is very easy and straightforward. You can trivially step through
 the execution of any PEG expression.</p>
@@ -921,7 +916,7 @@ the execution of any PEG expression.</p>
 <pre><code>(this ~ next_thing) | (other_thing)
 </code></pre>
 <p>These rules together make PEGs very pleasant tools for writing a parser.</p>
-<a class="header" href="#syntax-of-pest-parsers" id="syntax-of-pest-parsers"><h1>Syntax of pest parsers</h1></a>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="syntax-of-pest-grammars"><a class="header" href="#syntax-of-pest-grammars">Syntax of pest grammars</a></h1>
 <p><code>pest</code> grammars are lists of rules. Rules are defined like this:</p>
 <pre><code class="language-pest">my_rule = { ... }
 
@@ -931,12 +926,12 @@ another_rule = {        // comments are preceded by two slashes
 </code></pre>
 <p>Since rule names are translated into Rust enum variants, they are not allowed
 to be Rust keywords.</p>
-<p>The left curly bracket <code>{</code> defining a rule can be preceded by <a href="#silent-and-atomic-rules">symbols that
+<p>The left curly bracket <code>{</code> defining a rule can be preceded by <a href="grammars/syntax.html#silent-and-atomic-rules">symbols that
 affect its operation</a>:</p>
 <pre><code class="language-pest">silent_rule = _{ ... }
 atomic_rule = @{ ... }
 </code></pre>
-<a class="header" href="#expressions" id="expressions"><h2>Expressions</h2></a>
+<h2 id="expressions"><a class="header" href="#expressions">Expressions</a></h2>
 <p>Grammar rules are built from <em>expressions</em> (hence &quot;parsing expression
 grammar&quot;). These expressions are a terse, formal description of how to parse an
 input string.</p>
@@ -947,8 +942,8 @@ easier to manage).</p>
 <p>PEG expressions are suitable for both high-level meaning, like &quot;a function
 signature, followed by a function body&quot;, and low-level meaning, like &quot;a
 semicolon, followed by a line feed&quot;. The combining form &quot;followed by&quot;,
-the <a href="#sequence">sequence operator</a>, is the same in either case.</p>
-<a class="header" href="#terminals" id="terminals"><h3>Terminals</h3></a>
+the <a href="grammars/syntax.html#sequence">sequence operator</a>, is the same in either case.</p>
+<h3 id="terminals"><a class="header" href="#terminals">Terminals</a></h3>
 <p>The most basic rule is a <strong>literal string</strong> in double quotes: <code>&quot;text&quot;</code>.</p>
 <p>A string can be <strong>case-insensitive</strong> (for ASCII characters only) if preceded by
 a caret: <code>^&quot;text&quot;</code>.</p>
@@ -967,7 +962,7 @@ even <strong>use rules recursively</strong>:</p>
 other_rule = { &quot;toves&quot; }
 recursive_rule = { &quot;mimsy &quot; ~ recursive_rule }
 </code></pre>
-<a class="header" href="#sequence" id="sequence"><h3>Sequence</h3></a>
+<h3 id="sequence"><a class="header" href="#sequence">Sequence</a></h3>
 <p>The sequence operator is written as a tilde <code>~</code>.</p>
 <pre><code>first ~ and_then
 
@@ -978,7 +973,7 @@ successfully, <code>and_then</code> is attempted next. However, if <code>first</
 entire expression fails.</p>
 <p>A list of expressions can be chained together with sequences, which indicates
 that <em>all</em> of the components must occur, in the specified order.</p>
-<a class="header" href="#ordered-choice-1" id="ordered-choice-1"><h3>Ordered choice</h3></a>
+<h3 id="ordered-choice-1"><a class="header" href="#ordered-choice-1">Ordered choice</a></h3>
 <p>The choice operator is written as a vertical line <code>|</code>.</p>
 <pre><code>first | or_else
 
@@ -1003,8 +998,8 @@ creature = {
 </code></pre>
 <p>It is somewhat tempting to borrow terminology and think of this operation as
 &quot;alternation&quot; or simply &quot;OR&quot;, but this is misleading. The word &quot;choice&quot; is used
-specifically because <a href="peg.html#ordered-choice">the operation is <em>not</em> merely logical &quot;OR&quot;</a>.</p>
-<a class="header" href="#repetition" id="repetition"><h3>Repetition</h3></a>
+specifically because <a href="grammars/peg.html#ordered-choice">the operation is <em>not</em> merely logical &quot;OR&quot;</a>.</p>
+<h3 id="repetition"><a class="header" href="#repetition">Repetition</a></h3>
 <p>There are two repetition operators: the asterisk <code>*</code> and plus sign <code>+</code>. They
 are placed after an expression. The asterisk <code>*</code> indicates that the preceding
 expression can occur <strong>zero or more</strong> times. The plus sign <code>+</code> indicates that
@@ -1027,7 +1022,7 @@ expr{, n}         // at most n repetitions
 expr{m, }         // at least m repetitions
 </code></pre>
 <p>Thus <code>expr*</code> is equivalent to <code>expr{0, }</code>; <code>expr+</code> is equivalent to <code>expr{1, }</code>; and <code>expr?</code> is equivalent to <code>expr{0, 1}</code>.</p>
-<a class="header" href="#predicates" id="predicates"><h3>Predicates</h3></a>
+<h3 id="predicates"><a class="header" href="#predicates">Predicates</a></h3>
 <p>Preceding an expression with an ampersand <code>&amp;</code> or exclamation mark <code>!</code> turns it
 into a <em>predicate</em> that never consumes any input. You might know these
 operators as &quot;lookahead&quot; or &quot;non-progressing&quot;.</p>
@@ -1060,7 +1055,7 @@ triple_quoted_character = {
     ~ ANY         // then consume one character
 }
 </code></pre>
-<a class="header" href="#operator-precedence-and-grouping-wip" id="operator-precedence-and-grouping-wip"><h2>Operator precedence and grouping (WIP)</h2></a>
+<h2 id="operator-precedence-and-grouping-wip"><a class="header" href="#operator-precedence-and-grouping-wip">Operator precedence and grouping (WIP)</a></h2>
 <p>The repetition operators asterisk <code>*</code>, plus sign <code>+</code>, and question mark <code>?</code>
 apply to the immediately preceding expression.</p>
 <pre><code>&quot;One &quot; ~ &quot;or &quot; ~ &quot;more. &quot;+
@@ -1087,7 +1082,7 @@ my_rule = {
     | ( (&amp;(&quot;b&quot;+)) ~ &quot;a&quot; )
 }
 </code></pre>
-<a class="header" href="#start-and-end-of-input" id="start-and-end-of-input"><h2>Start and end of input</h2></a>
+<h2 id="start-and-end-of-input"><a class="header" href="#start-and-end-of-input">Start and end of input</a></h2>
 <p>The rules <code>SOI</code> and <code>EOI</code> match the <em>start</em> and <em>end</em> of the input string,
 respectively. Neither consumes any text. They only indicate whether the parser
 is currently at one edge of the input.</p>
@@ -1100,12 +1095,12 @@ parse):</p>
     ~ EOI
 }
 </code></pre>
-<a class="header" href="#implicit-whitespace" id="implicit-whitespace"><h2>Implicit whitespace</h2></a>
+<h2 id="implicit-whitespace"><a class="header" href="#implicit-whitespace">Implicit whitespace</a></h2>
 <p>Many languages and text formats allow arbitrary whitespace and comments between
 logical tokens. For instance, Rust considers <code>4+5</code> equivalent to <code>4 + 5</code> and <code>4 /* comment */ + 5</code>.</p>
 <p>The <strong>optional rules <code>WHITESPACE</code> and <code>COMMENT</code></strong> implement this behaviour. If
 either (or both) are defined, they will be implicitly inserted at every
-<a href="#sequence">sequence</a> and between every <a href="#repetition">repetition</a> (except in <a href="#atomic">atomic rules</a>).</p>
+<a href="grammars/syntax.html#sequence">sequence</a> and between every <a href="grammars/syntax.html#repetition">repetition</a> (except in <a href="grammars/syntax.html#atomic">atomic rules</a>).</p>
 <pre><code class="language-pest">expression = { &quot;4&quot; ~ &quot;+&quot; ~ &quot;5&quot; }
 WHITESPACE = _{ &quot; &quot; }
 COMMENT = _{ &quot;/*&quot; ~ (!&quot;*/&quot; ~ ANY)* ~ &quot;*/&quot; }
@@ -1129,7 +1124,7 @@ com = _{ &quot;/*&quot; ~ (!&quot;*/&quot; ~ ANY)* ~ &quot;*/&quot; }
 <p>Note that implicit whitespace is <em>not</em> inserted at the beginning or end of rules
 — for instance, <code>expression</code> does <em>not</em> match <code>&quot; 4+5 &quot;</code>. If you want to
 include implicit whitespace at the beginning and end of a rule, you will need to
-sandwich it between two empty rules (often <code>SOI</code> and <code>EOI</code> <a href="#start-and-end-of-input">as above</a>):</p>
+sandwich it between two empty rules (often <code>SOI</code> and <code>EOI</code> <a href="grammars/syntax.html#start-and-end-of-input">as above</a>):</p>
 <pre><code class="language-pest">WHITESPACE = _{ &quot; &quot; }
 expression = { &quot;4&quot; ~ &quot;+&quot; ~ &quot;5&quot; }
 main = { SOI ~ expression ~ EOI }
@@ -1137,33 +1132,36 @@ main = { SOI ~ expression ~ EOI }
 <pre><code>&quot;4+5&quot;
 &quot;  4 + 5   &quot;
 </code></pre>
-<p>(Be sure to mark the <code>WHITESPACE</code> and <code>COMMENT</code> rules as <a href="#silent-and-atomic-rules">silent</a> unless you
+<p>(Be sure to mark the <code>WHITESPACE</code> and <code>COMMENT</code> rules as <a href="grammars/syntax.html#silent-and-atomic-rules">silent</a> unless you
 want to see them included inside other rules!)</p>
-<a class="header" href="#silent-and-atomic-rules" id="silent-and-atomic-rules"><h2>Silent and atomic rules</h2></a>
+<h2 id="silent-and-atomic-rules"><a class="header" href="#silent-and-atomic-rules">Silent and atomic rules</a></h2>
 <p><strong>Silent</strong> rules are just like normal rules — when run, they function the
-same way — except they do not produce <a href="../parser_api.html#pairs">pairs</a> or <a href="../parser_api.html#tokens">tokens</a>. If a rule is
+same way — except they do not produce <a href="grammars/../parser_api.html#pairs">pairs</a> or <a href="grammars/../parser_api.html#tokens">tokens</a>. If a rule is
 silent, it will never appear in a parse result.</p>
 <p>To make a silent rule, precede the left curly bracket <code>{</code> with a low line
 (underscore) <code>_</code>.</p>
 <pre><code class="language-pest">silent = _{ ... }
 </code></pre>
-<a class="header" href="#atomic" id="atomic"><h3>Atomic</h3></a>
+<p>Rules called from a silent rule are not treated as silent unless they are
+declared to be silent. These rules may produce <a href="grammars/../parser_api.html#pairs">pairs</a> or <a href="grammars/../parser_api.html#tokens">tokens</a> and can appear
+in a parse result.</p>
+<h3 id="atomic"><a class="header" href="#atomic">Atomic</a></h3>
 <p><code>pest</code> has two kinds of atomic rules: <strong>atomic</strong> and <strong>compound atomic</strong>. To
 make one, write the sigil before the left curly bracket <code>{</code>.</p>
 <pre><code class="language-pest">atomic = @{ ... }
 compound_atomic = ${ ... }
 </code></pre>
-<p>Both kinds of atomic rule prevent <a href="#implicit-whitespace">implicit whitespace</a>: inside an atomic rule,
-the tilde <code>~</code> means &quot;immediately followed by&quot;, and <a href="#repetition">repetition operators</a>
+<p>Both kinds of atomic rule prevent <a href="grammars/syntax.html#implicit-whitespace">implicit whitespace</a>: inside an atomic rule,
+the tilde <code>~</code> means &quot;immediately followed by&quot;, and <a href="grammars/syntax.html#repetition">repetition operators</a>
 (asterisk <code>*</code> and plus sign <code>+</code>) have no implicit separation. In addition, all
 other rules called from an atomic rule are also treated as atomic.</p>
 <p>The difference between the two is how they produce tokens for inner rules. In
-an atomic rule, interior matching rules are <a href="#silent-and-atomic-rules">silent</a>. By contrast, compound
+an atomic rule, interior matching rules are <a href="grammars/syntax.html#silent-and-atomic-rules">silent</a>. By contrast, compound
 atomic rules produce inner tokens as normal.</p>
 <p>Atomic rules are useful when the text you are parsing ignores whitespace except
 in a few cases, such as literal strings. In this instance, you can write
 <code>WHITESPACE</code> or <code>COMMENT</code> rules, then make your string-matching rule be atomic.</p>
-<a class="header" href="#non-atomic" id="non-atomic"><h3>Non-atomic</h3></a>
+<h3 id="non-atomic"><a class="header" href="#non-atomic">Non-atomic</a></h3>
 <p>Sometimes, you'll want to cancel the effects of atomic parsing. For instance,
 you might want to have string interpolation with an expression inside, where
 the inside expression can still have whitespace like normal.</p>
@@ -1176,7 +1174,7 @@ it is called from an atomic rule or not.</p>
 <pre><code class="language-pest">fstring = @{ &quot;\&quot;&quot; ~ ... }
 expr = !{ ... }
 </code></pre>
-<a class="header" href="#the-stack-wip" id="the-stack-wip"><h2>The stack (WIP)</h2></a>
+<h2 id="the-stack-wip"><a class="header" href="#the-stack-wip">The stack (WIP)</a></h2>
 <p><code>pest</code> maintains a stack that can be manipulated directly from the grammar. An
 expression can be matched and pushed onto the stack with the keyword <code>PUSH</code>,
 then later matched exactly with the keywords <code>PEEK</code> and <code>POP</code>.</p>
@@ -1195,16 +1193,16 @@ same_pattern = {
 <p>In this case, <code>same_pattern</code> will match <code>&quot;ab&quot;</code>, while <code>same_text</code> will not.</p>
 <p>One practical use is in parsing Rust <a href="https://doc.rust-lang.org/book/second-edition/appendix-02-operators.html#non-operator-symbols">&quot;raw string literals&quot;</a>, which look like
 this:</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-const raw_str: &amp;str = r###&quot;
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>const raw_str: &amp;str = r###&quot;
     Some number of number signs # followed by a quotation mark &quot;.
 
     Quotation marks can be used anywhere inside: &quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;&quot;,
     as long as one is not followed by a matching number of number signs,
     which ends the string: &quot;###;
-#}</code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>When parsing a raw string, we have to keep track of how many number signs <code>#</code>
 occurred before the quotation mark. We can do this using the stack:</p>
 <pre><code class="language-pest">raw_string = {
@@ -1220,47 +1218,50 @@ raw_string_interior = {
     )*
 }
 </code></pre>
-<a class="header" href="#cheat-sheet" id="cheat-sheet"><h1>Cheat sheet</h1></a>
-<table><thead><tr><th align="center"> Syntax           </th><th align="center"> Meaning                           </th><th align="center"> Syntax                  </th><th align="center"> Meaning              </th></tr></thead><tbody>
-<tr><td align="center"> <code>foo = { ... }</code> </td><td align="center"> <a href="#syntax-of-pest-parsers">regular rule</a>                    </td><td align="center"> <code>baz = @{ ... }</code>        </td><td align="center"> <a href="#atomic">atomic</a>             </td></tr>
-<tr><td align="center"> <code>bar = _{ ... }</code> </td><td align="center"> <a href="#silent-and-atomic-rules">silent</a>                          </td><td align="center"> <code>qux = ${ ... }</code>        </td><td align="center"> <a href="#atomic">compound-atomic</a>    </td></tr>
-<tr><td align="center">                  </td><td align="center">                                   </td><td align="center"> <code>plugh = !{ ... }</code>      </td><td align="center"> <a href="#non-atomic">non-atomic</a>         </td></tr>
-<tr><td align="center"> <code>&quot;abc&quot;</code>          </td><td align="center"> <a href="#terminals">exact string</a>                    </td><td align="center"> <code>^&quot;abc&quot;</code>                </td><td align="center"> <a href="#terminals">case insensitive</a>   </td></tr>
-<tr><td align="center"> <code>'a'..'z'</code>       </td><td align="center"> <a href="#terminals">character range</a>                 </td><td align="center"> <code>ANY</code>                   </td><td align="center"> <a href="#terminals">any character</a>      </td></tr>
-<tr><td align="center"> <code>foo ~ bar</code>      </td><td align="center"> <a href="#sequence">sequence</a>                        </td><td align="center"> <code>baz | qux</code> </td><td align="center"> <a href="#ordered-choice">ordered choice</a>     </td></tr>
-<tr><td align="center"> <code>foo*</code>           </td><td align="center"> <a href="#repetition">zero or more</a>                    </td><td align="center"> <code>bar+</code>                  </td><td align="center"> <a href="#repetition">one or more</a>        </td></tr>
-<tr><td align="center"> <code>baz?</code>           </td><td align="center"> <a href="#repetition">optional</a>                        </td><td align="center"> <code>qux{n}</code>                </td><td align="center"> <a href="#repetition">exactly <em>n</em></a>        </td></tr>
-<tr><td align="center"> <code>qux{m, n}</code>      </td><td align="center"> <a href="#repetition">between <em>m</em> and <em>n</em> (inclusive)</a> </td><td align="center">                         </td><td align="center">                      </td></tr>
-<tr><td align="center"> <code>&amp;foo</code>           </td><td align="center"> <a href="#predicates">positive predicate</a>              </td><td align="center"> <code>!bar</code>                  </td><td align="center"> <a href="#predicates">negative predicate</a> </td></tr>
-<tr><td align="center"> <code>PUSH(baz)</code>      </td><td align="center"> <a href="#the-stack-wip">match and push</a>                  </td><td align="center">                         </td><td align="center">                      </td></tr>
-<tr><td align="center"> <code>POP</code>            </td><td align="center"> <a href="#the-stack-wip">match and pop</a>                   </td><td align="center"> <code>PEEK</code>                  </td><td align="center"> <a href="#the-stack-wip">match without pop</a>  </td></tr>
+<h1 id="cheat-sheet"><a class="header" href="#cheat-sheet">Cheat sheet</a></h1>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center">Syntax</th><th style="text-align: center">Meaning</th><th style="text-align: center">Syntax</th><th style="text-align: center">Meaning</th></tr></thead><tbody>
+<tr><td style="text-align: center"><code>foo =  { ... }</code></td><td style="text-align: center"><a href="grammars/syntax.html#syntax-of-pest-parsers">regular rule</a></td><td style="text-align: center"><code>baz = @{ ... }</code></td><td style="text-align: center"><a href="grammars/syntax.html#atomic">atomic</a></td></tr>
+<tr><td style="text-align: center"><code>bar = _{ ... }</code></td><td style="text-align: center"><a href="grammars/syntax.html#silent-and-atomic-rules">silent</a></td><td style="text-align: center"><code>qux = ${ ... }</code></td><td style="text-align: center"><a href="grammars/syntax.html#atomic">compound-atomic</a></td></tr>
+<tr><td style="text-align: center"></td><td style="text-align: center"></td><td style="text-align: center"><code>plugh = !{ ... }</code></td><td style="text-align: center"><a href="grammars/syntax.html#non-atomic">non-atomic</a></td></tr>
+<tr><td style="text-align: center"><code>&quot;abc&quot;</code></td><td style="text-align: center"><a href="grammars/syntax.html#terminals">exact string</a></td><td style="text-align: center"><code>^&quot;abc&quot;</code></td><td style="text-align: center"><a href="grammars/syntax.html#terminals">case insensitive</a></td></tr>
+<tr><td style="text-align: center"><code>'a'..'z'</code></td><td style="text-align: center"><a href="grammars/syntax.html#terminals">character range</a></td><td style="text-align: center"><code>ANY</code></td><td style="text-align: center"><a href="grammars/syntax.html#terminals">any character</a></td></tr>
+<tr><td style="text-align: center"><code>foo ~ bar</code></td><td style="text-align: center"><a href="grammars/syntax.html#sequence">sequence</a></td><td style="text-align: center"><code>baz | qux</code></td><td style="text-align: center"><a href="grammars/syntax.html#ordered-choice">ordered choice</a></td></tr>
+<tr><td style="text-align: center"><code>foo*</code></td><td style="text-align: center"><a href="grammars/syntax.html#repetition">zero or more</a></td><td style="text-align: center"><code>bar+</code></td><td style="text-align: center"><a href="grammars/syntax.html#repetition">one or more</a></td></tr>
+<tr><td style="text-align: center"><code>baz?</code></td><td style="text-align: center"><a href="grammars/syntax.html#repetition">optional</a></td><td style="text-align: center"><code>qux{n}</code></td><td style="text-align: center"><a href="grammars/syntax.html#repetition">exactly <em>n</em></a></td></tr>
+<tr><td style="text-align: center"><code>qux{m, n}</code></td><td style="text-align: center"><a href="grammars/syntax.html#repetition">between <em>m</em> and <em>n</em> (inclusive)</a></td><td style="text-align: center"></td><td style="text-align: center"></td></tr>
+<tr><td style="text-align: center"><code>&amp;foo</code></td><td style="text-align: center"><a href="grammars/syntax.html#predicates">positive predicate</a></td><td style="text-align: center"><code>!bar</code></td><td style="text-align: center"><a href="grammars/syntax.html#predicates">negative predicate</a></td></tr>
+<tr><td style="text-align: center"><code>PUSH(baz)</code></td><td style="text-align: center"><a href="grammars/syntax.html#the-stack-wip">match and push</a></td><td style="text-align: center"></td><td style="text-align: center"></td></tr>
+<tr><td style="text-align: center"><code>POP</code></td><td style="text-align: center"><a href="grammars/syntax.html#the-stack-wip">match and pop</a></td><td style="text-align: center"><code>PEEK</code></td><td style="text-align: center"><a href="grammars/syntax.html#the-stack-wip">match without pop</a></td></tr>
 </tbody></table>
-<a class="header" href="#built-in-rules" id="built-in-rules"><h1>Built-in rules</h1></a>
+</div><div style="break-before: page; page-break-before: always;"></div><h1 id="built-in-rules"><a class="header" href="#built-in-rules">Built-in rules</a></h1>
 <p>Besides <code>ANY</code>, matching any single Unicode character, <code>pest</code> provides several
 rules to make parsing text more convenient.</p>
-<a class="header" href="#ascii-rules" id="ascii-rules"><h2>ASCII rules</h2></a>
+<h2 id="ascii-rules"><a class="header" href="#ascii-rules">ASCII rules</a></h2>
 <p>Among the printable ASCII characters, it is often useful to match alphabetic
 characters and numbers. For <strong>numbers</strong>, <code>pest</code> provides digits in common
 radixes (bases):</p>
-<table><thead><tr><th align="center"> Built-in rule         </th><th align="center"> Equivalent                                    </th></tr></thead><tbody>
-<tr><td align="center"> <code>ASCII_DIGIT</code>         </td><td align="center"> <code>'0'..'9'</code>                                    </td></tr>
-<tr><td align="center"> <code>ASCII_NONZERO_DIGIT</code> </td><td align="center"> <code>'1'..'9'</code>                                    </td></tr>
-<tr><td align="center"> <code>ASCII_BIN_DIGIT</code>     </td><td align="center"> <code>'0'..'1'</code>                                    </td></tr>
-<tr><td align="center"> <code>ASCII_OCT_DIGIT</code>     </td><td align="center"> <code>'0'..'7'</code>                                    </td></tr>
-<tr><td align="center"> <code>ASCII_HEX_DIGIT</code>     </td><td align="center"> <code>'0'..'9' | 'a'..'f' | 'A'..'F'</code> </td></tr>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center">Built-in rule</th><th style="text-align: center">Equivalent</th></tr></thead><tbody>
+<tr><td style="text-align: center"><code>ASCII_DIGIT</code></td><td style="text-align: center"><code>'0'..'9'</code></td></tr>
+<tr><td style="text-align: center"><code>ASCII_NONZERO_DIGIT</code></td><td style="text-align: center"><code>'1'..'9'</code></td></tr>
+<tr><td style="text-align: center"><code>ASCII_BIN_DIGIT</code></td><td style="text-align: center"><code>'0'..'1'</code></td></tr>
+<tr><td style="text-align: center"><code>ASCII_OCT_DIGIT</code></td><td style="text-align: center"><code>'0'..'7'</code></td></tr>
+<tr><td style="text-align: center"><code>ASCII_HEX_DIGIT</code></td><td style="text-align: center"><code>'0'..'9' | 'a'..'f' | 'A'..'F'</code></td></tr>
 </tbody></table>
+</div>
 <p>For <strong>alphabetic</strong> characters, distinguishing between uppercase and lowercase:</p>
-<table><thead><tr><th> Built-in rule       </th><th> Equivalent                        </th></tr></thead><tbody>
-<tr><td align="center"> <code>ASCII_ALPHA_LOWER</code> </td><td align="center"> <code>'a'..'z'</code>                        </td></tr>
-<tr><td align="center"> <code>ASCII_ALPHA_UPPER</code> </td><td align="center"> <code>'A'..'Z'</code>                        </td></tr>
-<tr><td align="center"> <code>ASCII_ALPHA</code>       </td><td align="center"> <code>'a'..'z' | 'A'..'Z'</code> </td></tr>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center">Built-in rule</th><th style="text-align: center">Equivalent</th></tr></thead><tbody>
+<tr><td style="text-align: center"><code>ASCII_ALPHA_LOWER</code></td><td style="text-align: center"><code>'a'..'z'</code></td></tr>
+<tr><td style="text-align: center"><code>ASCII_ALPHA_UPPER</code></td><td style="text-align: center"><code>'A'..'Z'</code></td></tr>
+<tr><td style="text-align: center"><code>ASCII_ALPHA</code></td><td style="text-align: center"><code>'a'..'z' | 'A'..'Z'</code></td></tr>
 </tbody></table>
+</div>
 <p>And for <strong>miscellaneous</strong> use:</p>
-<table><thead><tr><th align="center"> Built-in rule        </th><th> Meaning              </th><th> Equivalent                              </th></tr></thead><tbody>
-<tr><td align="center"> <code>ASCII_ALPHANUMERIC</code> </td><td align="center"> any digit or letter  </td><td align="center"> <code>ASCII_DIGIT | ASCII_ALPHA</code> </td></tr>
-<tr><td align="center"> <code>NEWLINE</code>            </td><td align="center"> any line feed format </td><td align="center"> <code>&quot;\n&quot; | &quot;\r\n&quot; | &quot;\r&quot;</code>     </td></tr>
+<div class="table-wrapper"><table><thead><tr><th style="text-align: center">Built-in rule</th><th style="text-align: center">Meaning</th><th style="text-align: center">Equivalent</th></tr></thead><tbody>
+<tr><td style="text-align: center"><code>ASCII_ALPHANUMERIC</code></td><td style="text-align: center">any digit or letter</td><td style="text-align: center"><code>ASCII_DIGIT | ASCII_ALPHA</code></td></tr>
+<tr><td style="text-align: center"><code>NEWLINE</code></td><td style="text-align: center">any line feed format</td><td style="text-align: center"><code>&quot;\n&quot; | &quot;\r\n&quot; | &quot;\r&quot;</code></td></tr>
 </tbody></table>
-<a class="header" href="#unicode-rules" id="unicode-rules"><h2>Unicode rules</h2></a>
+</div>
+<h2 id="unicode-rules"><a class="header" href="#unicode-rules">Unicode rules</a></h2>
 <p>To make it easier to correctly parse arbitrary Unicode text, <code>pest</code> includes a
 large number of rules corresponding to Unicode character properties. These
 rules are divided into <strong>general category</strong> and <strong>binary property</strong> rules.</p>
@@ -1278,7 +1279,7 @@ has the binary property &quot;Uppercase&quot; but not &quot;Emoji&quot;. By cont
 category &quot;Other Symbol&quot; because it does not generally occur as a letter in
 text. It has both the binary properties &quot;Uppercase&quot; and &quot;Emoji&quot;.</p>
 <p>For more details, consult Chapter 4 of <a href="https://www.unicode.org/versions/latest/">The Unicode Standard</a>.</p>
-<a class="header" href="#general-categories" id="general-categories"><h3>General categories</h3></a>
+<h3 id="general-categories"><a class="header" href="#general-categories">General categories</a></h3>
 <p>Formally, categories are non-overlapping: each Unicode character belongs to
 exactly one category, and no category contains another. However, since certain
 groups of categories are often useful together, <code>pest</code> exposes the hierarchy of
@@ -1349,7 +1350,7 @@ Unicode general category; it instead matches characters that are
 </ul>
 </li>
 </ul>
-<a class="header" href="#binary-properties" id="binary-properties"><h3>Binary properties</h3></a>
+<h3 id="binary-properties"><a class="header" href="#binary-properties">Binary properties</a></h3>
 <p>Many of these properties are used to define Unicode text algorithms, such as
 <a href="https://www.unicode.org/reports/tr9/">the bidirectional algorithm</a> and <a href="https://www.unicode.org/reports/tr29/">the text segmentation algorithm</a>. Such
 properties are not likely to be useful for most parsers.</p>
@@ -1360,6 +1361,7 @@ details.</p>
 <ul>
 <li><code>ALPHABETIC</code></li>
 <li><code>BIDI_CONTROL</code></li>
+<li><code>BIDI_MIRRORED</code></li>
 <li><code>CASE_IGNORABLE</code></li>
 <li><code>CASED</code></li>
 <li><code>CHANGES_WHEN_CASEFOLDED</code></li>
@@ -1371,6 +1373,12 @@ details.</p>
 <li><code>DEFAULT_IGNORABLE_CODE_POINT</code></li>
 <li><code>DEPRECATED</code></li>
 <li><code>DIACRITIC</code></li>
+<li><code>EMOJI</code></li>
+<li><code>EMOJI_COMPONENT</code></li>
+<li><code>EMOJI_MODIFIER</code></li>
+<li><code>EMOJI_MODIFIER_BASE</code></li>
+<li><code>EMOJI_PRESENTATION</code></li>
+<li><code>EXTENDED_PICTOGRAPHIC</code></li>
 <li><code>EXTENDER</code></li>
 <li><code>GRAPHEME_BASE</code></li>
 <li><code>GRAPHEME_EXTEND</code></li>
@@ -1411,7 +1419,7 @@ details.</p>
 <li><code>XID_CONTINUE</code></li>
 <li><code>XID_START</code></li>
 </ul>
-<a class="header" href="#example-json" id="example-json"><h1>Example: JSON</h1></a>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="example-json"><a class="header" href="#example-json">Example: JSON</a></h1>
 <p><a href="https://json.org/">JSON</a> is a popular format for data serialization that is derived from the
 syntax of JavaScript. JSON documents are tree-like and potentially recursive
 — two data types, <em>objects</em> and <em>arrays</em>, can contain other values,
@@ -1425,13 +1433,12 @@ including other objects and arrays.</p>
 </code></pre>
 <p>Let's write a program that <strong>parses</strong> the JSON to an Rust object, known as an
 <em>abstract syntax tree</em>, then <strong>serializes</strong> the AST back to JSON.</p>
-<a class="header" href="#setup-1" id="setup-1"><h2>Setup</h2></a>
+<h2 id="setup-1"><a class="header" href="#setup-1">Setup</a></h2>
 <p>We'll start by defining the AST in Rust. Each JSON data type is represented by
 an enum variant.</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-enum JSONValue&lt;'a&gt; {
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>enum JSONValue&lt;'a&gt; {
     Object(Vec&lt;(&amp;'a str, JSONValue&lt;'a&gt;)&gt;),
     Array(Vec&lt;JSONValue&lt;'a&gt;&gt;),
     String(&amp;'a str),
@@ -1439,7 +1446,8 @@ enum JSONValue&lt;'a&gt; {
     Boolean(bool),
     Null,
 }
-#}</code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>To avoid copying when deserializing strings, <code>JSONValue</code> borrows strings from
 the original unparsed JSON. In order for this to work, we cannot interpret
 string escape sequences: the input string <code>&quot;\n&quot;</code> will be represented by
@@ -1448,10 +1456,9 @@ represents a JSON string with just one character.</p>
 <p>Let's move on to the serializer. For the sake of clarity, it uses allocated
 <code>String</code>s instead of providing an implementation of <a href="https://doc.rust-lang.org/std/fmt/trait.Display.html"><code>std::fmt::Display</code></a>,
 which would be more idiomatic.</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-fn serialize_jsonvalue(val: &amp;JSONValue) -&gt; String {
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn serialize_jsonvalue(val: &amp;JSONValue) -&gt; String {
     use JSONValue::*;
 
     match val {
@@ -1473,12 +1480,13 @@ fn serialize_jsonvalue(val: &amp;JSONValue) -&gt; String {
         Null =&gt; format!(&quot;null&quot;),
     }
 }
-#}</code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>Note that the function invokes itself recursively in the <code>Object</code> and <code>Array</code>
 cases. This pattern appears throughout the parser. The AST creation function
 iterates recursively through the parse result, and the grammar has rules which
 include themselves.</p>
-<a class="header" href="#writing-the-grammar-1" id="writing-the-grammar-1"><h2>Writing the grammar</h2></a>
+<h2 id="writing-the-grammar-1"><a class="header" href="#writing-the-grammar-1">Writing the grammar</a></h2>
 <p>Let's begin with whitespace. JSON whitespace can appear anywhere, except inside
 strings (where it must be parsed separately) and between digits in numbers
 (where it is not allowed). This makes it a good fit for <code>pest</code>'s <a href="examples/../grammars/syntax.html#implicit-whitespace">implicit
@@ -1548,12 +1556,11 @@ that a parsed JSON file contains only two token pairs: the parsed value itself,
 and <a href="examples/../grammars/syntax.html#start-and-end-of-input">the <code>EOI</code> rule</a>.</p>
 <pre><code class="language-pest">json = _{ SOI ~ (object | array) ~ EOI }
 </code></pre>
-<a class="header" href="#ast-generation" id="ast-generation"><h2>AST generation</h2></a>
+<h2 id="ast-generation"><a class="header" href="#ast-generation">AST generation</a></h2>
 <p>Let's compile the grammar into Rust.</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-extern crate pest;
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>extern crate pest;
 #[macro_use]
 extern crate pest_derive;
 
@@ -1562,30 +1569,30 @@ use pest::Parser;
 #[derive(Parser)]
 #[grammar = &quot;json.pest&quot;]
 struct JSONParser;
-#}</code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>We'll write a function that handles both parsing and AST generation. Users of
 the function can call it on an input string, then use the result returned as
 either a <code>JSONValue</code> or a parse error.</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-use pest::error::Error;
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use pest::error::Error;
 
 fn parse_json_file(file: &amp;str) -&gt; Result&lt;JSONValue, Error&lt;Rule&gt;&gt; {
     let json = JSONParser::parse(Rule::json, file)?.next().unwrap();
 
     // ...
 }
-#}</code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>Now we need to handle <code>Pair</code>s recursively, depending on the rule. We know that
 <code>json</code> is either an <code>object</code> or an <code>array</code>, but these values might contain an
 <code>object</code> or an <code>array</code> themselves! The most logical way to handle this is to
 write an auxiliary recursive function that parses a <code>Pair</code> into a <code>JSONValue</code>
 directly.</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-fn parse_json_file(file: &amp;str) -&gt; Result&lt;JSONValue, Error&lt;Rule&gt;&gt; {
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn parse_json_file(file: &amp;str) -&gt; Result&lt;JSONValue, Error&lt;Rule&gt;&gt; {
     // ...
 
     use pest::iterators::Pair;
@@ -1625,7 +1632,8 @@ fn parse_json_file(file: &amp;str) -&gt; Result&lt;JSONValue, Error&lt;Rule&gt;&
 
     // ...
 }
-#}</code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>The <code>object</code> and <code>array</code> cases deserve special attention. The contents of an
 <code>array</code> token pair is just a sequence of <code>value</code>s. Since we're working with a
 Rust iterator, we can simply map each value to its parsed AST node recursively,
@@ -1636,20 +1644,20 @@ separately.</p>
 parsed string to the appropriate Rust type. Every legal JSON number can be
 parsed directly into a Rust floating point number!</p>
 <p>We run <code>parse_value</code> on the parse result to finish the conversion.</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-fn parse_json_file(file: &amp;str) -&gt; Result&lt;JSONValue, Error&lt;Rule&gt;&gt; {
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn parse_json_file(file: &amp;str) -&gt; Result&lt;JSONValue, Error&lt;Rule&gt;&gt; {
     // ...
 
     Ok(parse_value(json))
 }
-#}</code></pre></pre>
-<a class="header" href="#finishing" id="finishing"><h2>Finishing</h2></a>
+<span class="boring">}
+</span></code></pre></pre>
+<h2 id="finishing"><a class="header" href="#finishing">Finishing</a></h2>
 <p>Our <code>main</code> function is now very simple. First, we read the JSON data from a
 file named <code>data.json</code>. Next, we parse the file contents into a JSON AST.
 Finally, we serialize the AST back into a string and print it.</p>
-<pre><pre class="playpen"><code class="language-rust">use std::fs;
+<pre><pre class="playground"><code class="language-rust">use std::fs;
 
 fn main() {
     let unparsed_file = fs::read_to_string(&quot;data.json&quot;).expect(&quot;cannot read file&quot;);
@@ -1665,9 +1673,9 @@ fn main() {
   [ ... ]
 {&quot;nesting&quot;:{&quot;inner object&quot;:{}},&quot;an array&quot;:[1.5,true,null,0.000001],&quot;string with escaped double quotes&quot;:&quot;\&quot;quick brown foxes\&quot;&quot;}
 </code></pre>
-<a class="header" href="#example-the-j-language" id="example-the-j-language"><h1>Example: The J language</h1></a>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="example-the-j-language"><a class="header" href="#example-the-j-language">Example: The J language</a></h1>
 <p>The J language is an array programming language influenced by APL.
-In J, operations on individual numbers (<code>2 * 3</code>) can just as easily
+In J, operations on individual numbers (<code>2 * 3</code>) can just as easily 
 be applied to entire lists of numbers (<code>2 * 3 4 5</code>, returning <code>6 8 10</code>).</p>
 <p>Operators in J are referred to as <em>verbs</em>.
 Verbs are either <em>monadic</em> (taking a single argument, such as <code>*: 3</code>, &quot;3 squared&quot;)
@@ -1700,11 +1708,11 @@ yields the following on standard out:</p>
 
 0 1 0 1 0 1 0 1
 </code></pre>
-<p>In this section we'll write a grammar for a subset of J. We'll then walk
-through a parser that builds an AST by iterating over the rules that
+<p>In this section we'll write a grammar for a subset of J. We'll then walk 
+through a parser that builds an AST by iterating over the rules that 
 <code>pest</code> gives us. You can find the full source code
 <a href="https://github.com/pest-parser/book/tree/master/examples/jlang-parser">within this book's repository</a>.</p>
-<a class="header" href="#the-grammar" id="the-grammar"><h2>The grammar</h2></a>
+<h2 id="the-grammar"><a class="header" href="#the-grammar">The grammar</a></h2>
 <p>We'll build up a grammar section by section, starting with
 the program rule:</p>
 <pre><code class="language-pest">program = _{ SOI ~ &quot;\n&quot;* ~ (stmt ~ &quot;\n&quot;+) * ~ stmt? ~ EOI }
@@ -1713,8 +1721,8 @@ the program rule:</p>
 Notice the leading underscore, which tells <code>pest</code> to <a href="examples/../grammars/syntax.html#silent-and-atomic-rules">silence</a> the <code>program</code>
 rule — we don't want <code>program</code> to appear as a token in the parse stream,
 we want the underlying statements instead.</p>
-<p>A statement is simply an expression, and since there's only one such
-possibility, we also <a href="examples/../grammars/syntax.html#silent-and-atomic-rules">silence</a> this <code>stmt</code> rule as well, and thus our
+<p>A statement is simply an expression, and since there's only one such 
+possibility, we also <a href="examples/../grammars/syntax.html#silent-and-atomic-rules">silence</a> this <code>stmt</code> rule as well, and thus our 
 parser will receive an iterator of underlying <code>expr</code>s:</p>
 <pre><code class="language-pest">stmt = _{ expr }
 </code></pre>
@@ -1740,9 +1748,9 @@ dyadicExpr = { (monadicExpr | terms) ~ verb ~ expr }
 
 assgmtExpr = { ident ~ &quot;=:&quot; ~ expr }
 </code></pre>
-<p>A list of terms should contain at least one decimal, integer,
-identifier, or parenthesized expression; we care only about those
-underlying values, so we make the <code>term</code> rule <a href="examples/../grammars/syntax.html#silent-and-atomic-rules">silent</a> with a leading
+<p>A list of terms should contain at least one decimal, integer, 
+identifier, or parenthesized expression; we care only about those 
+underlying values, so we make the <code>term</code> rule <a href="examples/../grammars/syntax.html#silent-and-atomic-rules">silent</a> with a leading 
 underscore:</p>
 <pre><code class="language-pest">terms = { term+ }
 
@@ -1756,12 +1764,12 @@ J's <a href="https://code.jsoftware.com/wiki/NuVoc">full vocabulary</a> is much 
   | &quot;&gt;&quot;  | &quot;$&quot;
 }
 </code></pre>
-<p>Now we can get into lexing rules. Numbers in J are represented as
-usual, with the exception that negatives are represented using a
-leading <code>_</code> underscore (because <code>-</code> is a verb that performs negation
-as a monad and subtraction as a dyad).  Identifiers in J must start
-with a letter, but can contain numbers thereafter. Strings are
-surrounded by single quotes; quotes themselves can be embedded by
+<p>Now we can get into lexing rules. Numbers in J are represented as 
+usual, with the exception that negatives are represented using a 
+leading <code>_</code> underscore (because <code>-</code> is a verb that performs negation 
+as a monad and subtraction as a dyad).  Identifiers in J must start 
+with a letter, but can contain numbers thereafter. Strings are 
+surrounded by single quotes; quotes themselves can be embedded by 
 escaping them with an additional quote.</p>
 <p>Notice how we use <code>pest</code>'s <code>@</code> modifier to make each of these rules <a href="examples/../grammars/syntax.html#atomic">atomic</a>,
 meaning <a href="examples/../grammars/syntax.html#implicit-whitespace">implicit whitespace</a> is forbidden, and
@@ -1780,24 +1788,23 @@ significant because they delimit statements, so they are excluded
 from this rule:</p>
 <pre><code class="language-pest">WHITESPACE = _{ &quot; &quot; | &quot;\t&quot; }
 </code></pre>
-<p>Finally, we must handle comments. Comments in J start with <code>NB.</code> and
-continue to the end of the line on which they are found. Critically, we must
-not consume the newline at the end of the comment line; this is needed
-to separate any statement that might precede the comment from the statement
+<p>Finally, we must handle comments. Comments in J start with <code>NB.</code> and 
+continue to the end of the line on which they are found. Critically, we must 
+not consume the newline at the end of the comment line; this is needed 
+to separate any statement that might precede the comment from the statement 
 on the succeeding line.</p>
 <pre><code class="language-pest">COMMENT = _{ &quot;NB.&quot; ~ (!&quot;\n&quot; ~ ANY)* }
 </code></pre>
-<a class="header" href="#parsing-and-ast-generation" id="parsing-and-ast-generation"><h2>Parsing and AST generation</h2></a>
+<h2 id="parsing-and-ast-generation"><a class="header" href="#parsing-and-ast-generation">Parsing and AST generation</a></h2>
 <p>This section will walk through a parser that uses the grammar above.
-Library includes and self-explanatory code are omitted here; you can find
+Library includes and self-explanatory code are omitted here; you can find 
 the parser in its entirety <a href="https://github.com/pest-parser/book/tree/master/examples/jlang-parser">within this book's repository</a>.</p>
-<p>First we'll enumerate the verbs defined in our grammar, distinguishing between
-monadic and dyadic verbs. These enumerations will be be used as labels
+<p>First we'll enumerate the verbs defined in our grammar, distinguishing between 
+monadic and dyadic verbs. These enumerations will be be used as labels 
 in our AST:</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-pub enum MonadicVerb {
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub enum MonadicVerb {
     Increment,
     Square,
     Negate,
@@ -1822,12 +1829,12 @@ pub enum DyadicVerb {
     LargerOrEqual,
     Shape,
 }
-#}</code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>Then we'll enumerate the various kinds of AST nodes:</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-pub enum AstNode {
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub enum AstNode {
     Print(Box&lt;AstNode&gt;),
     Integer(i32),
     DoublePrecisionFloat(f64),
@@ -1848,17 +1855,17 @@ pub enum AstNode {
     Ident(String),
     Str(CString),
 }
-#}</code></pre></pre>
-<p>To parse top-level statements in a J program, we have the following
-<code>parse</code> function that accepts a J program in string form and passes it
+<span class="boring">}
+</span></code></pre></pre>
+<p>To parse top-level statements in a J program, we have the following 
+<code>parse</code> function that accepts a J program in string form and passes it 
 to <code>pest</code> for parsing. We get back a sequence of <a href="examples/../parser_api.html#pairs"><code>Pair</code></a>s. As specified
-in the grammar, a statement can only consist of an expression, so the <code>match</code>
-below parses each of those top-level expressions and wraps them in a <code>Print</code>
+in the grammar, a statement can only consist of an expression, so the <code>match</code> 
+below parses each of those top-level expressions and wraps them in a <code>Print</code> 
 AST node in keeping with the J interpreter's REPL behavior:</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-pub fn parse(source: &amp;str) -&gt; Result&lt;Vec&lt;AstNode&gt;, Error&lt;Rule&gt;&gt; {
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn parse(source: &amp;str) -&gt; Result&lt;Vec&lt;AstNode&gt;, Error&lt;Rule&gt;&gt; {
     let mut ast = vec![];
 
     let pairs = JParser::parse(Rule::program, source)?;
@@ -1873,16 +1880,16 @@ pub fn parse(source: &amp;str) -&gt; Result&lt;Vec&lt;AstNode&gt;, Error&lt;Rule
 
     Ok(ast)
 }
-#}</code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>AST nodes are built from expressions by walking the <a href="examples/../parser_api.html#pairs"><code>Pair</code></a> iterator in
-lockstep with the expectations set out in our grammar file. Common behaviors
+lockstep with the expectations set out in our grammar file. Common behaviors 
 are abstracted out into separate functions, such as <code>parse_monadic_verb</code>
 and <code>parse_dyadic_verb</code>, and <a href="examples/../parser_api.html#pairs"><code>Pair</code></a>s representing expressions themselves are
 passed in recursive calls to <code>build_ast_from_expr</code>:</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-fn build_ast_from_expr(pair: pest::iterators::Pair&lt;Rule&gt;) -&gt; AstNode {
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn build_ast_from_expr(pair: pest::iterators::Pair&lt;Rule&gt;) -&gt; AstNode {
     match pair.as_rule() {
         Rule::expr =&gt; build_ast_from_expr(pair.into_inner().next().unwrap()),
         Rule::monadicExpr =&gt; {
@@ -1895,13 +1902,13 @@ fn build_ast_from_expr(pair: pest::iterators::Pair&lt;Rule&gt;) -&gt; AstNode {
         // ... other cases elided here ...
     }
 }
-#}</code></pre></pre>
-<p>Dyadic verbs are mapped from their string representations to AST nodes in
+<span class="boring">}
+</span></code></pre></pre>
+<p>Dyadic verbs are mapped from their string representations to AST nodes in 
 a straightforward way:</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-fn parse_dyadic_verb(pair: pest::iterators::Pair&lt;Rule&gt;, lhs: AstNode, rhs: AstNode) -&gt; AstNode {
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn parse_dyadic_verb(pair: pest::iterators::Pair&lt;Rule&gt;, lhs: AstNode, rhs: AstNode) -&gt; AstNode {
     AstNode::DyadicOp {
         lhs: Box::new(lhs),
         rhs: Box::new(rhs),
@@ -1923,12 +1930,12 @@ fn parse_dyadic_verb(pair: pest::iterators::Pair&lt;Rule&gt;, lhs: AstNode, rhs:
         },
     }
 }
-#}</code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>As are monadic verbs:</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-fn parse_monadic_verb(pair: pest::iterators::Pair&lt;Rule&gt;, expr: AstNode) -&gt; AstNode {
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn parse_monadic_verb(pair: pest::iterators::Pair&lt;Rule&gt;, expr: AstNode) -&gt; AstNode {
     AstNode::MonadicOp {
         verb: match pair.as_str() {
             &quot;&gt;:&quot; =&gt; MonadicVerb::Increment,
@@ -1943,14 +1950,14 @@ fn parse_monadic_verb(pair: pest::iterators::Pair&lt;Rule&gt;, expr: AstNode) -&
         expr: Box::new(expr),
     }
 }
-#}</code></pre></pre>
-<p>Finally, we define a function to process terms such as numbers and strings.
-Numbers require some manuevering to handle J's leading underscores
+<span class="boring">}
+</span></code></pre></pre>
+<p>Finally, we define a function to process terms such as numbers and strings. 
+Numbers require some manuevering to handle J's leading underscores 
 representing negation, but other than that the process is typical:</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-fn build_ast_from_term(pair: pest::iterators::Pair&lt;Rule&gt;) -&gt; AstNode {
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn build_ast_from_term(pair: pest::iterators::Pair&lt;Rule&gt;) -&gt; AstNode {
     match pair.as_rule() {
         Rule::integer =&gt; {
             let istr = pair.as_str();
@@ -1979,11 +1986,12 @@ fn build_ast_from_term(pair: pest::iterators::Pair&lt;Rule&gt;) -&gt; AstNode {
         unknown_term =&gt; panic!(&quot;Unexpected term: {:?}&quot;, unknown_term),
     }
 }
-#}</code></pre></pre>
-<a class="header" href="#running-the-parser" id="running-the-parser"><h2>Running the Parser</h2></a>
-<p>We can now define a <code>main</code> function to pass J programs to our
+<span class="boring">}
+</span></code></pre></pre>
+<h2 id="running-the-parser"><a class="header" href="#running-the-parser">Running the Parser</a></h2>
+<p>We can now define a <code>main</code> function to pass J programs to our 
 <code>pest</code>-enabled parser:</p>
-<pre><pre class="playpen"><code class="language-rust">fn main() {
+<pre><pre class="playground"><code class="language-rust">fn main() {
     let unparsed_file = std::fs::read_to_string(&quot;example.ijs&quot;)
       .expect(&quot;cannot read ijs file&quot;);
     let astnode = parse(&amp;unparsed_file).expect(&quot;unsuccessful parse&quot;);
@@ -2009,7 +2017,7 @@ x - 1
 y =: x - 1
 y
 </code></pre>
-<p>We'll get the following abstract syntax tree on stdout when we run
+<p>We'll get the following abstract syntax tree on stdout when we run 
 the parser:</p>
 <pre><code class="language-shell">$ cargo run
   [ ... ]
@@ -2045,14 +2053,14 @@ Print(IsGlobal { ident: &quot;y&quot;, expr: DyadicOp { verb: Minus, lhs: Ident(
     rhs: Integer(1) } }),
 Print(Ident(&quot;y&quot;))]
 </code></pre>
-<a class="header" href="#operator-precedence-wip" id="operator-precedence-wip"><h1>Operator precedence (WIP)</h1></a>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="operator-precedence-wip"><a class="header" href="#operator-precedence-wip">Operator precedence (WIP)</a></h1>
 <p>This chapter will discuss two methods of dealing with operator precedence:
 directly in the PEG grammar, and using a <code>PrecClimber</code>. It will probably also
 include an explanation of how precedence climbing works.</p>
-<a class="header" href="#example-calculator-wip" id="example-calculator-wip"><h1>Example: Calculator (WIP)</h1></a>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="example-calculator-wip"><a class="header" href="#example-calculator-wip">Example: Calculator (WIP)</a></h1>
 <p>This section will walk through the creation of a simple calculator. It will
 provide an example of parsing expressions with operator precedence.</p>
-<a class="header" href="#final-project-awk-clone-wip" id="final-project-awk-clone-wip"><h1>Final project: Awk clone (WIP)</h1></a>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="final-project-awk-clone-wip"><a class="header" href="#final-project-awk-clone-wip">Final project: Awk clone (WIP)</a></h1>
 <p>This chapter will walk through the creation of a simple variant of <a href="http://pubs.opengroup.org/onlinepubs/9699919799/utilities/awk.html">Awk</a> (only
 loosely following the POSIX specification). It will probably have several
 sections. It will provide an example of a full project based on <code>pest</code> with a
@@ -2065,53 +2073,32 @@ functions in the interest of avoiding variable scoping.</p>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                        
-
-                        
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                
-
-                
             </nav>
 
         </div>
 
-        
-
-        
-
-        
-
-        
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
         <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
         <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
         <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
-        
-
         <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
         <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
         <script src="book.js" type="text/javascript" charset="utf-8"></script>
 
         <!-- Custom JS scripts -->
-        
         <script type="text/javascript" src="highlight-pest.js"></script>
-        
-
-        
-        
         <script type="text/javascript">
         window.addEventListener('load', function() {
             window.setTimeout(window.print, 100);
         });
         </script>
-        
-        
-
     </body>
 </html>

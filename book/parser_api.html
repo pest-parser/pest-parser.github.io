@@ -1,40 +1,36 @@
 <!DOCTYPE HTML>
-<html lang="en" class="sidebar-visible no-js">
+<html lang="en" class="sidebar-visible no-js light">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
         <title>Parser API - A thoughtful introduction to the pest parser</title>
+        <!-- Custom HTML head -->
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="An introduction to the pest parser by implementing a Rust grammar subset">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff" />
 
+        <link rel="icon" href="favicon.svg">
         <link rel="shortcut icon" href="favicon.png">
         <link rel="stylesheet" href="css/variables.css">
         <link rel="stylesheet" href="css/general.css">
         <link rel="stylesheet" href="css/chrome.css">
         <link rel="stylesheet" href="css/print.css" media="print">
-
         <!-- Fonts -->
         <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
-        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
-        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
-
+        <link rel="stylesheet" href="fonts/fonts.css">
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="highlight.css">
         <link rel="stylesheet" href="tomorrow-night.css">
         <link rel="stylesheet" href="ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
-        
-
-        
     </head>
-    <body class="light">
+    <body>
         <!-- Provide site root to javascript -->
         <script type="text/javascript">
             var path_to_root = "";
-            var default_theme = "light";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
         </script>
 
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
@@ -56,10 +52,13 @@
         <!-- Set the theme before any content is loaded, prevents flash -->
         <script type="text/javascript">
             var theme;
-            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { } 
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
-            document.body.className = theme;
-            document.querySelector('html').className = theme + ' js';
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
         </script>
 
         <!-- Hide / unhide sidebar before it is displayed -->
@@ -75,51 +74,48 @@
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
-            <ol class="chapter"><li><a href="intro.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li><a href="examples/csv.html"><strong aria-hidden="true">1.1.</strong> Example: CSV</a></li></ol></li><li><a href="parser_api.html" class="active"><strong aria-hidden="true">2.</strong> Parser API</a></li><li><ol class="section"><li><a href="examples/ini.html"><strong aria-hidden="true">2.1.</strong> Example: INI</a></li></ol></li><li><a href="grammars/grammars.html"><strong aria-hidden="true">3.</strong> Grammars</a></li><li><ol class="section"><li><a href="grammars/peg.html"><strong aria-hidden="true">3.1.</strong> Parsing expression grammars</a></li><li><a href="grammars/syntax.html"><strong aria-hidden="true">3.2.</strong> Syntax of pest parsers</a></li><li><a href="grammars/built-ins.html"><strong aria-hidden="true">3.3.</strong> Built-in rules</a></li><li><a href="examples/json.html"><strong aria-hidden="true">3.4.</strong> Example: JSON</a></li><li><a href="examples/jlang.html"><strong aria-hidden="true">3.5.</strong> Example: The J language</a></li></ol></li><li><a href="precedence.html"><strong aria-hidden="true">4.</strong> Operator precedence (WIP)</a></li><li><ol class="section"><li><a href="examples/calculator.html"><strong aria-hidden="true">4.1.</strong> Example: Calculator (WIP)</a></li></ol></li><li><a href="examples/awk.html"><strong aria-hidden="true">5.</strong> Final project: Awk clone (WIP)</a></li></ol>
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="intro.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/csv.html"><strong aria-hidden="true">1.1.</strong> Example: CSV</a></li></ol></li><li class="chapter-item expanded "><a href="parser_api.html" class="active"><strong aria-hidden="true">2.</strong> Parser API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/ini.html"><strong aria-hidden="true">2.1.</strong> Example: INI</a></li></ol></li><li class="chapter-item expanded "><a href="grammars/grammars.html"><strong aria-hidden="true">3.</strong> Grammars</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="grammars/peg.html"><strong aria-hidden="true">3.1.</strong> Parsing expression grammars</a></li><li class="chapter-item expanded "><a href="grammars/syntax.html"><strong aria-hidden="true">3.2.</strong> Syntax of pest parsers</a></li><li class="chapter-item expanded "><a href="grammars/built-ins.html"><strong aria-hidden="true">3.3.</strong> Built-in rules</a></li><li class="chapter-item expanded "><a href="examples/json.html"><strong aria-hidden="true">3.4.</strong> Example: JSON</a></li><li class="chapter-item expanded "><a href="examples/jlang.html"><strong aria-hidden="true">3.5.</strong> Example: The J language</a></li></ol></li><li class="chapter-item expanded "><a href="precedence.html"><strong aria-hidden="true">4.</strong> Operator precedence (WIP)</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/calculator.html"><strong aria-hidden="true">4.1.</strong> Example: Calculator (WIP)</a></li></ol></li><li class="chapter-item expanded "><a href="examples/awk.html"><strong aria-hidden="true">5.</strong> Final project: Awk clone (WIP)</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
 
         <div id="page-wrapper" class="page-wrapper">
 
             <div class="page">
-                
-                <div id="menu-bar" class="menu-bar">
-                    <div id="menu-bar-sticky-container">
-                        <div class="left-buttons">
-                            <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
-                                <i class="fa fa-bars"></i>
-                            </button>
-                            <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
-                                <i class="fa fa-paint-brush"></i>
-                            </button>
-                            <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
-                                <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
-                                <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
-                                <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
-                                <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
-                                <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
-                            </ul>
-                            
-                            <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
-                                <i class="fa fa-search"></i>
-                            </button>
-                            
-                        </div>
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
 
-                        <h1 class="menu-title">A thoughtful introduction to the pest parser</h1> 
+                    <h1 class="menu-title">A thoughtful introduction to the pest parser</h1>
 
-                        <div class="right-buttons">
-                            <a href="print.html" title="Print this book" aria-label="Print this book">
-                                <i id="print-button" class="fa fa-print"></i>
-                            </a>
-                            
-                        </div>
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
                     </div>
                 </div>
 
-                
                 <div id="search-wrapper" class="hidden">
                     <form id="searchbar-outer" class="searchbar-outer">
-                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
                     </form>
                     <div id="searchresults-outer" class="searchresults-outer hidden">
                         <div id="searchresults-header" class="searchresults-header"></div>
@@ -127,8 +123,6 @@
                         </ul>
                     </div>
                 </div>
-                
-
                 <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
                 <script type="text/javascript">
                     document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
@@ -140,14 +134,14 @@
 
                 <div id="content" class="content">
                     <main>
-                        <a class="header" href="#parser-api" id="parser-api"><h1>Parser API</h1></a>
+                        <h1 id="parser-api"><a class="header" href="#parser-api">Parser API</a></h1>
 <p><code>pest</code> provides several ways of accessing the results of a successful parse.
 The examples below use the following grammar:</p>
 <pre><code class="language-pest">number = { ASCII_DIGIT+ }                // one or more decimal digits
 enclosed = { &quot;(..&quot; ~ number ~ &quot;..)&quot; }    // for instance, &quot;(..6472..)&quot;
 sum = { number ~ &quot; + &quot; ~ number }        // for instance, &quot;1362 + 12&quot;
 </code></pre>
-<a class="header" href="#tokens" id="tokens"><h2>Tokens</h2></a>
+<h2 id="tokens"><a class="header" href="#tokens">Tokens</a></h2>
 <p><code>pest</code> represents successful parses using <em>tokens</em>. Whenever a rule matches,
 two tokens are produced: one at the <em>start</em> of the text that the rule matched,
 and one at the <em>end</em>. For example, the rule <code>number</code> applied to the string
@@ -160,7 +154,7 @@ and one at the <em>end</em>. For example, the rule <code>number</code> applied t
 text as possible, then stops if successful.</p>
 <p>A token is like a cursor in the input string. It has a character position in
 the string, as well as a reference to the rule that created it.</p>
-<a class="header" href="#nested-rules" id="nested-rules"><h3>Nested rules</h3></a>
+<h3 id="nested-rules"><a class="header" href="#nested-rules">Nested rules</a></h3>
 <p>If a named rule contains another named rule, tokens will be produced for <em>both</em>
 rules. For instance, the rule <code>enclosed</code> applied to the string <code>&quot;(..6472..)&quot;</code>
 would match and produce these four tokens:</p>
@@ -183,19 +177,19 @@ positions:</p>
 </code></pre>
 <p>In fact, for a rule that matches empty input, the start and end tokens will be
 at the same position!</p>
-<a class="header" href="#interface" id="interface"><h3>Interface</h3></a>
+<h3 id="interface"><a class="header" href="#interface">Interface</a></h3>
 <p>Tokens are exposed as the <a href="https://docs.rs/pest/2.0/pest/enum.Token.html"><code>Token</code></a> enum, which has <code>Start</code> and <code>End</code> variants.
 You can get an iterator of <code>Token</code>s by calling <code>tokens</code> on a parse result:</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-let parse_result = Parser::parse(Rule::sum, &quot;1773 + 1362&quot;).unwrap();
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let parse_result = Parser::parse(Rule::sum, &quot;1773 + 1362&quot;).unwrap();
 let tokens = parse_result.tokens();
 
 for token in tokens {
     println!(&quot;{:?}&quot;, token);
 }
-#}</code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>After a successful parse, tokens will occur as nested pairs of matching <code>Start</code>
 and <code>End</code>. Both kinds of tokens have two fields:</p>
 <ul>
@@ -207,7 +201,7 @@ token's position is the first character that the rule did not match —
 that is, an end token refers to a position <em>after</em> the match. If a rule matched
 the entire input string, the end token points to an imaginary position <em>after</em>
 the string.</p>
-<a class="header" href="#pairs" id="pairs"><h2>Pairs</h2></a>
+<h2 id="pairs"><a class="header" href="#pairs">Pairs</a></h2>
 <p>Tokens are not the most convenient interface, however. Usually you will want to
 explore the parse tree by considering matching pairs of tokens. For this
 purpose, <code>pest</code> provides the <a href="https://docs.rs/pest/2.0/pest/iterators/struct.Pair.html"><code>Pair</code></a> type.</p>
@@ -219,10 +213,9 @@ ways:</p>
 <li>Using the <code>Pair</code> as a raw <code>&amp;str</code></li>
 <li>Inspecting the inner named sub-rules that produced the <code>Pair</code></li>
 </ul>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-let pair = Parser::parse(Rule::enclosed, &quot;(..6472..) and more text&quot;)
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let pair = Parser::parse(Rule::enclosed, &quot;(..6472..) and more text&quot;)
     .unwrap().next().unwrap();
 
 assert_eq!(pair.as_rule(), Rule::enclosed);
@@ -230,16 +223,16 @@ assert_eq!(pair.as_str(), &quot;(..6472..)&quot;);
 
 let inner_rules = pair.into_inner();
 println!(&quot;{}&quot;, inner_rules); // --&gt; [number(3, 7)]
-#}</code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>In general, a <code>Pair</code> might have any number of inner rules: zero, one, or more.
 For maximum flexibility, <code>Pair::into_inner()</code> returns <code>Pairs</code>, which is an
 iterator over each pair.</p>
 <p>This means that you can use <code>for</code> loops on parse results, as well as iterator
 methods such as <code>map</code>, <code>filter</code>, and <code>collect</code>.</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-let pairs = Parser::parse(Rule::sum, &quot;1773 + 1362&quot;)
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let pairs = Parser::parse(Rule::sum, &quot;1773 + 1362&quot;)
     .unwrap().next().unwrap()
     .into_inner();
 
@@ -253,15 +246,15 @@ for (found, expected) in pairs.zip(vec![&quot;1773&quot;, &quot;1362&quot;]) {
     assert_eq!(Rule::number, found.as_rule());
     assert_eq!(expected, found.as_str());
 }
-#}</code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p><code>Pairs</code> iterators are also commonly used via the <code>next</code> method directly. If a
 rule consists of a known number of sub-rules (for instance, the rule <code>sum</code> has
 exactly two sub-rules), the sub-matches can be extracted with <code>next</code> and
 <code>unwrap</code>:</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-let parse_result = Parser::parse(Rule::sum, &quot;1773 + 1362&quot;)
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let parse_result = Parser::parse(Rule::sum, &quot;1773 + 1362&quot;)
     .unwrap().next().unwrap();
 let mut inner_rules = parse_result.into_inner();
 
@@ -270,7 +263,8 @@ let match2 = inner_rules.next().unwrap();
 
 assert_eq!(match1.as_str(), &quot;1773&quot;);
 assert_eq!(match2.as_str(), &quot;1362&quot;);
-#}</code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>Sometimes rules will not have a known number of sub-rules, such as when a
 sub-rule is repeated with an asterisk <code>*</code>:</p>
 <pre><code class="language-pest">list = { number* }
@@ -278,14 +272,13 @@ sub-rule is repeated with an asterisk <code>*</code>:</p>
 <p>In cases like these it is not possible to call <code>.next().unwrap()</code>, because the
 number of sub-rules depends on the input string — it cannot be known at
 compile time.</p>
-<a class="header" href="#the-parse-method" id="the-parse-method"><h2>The <code>parse</code> method</h2></a>
+<h2 id="the-parse-method"><a class="header" href="#the-parse-method">The <code>parse</code> method</a></h2>
 <p>A <code>pest</code>-derived <a href="https://docs.rs/pest/2.0/pest/trait.Parser.html"><code>Parser</code></a> has a single method <code>parse</code> which returns a
 <code>Result&lt; Pairs, Error &gt;</code>. To access the underlying parse tree, it is necessary
 to <code>match</code> on or <code>unwrap</code> the result:</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-// check whether parse was successful
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>// check whether parse was successful
 match Parser::parse(Rule::enclosed, &quot;(..6472..)&quot;) {
     Ok(mut pairs) =&gt; {
         let enclosed = pairs.next().unwrap();
@@ -295,7 +288,8 @@ match Parser::parse(Rule::enclosed, &quot;(..6472..)&quot;) {
         // ...
     }
 }
-#}</code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p>Our examples so far have included the calls
 <code>Parser::parse(...).unwrap().next().unwrap()</code>. The first <code>unwrap</code> turns the
 result into a <code>Pairs</code>. If parsing had failed, the program would panic! We only
@@ -305,7 +299,7 @@ successfully.</p>
 <code>Pairs</code>, we use the iterator interface. The <code>next()</code> call returns an
 <code>Option&lt;Pair&gt;</code>, which we finally <code>unwrap</code> to get the <code>Pair</code> for the <code>enclosed</code>
 rule.</p>
-<a class="header" href="#using-pair-and-pairs-with-a-grammar" id="using-pair-and-pairs-with-a-grammar"><h3>Using <code>Pair</code> and <code>Pairs</code> with a grammar</h3></a>
+<h3 id="using-pair-and-pairs-with-a-grammar"><a class="header" href="#using-pair-and-pairs-with-a-grammar">Using <code>Pair</code> and <code>Pairs</code> with a grammar</a></h3>
 <p>While the <code>Result</code> from <code>Parser::parse(...)</code> might very well be an error on
 invalid input, <code>Pair</code> and <code>Pairs</code> often have more subtle behavior. For
 instance, with this grammar:</p>
@@ -313,10 +307,9 @@ instance, with this grammar:</p>
 sum = { number ~ &quot; + &quot; ~ number }
 </code></pre>
 <p>this function will <em>never</em> panic:</p>
-<pre><pre class="playpen"><code class="language-rust">
-# #![allow(unused_variables)]
-#fn main() {
-fn process(pair: Pair&lt;Rule&gt;) -&gt; f64 {
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn process(pair: Pair&lt;Rule&gt;) -&gt; f64 {
     match pair.as_rule() {
         Rule::number =&gt; str::parse(pair.as_str()).unwrap(),
         Rule::sum =&gt; {
@@ -329,7 +322,8 @@ fn process(pair: Pair&lt;Rule&gt;) -&gt; f64 {
         }
     }
 }
-#}</code></pre></pre>
+<span class="boring">}
+</span></code></pre></pre>
 <p><code>str::parse(...).unwrap()</code> is safe because the <code>number</code> rule only ever matches
 digits, which <code>str::parse(...)</code> can handle. And <code>pairs.next().unwrap()</code> is safe
 to call twice because a <code>sum</code> match <em>always</em> has two sub-matches, which is
@@ -339,7 +333,7 @@ only provides a few high-level types to represent parse trees. Nevertheless,
 you <em>should</em> rely on the meaning of your grammar for properties such as
 &quot;contains <em>n</em> sub-rules&quot;, &quot;is safe to <code>parse</code> to <code>f32</code>&quot;, and &quot;never fails to
 match&quot;. Idiomatic <code>pest</code> code uses <code>unwrap</code> and <code>unreachable!</code>.</p>
-<a class="header" href="#spans-and-positions" id="spans-and-positions"><h2>Spans and positions</h2></a>
+<h2 id="spans-and-positions"><a class="header" href="#spans-and-positions">Spans and positions</a></h2>
 <p>Occasionally, you will want to refer to a matching rule in the context of the
 raw source text, rather than the interior text alone. For example, you might
 want to print the entire line that contained the match. For this you can use
@@ -357,61 +351,39 @@ pattern matching to turn a <code>Token</code> into its component <code>Rule</cod
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
-                        
                             <a rel="prev" href="examples/csv.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
-                        
-
-                        
                             <a rel="next" href="examples/ini.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
-                        
-
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
-                
-                    <a href="examples/csv.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="examples/csv.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
-                
-
-                
-                    <a href="examples/ini.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next" href="examples/ini.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
-                
             </nav>
 
         </div>
 
-        
-
-        
-
-        
-
-        
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
         <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
         <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
         <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
-        
-
         <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
         <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
         <script src="book.js" type="text/javascript" charset="utf-8"></script>
 
         <!-- Custom JS scripts -->
-        
         <script type="text/javascript" src="highlight-pest.js"></script>
-        
-
-        
-
     </body>
 </html>
