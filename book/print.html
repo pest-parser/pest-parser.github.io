@@ -2311,13 +2311,14 @@ expression, it will not make ambiguous what operators belong to the inner expres
 <p>We can currently only parse positive integers, eg <code>16</code> or <code>2342</code>. But we also want to do calculations with negative intergers.
 To do this, we introduce the unary minus, so we can make <code>-4</code> and <code>-(8 + 15)</code>.
 We need the following change to grammar:</p>
-<pre><code class="language-pest">+ unary_minus = { &quot;-&quot; ~ atom }
+<pre><code class="language-pest">+ unary_minus = { &quot;-&quot; }
++ primary = _{ integer | &quot;(&quot; ~ expr ~ &quot;)&quot; }
 - atom = _{ integer | &quot;(&quot; ~ expr ~ &quot;)&quot; }
-+ atom = _{ integer | unary_minus | &quot;(&quot; ~ expr ~ &quot;)&quot; }
++ atom = _{ unary_minus? ~ primary }
 </code></pre>
 <p>For these last changes we've omitted the small changes to the AST and parsing logic (using <code>map_prefix</code>).</p>
 <p>You can find all these details in 
-the repository: https://github.com/pest-parser/book/tree/master/examples/pest-calculator.</p>
+the repository: <a href="https://github.com/pest-parser/book/tree/master/examples/pest-calculator">github.com/pest-parser/book/tree/master/examples/pest-calculator</a>.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="final-project-awk-clone-wip"><a class="header" href="#final-project-awk-clone-wip">Final project: Awk clone (WIP)</a></h1>
 <p>This chapter will walk through the creation of a simple variant of <a href="http://pubs.opengroup.org/onlinepubs/9699919799/utilities/awk.html">Awk</a> (only
 loosely following the POSIX specification). It will probably have several
