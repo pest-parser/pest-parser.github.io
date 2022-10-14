@@ -76,7 +76,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="intro.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/csv.html"><strong aria-hidden="true">1.1.</strong> Example: CSV</a></li></ol></li><li class="chapter-item expanded "><a href="parser_api.html"><strong aria-hidden="true">2.</strong> Parser API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/ini.html"><strong aria-hidden="true">2.1.</strong> Example: INI</a></li></ol></li><li class="chapter-item expanded "><a href="grammars/grammars.html"><strong aria-hidden="true">3.</strong> Grammars</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="grammars/peg.html"><strong aria-hidden="true">3.1.</strong> Parsing expression grammars</a></li><li class="chapter-item expanded "><a href="grammars/syntax.html"><strong aria-hidden="true">3.2.</strong> Syntax of pest parsers</a></li><li class="chapter-item expanded "><a href="grammars/built-ins.html"><strong aria-hidden="true">3.3.</strong> Built-in rules</a></li><li class="chapter-item expanded "><a href="examples/json.html"><strong aria-hidden="true">3.4.</strong> Example: JSON</a></li><li class="chapter-item expanded "><a href="examples/jlang.html"><strong aria-hidden="true">3.5.</strong> Example: The J language</a></li></ol></li><li class="chapter-item expanded "><a href="precedence.html"><strong aria-hidden="true">4.</strong> Operator precedence (WIP)</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/calculator.html"><strong aria-hidden="true">4.1.</strong> Example: Calculator (WIP)</a></li></ol></li><li class="chapter-item expanded "><a href="examples/awk.html"><strong aria-hidden="true">5.</strong> Final project: Awk clone (WIP)</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="intro.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/csv.html"><strong aria-hidden="true">1.1.</strong> Example: CSV</a></li></ol></li><li class="chapter-item expanded "><a href="parser_api.html"><strong aria-hidden="true">2.</strong> Parser API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/ini.html"><strong aria-hidden="true">2.1.</strong> Example: INI</a></li></ol></li><li class="chapter-item expanded "><a href="grammars/grammars.html"><strong aria-hidden="true">3.</strong> Grammars</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="grammars/peg.html"><strong aria-hidden="true">3.1.</strong> Parsing expression grammars</a></li><li class="chapter-item expanded "><a href="grammars/syntax.html"><strong aria-hidden="true">3.2.</strong> Syntax of pest parsers</a></li><li class="chapter-item expanded "><a href="grammars/built-ins.html"><strong aria-hidden="true">3.3.</strong> Built-in rules</a></li><li class="chapter-item expanded "><a href="examples/json.html"><strong aria-hidden="true">3.4.</strong> Example: JSON</a></li><li class="chapter-item expanded "><a href="examples/jlang.html"><strong aria-hidden="true">3.5.</strong> Example: The J language</a></li></ol></li><li class="chapter-item expanded "><a href="precedence.html"><strong aria-hidden="true">4.</strong> Operator precedence</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/calculator.html"><strong aria-hidden="true">4.1.</strong> Example: Calculator</a></li></ol></li><li class="chapter-item expanded "><a href="examples/awk.html"><strong aria-hidden="true">5.</strong> Final project: Awk clone (WIP)</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -165,35 +165,33 @@ WHITESPACE = _{ &quot; &quot; | &quot;\t&quot; }
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>lazy_static! {
-    static ref PREC_CLIMBER: PrecClimber&lt;Rule&gt; = {
+    static ref PRATT_PARSER: PrattParser&lt;Rule&gt; = {
         use Rule::*;
         use Assoc::*;
 
-        PrecClimber::new(vec![
-            Operator::new(add, Left) | Operator::new(subtract, Left),
-            Operator::new(multiply, Left) | Operator::new(divide, Left),
-            Operator::new(power, Right)
-        ])
+        PrattParser::new()
+            .op(Op::infix(add, Left) | Op::infix(subtract, Left))
+            .op(Op::infix(multiply, Left) | Op::infix(divide, Left))
+            .op(Op::infix(power, Right))
     };
 }
 
 fn eval(expression: Pairs&lt;Rule&gt;) -&gt; f64 {
-    PREC_CLIMBER.climb(
-        expression,
-        |pair: Pair&lt;Rule&gt;| match pair.as_rule() {
-            Rule::num =&gt; pair.as_str().parse::&lt;f64&gt;().unwrap(),
-            Rule::expr =&gt; eval(pair.into_inner()),
+    PRATT_PARSER
+        .map_primary(|primary| match primary.as_rule() {
+            Rule::num =&gt; primary.as_str().parse::&lt;f64&gt;().unwrap(),
+            Rule::expr =&gt; eval(primary.into_inner()),
             _ =&gt; unreachable!(),
-        },
-        |lhs: f64, op: Pair&lt;Rule&gt;, rhs: f64| match op.as_rule() {
-            Rule::add      =&gt; lhs + rhs,
+        })
+        .map_infix(|lhs, op, rhs| match op.as_rule() {
+            Rule::add =&gt; lhs + rhs,
             Rule::subtract =&gt; lhs - rhs,
             Rule::multiply =&gt; lhs * rhs,
-            Rule::divide   =&gt; lhs / rhs,
-            Rule::power    =&gt; lhs.powf(rhs),
+            Rule::divide =&gt; lhs / rhs,
+            Rule::power =&gt; lhs.powf(rhs),
             _ =&gt; unreachable!(),
-        },
-    )
+        })
+        .parse(expression)
 }
 <span class="boring">}
 </span></code></pre></pre>
@@ -2053,13 +2051,273 @@ Print(IsGlobal { ident: &quot;y&quot;, expr: DyadicOp { verb: Minus, lhs: Ident(
     rhs: Integer(1) } }),
 Print(Ident(&quot;y&quot;))]
 </code></pre>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="operator-precedence-wip"><a class="header" href="#operator-precedence-wip">Operator precedence (WIP)</a></h1>
-<p>This chapter will discuss two methods of dealing with operator precedence:
-directly in the PEG grammar, and using a <code>PrecClimber</code>. It will probably also
-include an explanation of how precedence climbing works.</p>
-<div style="break-before: page; page-break-before: always;"></div><h1 id="example-calculator-wip"><a class="header" href="#example-calculator-wip">Example: Calculator (WIP)</a></h1>
-<p>This section will walk through the creation of a simple calculator. It will
-provide an example of parsing expressions with operator precedence.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="operator-precedence"><a class="header" href="#operator-precedence">Operator precedence</a></h1>
+<p>There are several methods for dealing with operator precedence in <code>pest</code>:</p>
+<ol>
+<li>directly in the PEG grammar;</li>
+<li>using a <code>PrecClimber</code> (<em>deprecated</em>);</li>
+<li>using a <code>PrattParser</code>.</li>
+</ol>
+<p>Given <code>PrattParser</code> is the most general available method that supports
+unary prefix and suffix operators, we provide more details on its usage.</p>
+<h2 id="pratt-parser"><a class="header" href="#pratt-parser">Pratt Parser</a></h2>
+<p>The following pest grammar defines a calculator which can be used for Pratt parsing.</p>
+<pre><code class="language-pest">WHITESPACE   =  _{ &quot; &quot; | &quot;\t&quot; | NEWLINE }
+  
+program      =   { SOI ~ expr ~ EOI }
+  expr       =   { prefix* ~ primary ~ postfix* ~ (infix ~ prefix* ~ primary ~ postfix* )* }
+    infix    =  _{ add | sub | mul | div | pow }
+      add    =   { &quot;+&quot; } // Addition
+      sub    =   { &quot;-&quot; } // Subtraction
+      mul    =   { &quot;*&quot; } // Multiplication
+      div    =   { &quot;/&quot; } // Division
+      pow    =   { &quot;^&quot; } // Exponentiation
+    prefix   =  _{ neg }
+      neg    =   { &quot;-&quot; } // Negation
+    postfix  =  _{ fac }
+      fac    =   { &quot;!&quot; } // Factorial
+    primary  =  _{ int | &quot;(&quot; ~ expr ~ &quot;)&quot; }
+      int    =  @{ (ASCII_NONZERO_DIGIT ~ ASCII_DIGIT+ | ASCII_DIGIT) }
+</code></pre>
+<p>Below is a <code>PrattParser</code> that is able to parse an expr in the above grammar. The order of precedence corresponds to the order in which <code>op</code> is called. Thus, <code>mul</code> will have higher precedence than <code>add</code>. Operators can also be chained with <code>|</code> to give them equal precedence.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let pratt =
+    PrattParser::new()
+        .op(Op::infix(Rule::add, Assoc::Left) | Op::infix(Rule::sub, Assoc::Left))
+        .op(Op::infix(Rule::mul, Assoc::Left) | Op::infix(Rule::div, Assoc::Left))
+        .op(Op::infix(Rule::pow, Assoc::Right))
+        .op(Op::postfix(Rule::fac))
+        .op(Op::prefix(Rule::neg));
+<span class="boring">}
+</span></code></pre></pre>
+<p>To parse an expression, call the <code>map_primary</code>, <code>map_prefix</code>, <code>map_postfix</code>, <code>map_infix</code> and parse methods as follows:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn parse_expr(pairs: Pairs&lt;Rule&gt;, pratt: &amp;PrattParser&lt;Rule&gt;) -&gt; i32 {
+    pratt
+        .map_primary(|primary| match primary.as_rule() {
+            Rule::int  =&gt; primary.as_str().parse().unwrap(),
+            Rule::expr =&gt; parse_expr(primary.into_inner(), pratt), // from &quot;(&quot; ~ expr ~ &quot;)&quot;
+            _          =&gt; unreachable!(),
+        })
+        .map_prefix(|op, rhs| match op.as_rule() {
+            Rule::neg  =&gt; -rhs,
+            _          =&gt; unreachable!(),
+        })
+        .map_postfix(|lhs, op| match op.as_rule() {
+            Rule::fac  =&gt; (1..lhs+1).product(),
+            _          =&gt; unreachable!(),
+        })
+        .map_infix(|lhs, op, rhs| match op.as_rule() {
+            Rule::add  =&gt; lhs + rhs,
+            Rule::sub  =&gt; lhs - rhs,
+            Rule::mul  =&gt; lhs * rhs,
+            Rule::div  =&gt; lhs / rhs,
+            Rule::pow  =&gt; (1..rhs+1).map(|_| lhs).product(),
+            _          =&gt; unreachable!(),
+        })
+        .parse(pairs)
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Note that <code>map_prefix</code>, <code>map_postfix</code> and <code>map_infix</code> only need to be specified if the grammar contains the corresponding operators.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="example-calculator"><a class="header" href="#example-calculator">Example: Calculator</a></h1>
+<p>This example focuses on the practical aspect of using a Pratt parser to parse expressions using <code>pest</code>.
+To illustrate this, we build a parser for simple equations, and construct an abstract syntax tree.</p>
+<h2 id="precedence-and-associativity"><a class="header" href="#precedence-and-associativity">Precedence and associativity</a></h2>
+<p>In a simple equation multiplication and division are evaluated first, which means they have a higher precedence.
+e.g. <code>1 + 2 * 3</code> is evaluated as <code>1 + (2 * 3)</code>, if the precedence was equal it would be <code>(1 + 2) * 3</code>.
+For our system we have the following operands:</p>
+<ul>
+<li>highest precedence: multiplication &amp; division</li>
+<li>lowest precedence: addition &amp; subtraction</li>
+</ul>
+<p>In the expression <code>1 + 2 - 3</code>, no operator is inherently more important than the other.
+Addition, subtraction, multiplication and division are evaluated from left to right,
+e.g. <code>1 - 2 + 3</code> is evaluated as <code>(1 - 2) + 3</code>. We call this property left associativity. 
+Operators can also be right associative. For example, we usually evaluate the statement <code>x = y = 1</code> by first 
+assigning <code>y = 1</code> and <code>x = 1</code> (or <code>x = y</code>) afterwards.</p>
+<p>Associativity only matters if two operators have the same precedence, as is the case with addition and subtraction for 
+example. This means that if we have an expression with only additions and subtractions, we can just evaluate it from 
+left to right. <code>1 + 2 - 3</code> is equal to <code>(1 + 2) - 3</code>. And <code>1 - 2 + 3</code> is equal to <code>(1 - 2) + 3</code>.</p>
+<p>To go from a flat list of operands separated by operators, it suffices to define a precedence and associativity for each 
+operator. With these definitions an algorithm such as Pratt parsing is able to construct a corresponding 
+expression tree.</p>
+<p>If you are curious to know more about how Pratt parsing is implemented, Aleksey Kladov has a
+<a href="https://matklad.github.io/2020/04/13/simple-but-powerful-pratt-parsing.html">great tutorial</a> on implementing it
+from scratch using Rust.</p>
+<h2 id="calculator-example"><a class="header" href="#calculator-example">Calculator example</a></h2>
+<p>We want our calculator to be able to parse simple equations that consist of integers and simple binary operators.
+Additionally, we want to support parenthesis and unary minus.
+For example:</p>
+<pre><code>1 + 2 * 3
+-(2 + 5) * 16
+</code></pre>
+<h2 id="grammar"><a class="header" href="#grammar">Grammar</a></h2>
+<p>We start by defining our atoms, bits of self-contained syntax that cannot be split up into smaller parts.
+For our calculator we start with just simple integers:</p>
+<pre><code class="language-pest">// No whitespace allowed between digits
+integer = @{ ASCII_DIGIT+ }
+
+atom = _{ integer }
+</code></pre>
+<p>Next, our binary operators:</p>
+<pre><code class="language-pest">bin_op = _{ add | subtract | multiply | divide }
+	add = { &quot;+&quot; }
+	subtract = { &quot;-&quot; }
+	multiply = { &quot;*&quot; }
+	divide = { &quot;/&quot; }
+</code></pre>
+<p>These two rules will be the input to the
+<a href="https://docs.rs/pest/latest/pest/pratt_parser/struct.PrattParser.html"><code>PrattParser</code></a>. 
+It expects to receive atoms separated by operators, like so: <code>atom, bin_op, atom, bin_op, atom, ...</code>.</p>
+<p>Corresponding to this format, we define our rule for expressions:</p>
+<pre><code class="language-pest">expr = { atom ~ (bin_op ~ atom)* }
+</code></pre>
+<p>This defines the grammar which generates the required input for the Pratt parser.</p>
+<h2 id="abstract-syntax-tree"><a class="header" href="#abstract-syntax-tree">Abstract Syntax Tree</a></h2>
+<p>We want to convert our input into an abstract syntax tree.
+For this we define the following types:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>#[derive(Debug)]
+pub enum Expr {
+    Integer(i32),
+    BinOp {
+        lhs: Box&lt;Expr&gt;,
+        op: Op,
+        rhs: Box&lt;Expr&gt;,
+    },
+}
+
+#[derive(Debug)]
+pub enum Op {
+    Add,
+    Subtract,
+    Multiply,
+    Divide,
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Note the <code>Box&lt;Expr&gt;</code> required because Rust 
+<a href="https://doc.rust-lang.org/book/ch15-01-box.html#enabling-recursive-types-with-boxes">does not allow unboxed recursive types</a>. </p>
+<p>There is no separate atom type, any atom is also a valid expression.</p>
+<h2 id="pratt-parser-1"><a class="header" href="#pratt-parser-1">Pratt parser</a></h2>
+<p>The precedence of operations is defined in the Pratt parser.</p>
+<p>An easy approach is to define the PrattParser as global using <a href="https://docs.rs/lazy_static/1.4.0/lazy_static/"><code>lazy_static</code></a>.</p>
+<p>Adhering to standard rules of arithmetic, 
+we will define addition and subtraction to have lower priority than multiplication and division, 
+and make all operators left associative.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>lazy_static::lazy_static! {
+    static ref PRATT_PARSER: PrattParser&lt;Rule&gt; = {
+        use pest::pratt_parser::{Assoc::*, Op};
+        use Rule::*;
+
+        // Precedence is defined lowest to highest
+        PrattParser::new()
+            // Addition and subtract have equal precedence
+            .op(Op::infix(add, Left) | Op::infix(subtract, Left))
+            .op(Op::infix(multiply, Left) | Op::infix(divide, Left))
+    };
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>We are almost there, the only thing that's left is to use our Pratt parser.
+For this the <code>map_primary</code>, <code>map_infix</code>, and <code>parse</code> functions are used, the first two take functions and the third one takes an iterator over pairs.
+<code>map_primary</code> is executed for every primary (atom), and <code>map_infix</code> is executed for every binop with its new left-hand
+and right-hand side according to the precedence rules defined earlier.
+In this example, we create an AST in the Pratt parser.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>pub fn parse_expr(pairs: Pairs&lt;Rule&gt;) -&gt; Expr {
+    PRATT_PARSER
+        .map_primary(|primary| match primary.as_rule() {
+            Rule::integer =&gt; Expr::Integer(primary.as_str().parse::&lt;i32&gt;().unwrap()),
+            rule =&gt; unreachable!(&quot;Expr::parse expected atom, found {:?}&quot;, rule)
+        })
+        .map_infix(|lhs, op, rhs| {
+            let op = match op.as_rule() {
+                Rule::add =&gt; Op::Add,
+                Rule::subtract =&gt; Op::Subtract,
+                Rule::multiply =&gt; Op::Multiply,
+                Rule::divide =&gt; Op::Divide,
+                rule =&gt; unreachable!(&quot;Expr::parse expected infix operation, found {:?}&quot;, rule),
+            };
+            Expr::BinOp {
+                lhs: Box::new(lhs),
+                op,
+                rhs: Box::new(rhs),
+            }
+        })
+        .parse(pairs)
+
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Here's an example of how to use the parser.</p>
+<pre><pre class="playground"><code class="language-rust">fn main() -&gt; io::Result&lt;()&gt; {
+    for line in io::stdin().lock().lines() {
+        match CalculatorParser::parse(Rule::equation, &amp;line?) {
+            Ok(mut pairs) =&gt; {
+                println!(
+                    &quot;Parsed: {:#?}&quot;,
+                    parse_expr(
+                        // inner of expr
+                        pairs.next().unwrap().into_inner()
+                    )
+                );
+            }
+            Err(e) =&gt; {
+                eprintln!(&quot;Parse failed: {:?}&quot;, e);
+            }
+        }
+    }
+    Ok(())
+}
+
+</code></pre></pre>
+<p>With this, we can parse the following simple equation:</p>
+<pre><code>&gt; 1 * 2 + 3 / 4
+Parsed: BinOp {
+    lhs: BinOp {
+        lhs: Integer( 1 ),
+        op: Multiply,
+        rhs: Integer( 2 ),
+    },
+    op: Add,
+    rhs: BinOp {
+        lhs: Integer( 3 ),
+        op: Divide,
+        rhs: Integer( 4 ),
+    },
+}
+</code></pre>
+<h2 id="unary-minus-and-parenthesis"><a class="header" href="#unary-minus-and-parenthesis">Unary minus and parenthesis</a></h2>
+<p>So far, our calculator can parse fairly complicated expressions, but it will fail if it encounters explicit parentheses 
+or a unary minus sign. Let's fix that.</p>
+<h3 id="parentheses"><a class="header" href="#parentheses">Parentheses</a></h3>
+<p>Consider the expression <code>(1 + 2) * 3</code>. Clearly removing the parentheses would give a different result, so we must 
+support parsing such expressions. Luckily, this can be a simple addition to our <code>atom</code> rule:</p>
+<pre><code class="language-diff">- atom = _{ integer }
++ atom = _{ integer | &quot;(&quot; ~ expr ~ &quot;)&quot; }
+</code></pre>
+<p>Earlier we said that atoms should be simple token sequences that cannot be split up further, but now an atom can contain
+arbitrary expressions! The reason we are okay with this is that the parentheses mark clear boundaries for the 
+expression, it will not make ambiguous what operators belong to the inner expression and which to the outer one.</p>
+<h3 id="unary-minus"><a class="header" href="#unary-minus">Unary minus</a></h3>
+<p>We can currently only parse positive integers, eg <code>16</code> or <code>2342</code>. But we also want to do calculations with negative intergers.
+To do this, we introduce the unary minus, so we can make <code>-4</code> and <code>-(8 + 15)</code>.
+We need the following change to grammar:</p>
+<pre><code class="language-pest">+ unary_minus = { &quot;-&quot; ~ atom }
+- atom = _{ integer | &quot;(&quot; ~ expr ~ &quot;)&quot; }
++ atom = _{ integer | unary_minus | &quot;(&quot; ~ expr ~ &quot;)&quot; }
+</code></pre>
+<p>For these last changes we've omitted the small changes to the AST and parsing logic (using <code>map_prefix</code>).</p>
+<p>You can find all these details in 
+the repository: https://github.com/pest-parser/book/tree/master/examples/pest-calculator.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="final-project-awk-clone-wip"><a class="header" href="#final-project-awk-clone-wip">Final project: Awk clone (WIP)</a></h1>
 <p>This chapter will walk through the creation of a simple variant of <a href="http://pubs.opengroup.org/onlinepubs/9699919799/utilities/awk.html">Awk</a> (only
 loosely following the POSIX specification). It will probably have several

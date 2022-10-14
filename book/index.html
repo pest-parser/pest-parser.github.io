@@ -75,7 +75,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="intro.html" class="active"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/csv.html"><strong aria-hidden="true">1.1.</strong> Example: CSV</a></li></ol></li><li class="chapter-item expanded "><a href="parser_api.html"><strong aria-hidden="true">2.</strong> Parser API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/ini.html"><strong aria-hidden="true">2.1.</strong> Example: INI</a></li></ol></li><li class="chapter-item expanded "><a href="grammars/grammars.html"><strong aria-hidden="true">3.</strong> Grammars</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="grammars/peg.html"><strong aria-hidden="true">3.1.</strong> Parsing expression grammars</a></li><li class="chapter-item expanded "><a href="grammars/syntax.html"><strong aria-hidden="true">3.2.</strong> Syntax of pest parsers</a></li><li class="chapter-item expanded "><a href="grammars/built-ins.html"><strong aria-hidden="true">3.3.</strong> Built-in rules</a></li><li class="chapter-item expanded "><a href="examples/json.html"><strong aria-hidden="true">3.4.</strong> Example: JSON</a></li><li class="chapter-item expanded "><a href="examples/jlang.html"><strong aria-hidden="true">3.5.</strong> Example: The J language</a></li></ol></li><li class="chapter-item expanded "><a href="precedence.html"><strong aria-hidden="true">4.</strong> Operator precedence (WIP)</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/calculator.html"><strong aria-hidden="true">4.1.</strong> Example: Calculator (WIP)</a></li></ol></li><li class="chapter-item expanded "><a href="examples/awk.html"><strong aria-hidden="true">5.</strong> Final project: Awk clone (WIP)</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="intro.html" class="active"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/csv.html"><strong aria-hidden="true">1.1.</strong> Example: CSV</a></li></ol></li><li class="chapter-item expanded "><a href="parser_api.html"><strong aria-hidden="true">2.</strong> Parser API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/ini.html"><strong aria-hidden="true">2.1.</strong> Example: INI</a></li></ol></li><li class="chapter-item expanded "><a href="grammars/grammars.html"><strong aria-hidden="true">3.</strong> Grammars</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="grammars/peg.html"><strong aria-hidden="true">3.1.</strong> Parsing expression grammars</a></li><li class="chapter-item expanded "><a href="grammars/syntax.html"><strong aria-hidden="true">3.2.</strong> Syntax of pest parsers</a></li><li class="chapter-item expanded "><a href="grammars/built-ins.html"><strong aria-hidden="true">3.3.</strong> Built-in rules</a></li><li class="chapter-item expanded "><a href="examples/json.html"><strong aria-hidden="true">3.4.</strong> Example: JSON</a></li><li class="chapter-item expanded "><a href="examples/jlang.html"><strong aria-hidden="true">3.5.</strong> Example: The J language</a></li></ol></li><li class="chapter-item expanded "><a href="precedence.html"><strong aria-hidden="true">4.</strong> Operator precedence</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/calculator.html"><strong aria-hidden="true">4.1.</strong> Example: Calculator</a></li></ol></li><li class="chapter-item expanded "><a href="examples/awk.html"><strong aria-hidden="true">5.</strong> Final project: Awk clone (WIP)</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -164,35 +164,33 @@ WHITESPACE = _{ &quot; &quot; | &quot;\t&quot; }
 <pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
 </span><span class="boring">fn main() {
 </span>lazy_static! {
-    static ref PREC_CLIMBER: PrecClimber&lt;Rule&gt; = {
+    static ref PRATT_PARSER: PrattParser&lt;Rule&gt; = {
         use Rule::*;
         use Assoc::*;
 
-        PrecClimber::new(vec![
-            Operator::new(add, Left) | Operator::new(subtract, Left),
-            Operator::new(multiply, Left) | Operator::new(divide, Left),
-            Operator::new(power, Right)
-        ])
+        PrattParser::new()
+            .op(Op::infix(add, Left) | Op::infix(subtract, Left))
+            .op(Op::infix(multiply, Left) | Op::infix(divide, Left))
+            .op(Op::infix(power, Right))
     };
 }
 
 fn eval(expression: Pairs&lt;Rule&gt;) -&gt; f64 {
-    PREC_CLIMBER.climb(
-        expression,
-        |pair: Pair&lt;Rule&gt;| match pair.as_rule() {
-            Rule::num =&gt; pair.as_str().parse::&lt;f64&gt;().unwrap(),
-            Rule::expr =&gt; eval(pair.into_inner()),
+    PRATT_PARSER
+        .map_primary(|primary| match primary.as_rule() {
+            Rule::num =&gt; primary.as_str().parse::&lt;f64&gt;().unwrap(),
+            Rule::expr =&gt; eval(primary.into_inner()),
             _ =&gt; unreachable!(),
-        },
-        |lhs: f64, op: Pair&lt;Rule&gt;, rhs: f64| match op.as_rule() {
-            Rule::add      =&gt; lhs + rhs,
+        })
+        .map_infix(|lhs, op, rhs| match op.as_rule() {
+            Rule::add =&gt; lhs + rhs,
             Rule::subtract =&gt; lhs - rhs,
             Rule::multiply =&gt; lhs * rhs,
-            Rule::divide   =&gt; lhs / rhs,
-            Rule::power    =&gt; lhs.powf(rhs),
+            Rule::divide =&gt; lhs / rhs,
+            Rule::power =&gt; lhs.powf(rhs),
             _ =&gt; unreachable!(),
-        },
-    )
+        })
+        .parse(expression)
 }
 <span class="boring">}
 </span></code></pre></pre>

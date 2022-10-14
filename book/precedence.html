@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Operator precedence (WIP) - A thoughtful introduction to the pest parser</title>
+        <title>Operator precedence - A thoughtful introduction to the pest parser</title>
         <!-- Custom HTML head -->
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
         <meta name="description" content="An introduction to the pest parser by implementing a Rust grammar subset">
@@ -75,7 +75,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="intro.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/csv.html"><strong aria-hidden="true">1.1.</strong> Example: CSV</a></li></ol></li><li class="chapter-item expanded "><a href="parser_api.html"><strong aria-hidden="true">2.</strong> Parser API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/ini.html"><strong aria-hidden="true">2.1.</strong> Example: INI</a></li></ol></li><li class="chapter-item expanded "><a href="grammars/grammars.html"><strong aria-hidden="true">3.</strong> Grammars</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="grammars/peg.html"><strong aria-hidden="true">3.1.</strong> Parsing expression grammars</a></li><li class="chapter-item expanded "><a href="grammars/syntax.html"><strong aria-hidden="true">3.2.</strong> Syntax of pest parsers</a></li><li class="chapter-item expanded "><a href="grammars/built-ins.html"><strong aria-hidden="true">3.3.</strong> Built-in rules</a></li><li class="chapter-item expanded "><a href="examples/json.html"><strong aria-hidden="true">3.4.</strong> Example: JSON</a></li><li class="chapter-item expanded "><a href="examples/jlang.html"><strong aria-hidden="true">3.5.</strong> Example: The J language</a></li></ol></li><li class="chapter-item expanded "><a href="precedence.html" class="active"><strong aria-hidden="true">4.</strong> Operator precedence (WIP)</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/calculator.html"><strong aria-hidden="true">4.1.</strong> Example: Calculator (WIP)</a></li></ol></li><li class="chapter-item expanded "><a href="examples/awk.html"><strong aria-hidden="true">5.</strong> Final project: Awk clone (WIP)</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="intro.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/csv.html"><strong aria-hidden="true">1.1.</strong> Example: CSV</a></li></ol></li><li class="chapter-item expanded "><a href="parser_api.html"><strong aria-hidden="true">2.</strong> Parser API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/ini.html"><strong aria-hidden="true">2.1.</strong> Example: INI</a></li></ol></li><li class="chapter-item expanded "><a href="grammars/grammars.html"><strong aria-hidden="true">3.</strong> Grammars</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="grammars/peg.html"><strong aria-hidden="true">3.1.</strong> Parsing expression grammars</a></li><li class="chapter-item expanded "><a href="grammars/syntax.html"><strong aria-hidden="true">3.2.</strong> Syntax of pest parsers</a></li><li class="chapter-item expanded "><a href="grammars/built-ins.html"><strong aria-hidden="true">3.3.</strong> Built-in rules</a></li><li class="chapter-item expanded "><a href="examples/json.html"><strong aria-hidden="true">3.4.</strong> Example: JSON</a></li><li class="chapter-item expanded "><a href="examples/jlang.html"><strong aria-hidden="true">3.5.</strong> Example: The J language</a></li></ol></li><li class="chapter-item expanded "><a href="precedence.html" class="active"><strong aria-hidden="true">4.</strong> Operator precedence</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/calculator.html"><strong aria-hidden="true">4.1.</strong> Example: Calculator</a></li></ol></li><li class="chapter-item expanded "><a href="examples/awk.html"><strong aria-hidden="true">5.</strong> Final project: Awk clone (WIP)</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -134,10 +134,77 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1 id="operator-precedence-wip"><a class="header" href="#operator-precedence-wip">Operator precedence (WIP)</a></h1>
-<p>This chapter will discuss two methods of dealing with operator precedence:
-directly in the PEG grammar, and using a <code>PrecClimber</code>. It will probably also
-include an explanation of how precedence climbing works.</p>
+                        <h1 id="operator-precedence"><a class="header" href="#operator-precedence">Operator precedence</a></h1>
+<p>There are several methods for dealing with operator precedence in <code>pest</code>:</p>
+<ol>
+<li>directly in the PEG grammar;</li>
+<li>using a <code>PrecClimber</code> (<em>deprecated</em>);</li>
+<li>using a <code>PrattParser</code>.</li>
+</ol>
+<p>Given <code>PrattParser</code> is the most general available method that supports
+unary prefix and suffix operators, we provide more details on its usage.</p>
+<h2 id="pratt-parser"><a class="header" href="#pratt-parser">Pratt Parser</a></h2>
+<p>The following pest grammar defines a calculator which can be used for Pratt parsing.</p>
+<pre><code class="language-pest">WHITESPACE   =  _{ &quot; &quot; | &quot;\t&quot; | NEWLINE }
+  
+program      =   { SOI ~ expr ~ EOI }
+  expr       =   { prefix* ~ primary ~ postfix* ~ (infix ~ prefix* ~ primary ~ postfix* )* }
+    infix    =  _{ add | sub | mul | div | pow }
+      add    =   { &quot;+&quot; } // Addition
+      sub    =   { &quot;-&quot; } // Subtraction
+      mul    =   { &quot;*&quot; } // Multiplication
+      div    =   { &quot;/&quot; } // Division
+      pow    =   { &quot;^&quot; } // Exponentiation
+    prefix   =  _{ neg }
+      neg    =   { &quot;-&quot; } // Negation
+    postfix  =  _{ fac }
+      fac    =   { &quot;!&quot; } // Factorial
+    primary  =  _{ int | &quot;(&quot; ~ expr ~ &quot;)&quot; }
+      int    =  @{ (ASCII_NONZERO_DIGIT ~ ASCII_DIGIT+ | ASCII_DIGIT) }
+</code></pre>
+<p>Below is a <code>PrattParser</code> that is able to parse an expr in the above grammar. The order of precedence corresponds to the order in which <code>op</code> is called. Thus, <code>mul</code> will have higher precedence than <code>add</code>. Operators can also be chained with <code>|</code> to give them equal precedence.</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>let pratt =
+    PrattParser::new()
+        .op(Op::infix(Rule::add, Assoc::Left) | Op::infix(Rule::sub, Assoc::Left))
+        .op(Op::infix(Rule::mul, Assoc::Left) | Op::infix(Rule::div, Assoc::Left))
+        .op(Op::infix(Rule::pow, Assoc::Right))
+        .op(Op::postfix(Rule::fac))
+        .op(Op::prefix(Rule::neg));
+<span class="boring">}
+</span></code></pre></pre>
+<p>To parse an expression, call the <code>map_primary</code>, <code>map_prefix</code>, <code>map_postfix</code>, <code>map_infix</code> and parse methods as follows:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>fn parse_expr(pairs: Pairs&lt;Rule&gt;, pratt: &amp;PrattParser&lt;Rule&gt;) -&gt; i32 {
+    pratt
+        .map_primary(|primary| match primary.as_rule() {
+            Rule::int  =&gt; primary.as_str().parse().unwrap(),
+            Rule::expr =&gt; parse_expr(primary.into_inner(), pratt), // from &quot;(&quot; ~ expr ~ &quot;)&quot;
+            _          =&gt; unreachable!(),
+        })
+        .map_prefix(|op, rhs| match op.as_rule() {
+            Rule::neg  =&gt; -rhs,
+            _          =&gt; unreachable!(),
+        })
+        .map_postfix(|lhs, op| match op.as_rule() {
+            Rule::fac  =&gt; (1..lhs+1).product(),
+            _          =&gt; unreachable!(),
+        })
+        .map_infix(|lhs, op, rhs| match op.as_rule() {
+            Rule::add  =&gt; lhs + rhs,
+            Rule::sub  =&gt; lhs - rhs,
+            Rule::mul  =&gt; lhs * rhs,
+            Rule::div  =&gt; lhs / rhs,
+            Rule::pow  =&gt; (1..rhs+1).map(|_| lhs).product(),
+            _          =&gt; unreachable!(),
+        })
+        .parse(pairs)
+}
+<span class="boring">}
+</span></code></pre></pre>
+<p>Note that <code>map_prefix</code>, <code>map_postfix</code> and <code>map_infix</code> only need to be specified if the grammar contains the corresponding operators.</p>
 
                     </main>
 
