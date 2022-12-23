@@ -4,8 +4,10 @@
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
         <title>Built-in rules - A thoughtful introduction to the pest parser</title>
+
+
         <!-- Custom HTML head -->
-        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        
         <meta name="description" content="An introduction to the pest parser by implementing a Rust grammar subset">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff" />
@@ -16,25 +18,28 @@
         <link rel="stylesheet" href="../css/general.css">
         <link rel="stylesheet" href="../css/chrome.css">
         <link rel="stylesheet" href="../css/print.css" media="print">
+
         <!-- Fonts -->
         <link rel="stylesheet" href="../FontAwesome/css/font-awesome.css">
         <link rel="stylesheet" href="../fonts/fonts.css">
+
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="../highlight.css">
         <link rel="stylesheet" href="../tomorrow-night.css">
         <link rel="stylesheet" href="../ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
+
     </head>
     <body>
         <!-- Provide site root to javascript -->
-        <script type="text/javascript">
+        <script>
             var path_to_root = "../";
             var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
         </script>
 
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
-        <script type="text/javascript">
+        <script>
             try {
                 var theme = localStorage.getItem('mdbook-theme');
                 var sidebar = localStorage.getItem('mdbook-sidebar');
@@ -50,7 +55,7 @@
         </script>
 
         <!-- Set the theme before any content is loaded, prevents flash -->
-        <script type="text/javascript">
+        <script>
             var theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
@@ -62,7 +67,7 @@
         </script>
 
         <!-- Hide / unhide sidebar before it is displayed -->
-        <script type="text/javascript">
+        <script>
             var html = document.querySelector('html');
             var sidebar = 'hidden';
             if (document.body.clientWidth >= 1080) {
@@ -83,7 +88,7 @@
         <div id="page-wrapper" class="page-wrapper">
 
             <div class="page">
-                <div id="menu-bar-hover-placeholder"></div>
+                                <div id="menu-bar-hover-placeholder"></div>
                 <div id="menu-bar" class="menu-bar sticky bordered">
                     <div class="left-buttons">
                         <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
@@ -93,7 +98,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
-                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
@@ -110,6 +115,7 @@
                         <a href="../print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
+
                     </div>
                 </div>
 
@@ -123,8 +129,9 @@
                         </ul>
                     </div>
                 </div>
+
                 <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
-                <script type="text/javascript">
+                <script>
                     document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
                     document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
                     Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
@@ -320,6 +327,181 @@ details.</p>
 <li><code>XID_CONTINUE</code></li>
 <li><code>XID_START</code></li>
 </ul>
+<h3 id="script-properties"><a class="header" href="#script-properties">Script properties</a></h3>
+<p>The <a href="https://unicode.org/standard/supported.html">Unicode script property</a>
+has included built-in rules for matching characters in particular languages.</p>
+<p><strong>For example:</strong></p>
+<ul>
+<li><code>HAN</code> for matching characters in Chinese languages</li>
+<li><code>KATAKANA</code>, <code>HIRAGANA</code> for the Japanese language</li>
+<li><code>HANGUL</code> for the Korean language</li>
+</ul>
+<p><strong>All available rules:</strong></p>
+<ul>
+<li><code>ADLAM</code></li>
+<li><code>AHOM</code></li>
+<li><code>ANATOLIAN_HIEROGLYPHS</code></li>
+<li><code>ARABIC</code></li>
+<li><code>ARMENIAN</code></li>
+<li><code>AVESTAN</code></li>
+<li><code>BALINESE</code></li>
+<li><code>BAMUM</code></li>
+<li><code>BASSA_VAH</code></li>
+<li><code>BATAK</code></li>
+<li><code>BENGALI</code></li>
+<li><code>BHAIKSUKI</code></li>
+<li><code>BOPOMOFO</code></li>
+<li><code>BRAHMI</code></li>
+<li><code>BRAILLE</code></li>
+<li><code>BUGINESE</code></li>
+<li><code>BUHID</code></li>
+<li><code>CANADIAN_ABORIGINAL</code></li>
+<li><code>CARIAN</code></li>
+<li><code>CAUCASIAN_ALBANIAN</code></li>
+<li><code>CHAKMA</code></li>
+<li><code>CHAM</code></li>
+<li><code>CHEROKEE</code></li>
+<li><code>CHORASMIAN</code></li>
+<li><code>COMMON</code></li>
+<li><code>COPTIC</code></li>
+<li><code>CUNEIFORM</code></li>
+<li><code>CYPRIOT</code></li>
+<li><code>CYPRO_MINOAN</code></li>
+<li><code>CYRILLIC</code></li>
+<li><code>DESERET</code></li>
+<li><code>DEVANAGARI</code></li>
+<li><code>DIVES_AKURU</code></li>
+<li><code>DOGRA</code></li>
+<li><code>DUPLOYAN</code></li>
+<li><code>EGYPTIAN_HIEROGLYPHS</code></li>
+<li><code>ELBASAN</code></li>
+<li><code>ELYMAIC</code></li>
+<li><code>ETHIOPIC</code></li>
+<li><code>GEORGIAN</code></li>
+<li><code>GLAGOLITIC</code></li>
+<li><code>GOTHIC</code></li>
+<li><code>GRANTHA</code></li>
+<li><code>GREEK</code></li>
+<li><code>GUJARATI</code></li>
+<li><code>GUNJALA_GONDI</code></li>
+<li><code>GURMUKHI</code></li>
+<li><code>HAN</code></li>
+<li><code>HANGUL</code></li>
+<li><code>HANIFI_ROHINGYA</code></li>
+<li><code>HANUNOO</code></li>
+<li><code>HATRAN</code></li>
+<li><code>HEBREW</code></li>
+<li><code>HIRAGANA</code></li>
+<li><code>IMPERIAL_ARAMAIC</code></li>
+<li><code>INHERITED</code></li>
+<li><code>INSCRIPTIONAL_PAHLAVI</code></li>
+<li><code>INSCRIPTIONAL_PARTHIAN</code></li>
+<li><code>JAVANESE</code></li>
+<li><code>KAITHI</code></li>
+<li><code>KANNADA</code></li>
+<li><code>KATAKANA</code></li>
+<li><code>KAWI</code></li>
+<li><code>KAYAH_LI</code></li>
+<li><code>KHAROSHTHI</code></li>
+<li><code>KHITAN_SMALL_SCRIPT</code></li>
+<li><code>KHMER</code></li>
+<li><code>KHOJKI</code></li>
+<li><code>KHUDAWADI</code></li>
+<li><code>LAO</code></li>
+<li><code>LATIN</code></li>
+<li><code>LEPCHA</code></li>
+<li><code>LIMBU</code></li>
+<li><code>LINEAR_A</code></li>
+<li><code>LINEAR_B</code></li>
+<li><code>LISU</code></li>
+<li><code>LYCIAN</code></li>
+<li><code>LYDIAN</code></li>
+<li><code>MAHAJANI</code></li>
+<li><code>MAKASAR</code></li>
+<li><code>MALAYALAM</code></li>
+<li><code>MANDAIC</code></li>
+<li><code>MANICHAEAN</code></li>
+<li><code>MARCHEN</code></li>
+<li><code>MASARAM_GONDI</code></li>
+<li><code>MEDEFAIDRIN</code></li>
+<li><code>MEETEI_MAYEK</code></li>
+<li><code>MENDE_KIKAKUI</code></li>
+<li><code>MEROITIC_CURSIVE</code></li>
+<li><code>MEROITIC_HIEROGLYPHS</code></li>
+<li><code>MIAO</code></li>
+<li><code>MODI</code></li>
+<li><code>MONGOLIAN</code></li>
+<li><code>MRO</code></li>
+<li><code>MULTANI</code></li>
+<li><code>MYANMAR</code></li>
+<li><code>NABATAEAN</code></li>
+<li><code>NAG_MUNDARI</code></li>
+<li><code>NANDINAGARI</code></li>
+<li><code>NEW_TAI_LUE</code></li>
+<li><code>NEWA</code></li>
+<li><code>NKO</code></li>
+<li><code>NUSHU</code></li>
+<li><code>NYIAKENG_PUACHUE_HMONG</code></li>
+<li><code>OGHAM</code></li>
+<li><code>OL_CHIKI</code></li>
+<li><code>OLD_HUNGARIAN</code></li>
+<li><code>OLD_ITALIC</code></li>
+<li><code>OLD_NORTH_ARABIAN</code></li>
+<li><code>OLD_PERMIC</code></li>
+<li><code>OLD_PERSIAN</code></li>
+<li><code>OLD_SOGDIAN</code></li>
+<li><code>OLD_SOUTH_ARABIAN</code></li>
+<li><code>OLD_TURKIC</code></li>
+<li><code>OLD_UYGHUR</code></li>
+<li><code>ORIYA</code></li>
+<li><code>OSAGE</code></li>
+<li><code>OSMANYA</code></li>
+<li><code>PAHAWH_HMONG</code></li>
+<li><code>PALMYRENE</code></li>
+<li><code>PAU_CIN_HAU</code></li>
+<li><code>PHAGS_PA</code></li>
+<li><code>PHOENICIAN</code></li>
+<li><code>PSALTER_PAHLAVI</code></li>
+<li><code>REJANG</code></li>
+<li><code>RUNIC</code></li>
+<li><code>SAMARITAN</code></li>
+<li><code>SAURASHTRA</code></li>
+<li><code>SHARADA</code></li>
+<li><code>SHAVIAN</code></li>
+<li><code>SIDDHAM</code></li>
+<li><code>SIGNWRITING</code></li>
+<li><code>SINHALA</code></li>
+<li><code>SOGDIAN</code></li>
+<li><code>SORA_SOMPENG</code></li>
+<li><code>SOYOMBO</code></li>
+<li><code>SUNDANESE</code></li>
+<li><code>SYLOTI_NAGRI</code></li>
+<li><code>SYRIAC</code></li>
+<li><code>TAGALOG</code></li>
+<li><code>TAGBANWA</code></li>
+<li><code>TAI_LE</code></li>
+<li><code>TAI_THAM</code></li>
+<li><code>TAI_VIET</code></li>
+<li><code>TAKRI</code></li>
+<li><code>TAMIL</code></li>
+<li><code>TANGSA</code></li>
+<li><code>TANGUT</code></li>
+<li><code>TELUGU</code></li>
+<li><code>THAANA</code></li>
+<li><code>THAI</code></li>
+<li><code>TIBETAN</code></li>
+<li><code>TIFINAGH</code></li>
+<li><code>TIRHUTA</code></li>
+<li><code>TOTO</code></li>
+<li><code>UGARITIC</code></li>
+<li><code>VAI</code></li>
+<li><code>VITHKUQI</code></li>
+<li><code>WANCHO</code></li>
+<li><code>WARANG_CITI</code></li>
+<li><code>YEZIDI</code></li>
+<li><code>YI</code></li>
+<li><code>ZANABAZAR_SQUARE</code></li>
+</ul>
 
                     </main>
 
@@ -328,9 +510,11 @@ details.</p>
                             <a rel="prev" href="../grammars/syntax.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
+
                             <a rel="next" href="../examples/json.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
+
                         <div style="clear: both"></div>
                     </nav>
                 </div>
@@ -340,6 +524,7 @@ details.</p>
                     <a rel="prev" href="../grammars/syntax.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
+
                     <a rel="next" href="../examples/json.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
@@ -347,17 +532,25 @@ details.</p>
 
         </div>
 
-        <script type="text/javascript">
+
+
+
+        <script>
             window.playground_copyable = true;
         </script>
-        <script src="../elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../mark.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../searcher.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../clipboard.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../highlight.js" type="text/javascript" charset="utf-8"></script>
-        <script src="../book.js" type="text/javascript" charset="utf-8"></script>
+
+
+        <script src="../elasticlunr.min.js"></script>
+        <script src="../mark.min.js"></script>
+        <script src="../searcher.js"></script>
+
+        <script src="../clipboard.min.js"></script>
+        <script src="../highlight.js"></script>
+        <script src="../book.js"></script>
 
         <!-- Custom JS scripts -->
-        <script type="text/javascript" src="../highlight-pest.js"></script>
+        <script src="../highlight-pest.js"></script>
+
+
     </body>
 </html>
