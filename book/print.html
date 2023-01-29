@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="intro.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/csv.html"><strong aria-hidden="true">1.1.</strong> Example: CSV</a></li></ol></li><li class="chapter-item expanded "><a href="parser_api.html"><strong aria-hidden="true">2.</strong> Parser API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/ini.html"><strong aria-hidden="true">2.1.</strong> Example: INI</a></li></ol></li><li class="chapter-item expanded "><a href="grammars/grammars.html"><strong aria-hidden="true">3.</strong> Grammars</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="grammars/peg.html"><strong aria-hidden="true">3.1.</strong> Parsing expression grammars</a></li><li class="chapter-item expanded "><a href="grammars/syntax.html"><strong aria-hidden="true">3.2.</strong> Syntax of pest parsers</a></li><li class="chapter-item expanded "><a href="grammars/built-ins.html"><strong aria-hidden="true">3.3.</strong> Built-in rules</a></li><li class="chapter-item expanded "><a href="examples/json.html"><strong aria-hidden="true">3.4.</strong> Example: JSON</a></li><li class="chapter-item expanded "><a href="examples/jlang.html"><strong aria-hidden="true">3.5.</strong> Example: The J language</a></li></ol></li><li class="chapter-item expanded "><a href="precedence.html"><strong aria-hidden="true">4.</strong> Operator precedence</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/calculator.html"><strong aria-hidden="true">4.1.</strong> Example: Calculator</a></li></ol></li><li class="chapter-item expanded "><a href="examples/awk.html"><strong aria-hidden="true">5.</strong> Final project: Awk clone (WIP)</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="intro.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/csv.html"><strong aria-hidden="true">1.1.</strong> Example: CSV</a></li></ol></li><li class="chapter-item expanded "><a href="parser_api.html"><strong aria-hidden="true">2.</strong> Parser API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/ini.html"><strong aria-hidden="true">2.1.</strong> Example: INI</a></li></ol></li><li class="chapter-item expanded "><a href="grammars/grammars.html"><strong aria-hidden="true">3.</strong> Grammars</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="grammars/peg.html"><strong aria-hidden="true">3.1.</strong> Parsing expression grammars</a></li><li class="chapter-item expanded "><a href="grammars/syntax.html"><strong aria-hidden="true">3.2.</strong> Syntax of pest parsers</a></li><li class="chapter-item expanded "><a href="grammars/comments.html"><strong aria-hidden="true">3.3.</strong> Comments</a></li><li class="chapter-item expanded "><a href="grammars/built-ins.html"><strong aria-hidden="true">3.4.</strong> Built-in rules</a></li><li class="chapter-item expanded "><a href="examples/json.html"><strong aria-hidden="true">3.5.</strong> Example: JSON</a></li><li class="chapter-item expanded "><a href="examples/jlang.html"><strong aria-hidden="true">3.6.</strong> Example: The J language</a></li></ol></li><li class="chapter-item expanded "><a href="precedence.html"><strong aria-hidden="true">4.</strong> Operator precedence</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="examples/calculator.html"><strong aria-hidden="true">4.1.</strong> Example: Calculator</a></li></ol></li><li class="chapter-item expanded "><a href="examples/awk.html"><strong aria-hidden="true">5.</strong> Final project: Awk clone (WIP)</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -785,6 +785,19 @@ impl Parser for MyParser {
 exists during compilation. However, you can use <code>Rules</code> just like any other
 enum, and you can use <code>parse(...)</code> through the <a href="https://docs.rs/pest/2.0/pest/iterators/struct.Pairs.html"><code>Pairs</code></a> interface described in
 the <a href="grammars/../parser_api.html">Parser API chapter</a>.</p>
+<h2 id="load-multiple-grammars"><a class="header" href="#load-multiple-grammars">Load multiple grammars</a></h2>
+<p>If you have multiple grammars, you can load them all at once:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use pest::Parser;
+
+#[derive(Parser)]
+#[grammar = &quot;parser/base.pest&quot;]
+#[grammar = &quot;parser/grammar.pest&quot;]
+struct MyParser;
+<span class="boring">}</span></code></pre></pre>
+<p>Then <code>pest</code> will generate a <code>Rules</code> enum that contains all the rules from both.
+This is useful if you have a base grammar that you want to extend in multiple grammars.</p>
 <h2 id="warning-about-pegs"><a class="header" href="#warning-about-pegs">Warning about PEGs!</a></h2>
 <p>Parsing expression grammars look quite similar to other parsing tools you might
 be used to, like regular expressions, BNF grammars, and others (Yacc/Bison,
@@ -903,8 +916,10 @@ the execution of any PEG expression.</p>
 <p>These rules together make PEGs very pleasant tools for writing a parser.</p>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="syntax-of-pest-grammars"><a class="header" href="#syntax-of-pest-grammars">Syntax of pest grammars</a></h1>
 <p><code>pest</code> grammars are lists of rules. Rules are defined like this:</p>
-<pre><code class="language-pest">my_rule = { ... }
+<pre><code class="language-pest">//! Grammar doc
+my_rule = { ... }
 
+/// Rule doc
 another_rule = {        // comments are preceded by two slashes
     ...                 // whitespace goes anywhere
 }
@@ -1217,7 +1232,38 @@ raw_string_interior = {
 <tr><td style="text-align: center"><code>PUSH(baz)</code></td><td style="text-align: center"><a href="grammars/syntax.html#the-stack-wip">match and push</a></td><td style="text-align: center"></td><td style="text-align: center"></td></tr>
 <tr><td style="text-align: center"><code>POP</code></td><td style="text-align: center"><a href="grammars/syntax.html#the-stack-wip">match and pop</a></td><td style="text-align: center"><code>PEEK</code></td><td style="text-align: center"><a href="grammars/syntax.html#the-stack-wip">match without pop</a></td></tr>
 </tbody></table>
-</div><div style="break-before: page; page-break-before: always;"></div><h1 id="built-in-rules"><a class="header" href="#built-in-rules">Built-in rules</a></h1>
+</div><div style="break-before: page; page-break-before: always;"></div><h2 id="comments"><a class="header" href="#comments">Comments</a></h2>
+<h3 id="non-doc-comments"><a class="header" href="#non-doc-comments">Non-doc comments</a></h3>
+<p>Comments follow the general Rust style of line (<code>//</code>) and block (<code>/* ... */</code>) comment forms.
+Non-doc comments are interpreted as a form of whitespace.</p>
+<pre><code class="language-pest">/* 
+  Block comment
+ */
+another_rule = {        // line comment
+    ...                 // whitespace goes anywhere
+}
+</code></pre>
+<h3 id="doc-comments"><a class="header" href="#doc-comments">Doc comments</a></h3>
+<p>Line doc comments begin with exactly three slashes <code>///</code>
+and <code>//!</code> is used to document the entire grammar file.</p>
+<pre><code class="language-pest">//! A parser for JSON file.
+
+json = { ... }
+
+/// Matches object, e.g.: `{ &quot;foo&quot;: &quot;bar&quot; }`
+object = { ... }
+</code></pre>
+<p>Then will get</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>/// A parser for JSON file.
+enum Rule {
+    json,
+    /// Matches object, e.g.: `{ &quot;foo&quot;: &quot;bar&quot; }`
+    object,
+}
+<span class="boring">}</span></code></pre></pre>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="built-in-rules"><a class="header" href="#built-in-rules">Built-in rules</a></h1>
 <p>Besides <code>ANY</code>, matching any single Unicode character, <code>pest</code> provides several
 rules to make parsing text more convenient.</p>
 <h2 id="ascii-rules"><a class="header" href="#ascii-rules">ASCII rules</a></h2>
@@ -1407,11 +1453,17 @@ details.</p>
 <p>The <a href="https://unicode.org/standard/supported.html">Unicode script property</a>
 has included built-in rules for matching characters in particular languages.</p>
 <p><strong>For example:</strong></p>
+<p>We want match a string that contains any CJK (regexp: <code>\p{CJK}</code>) characters such as <code>你好世界</code> or <code>こんにちは世界</code> or <code>안녕하세요 세계</code>.</p>
 <ul>
-<li><code>HAN</code> for matching characters in Chinese languages</li>
-<li><code>KATAKANA</code>, <code>HIRAGANA</code> for the Japanese language</li>
-<li><code>HANGUL</code> for the Korean language</li>
+<li><code>HAN</code>: representing Chinese characters, including Simplified Chinese, Traditional Chinese, Japanese kanji, and Korean hanja.</li>
+<li><code>HIRAGANA</code>: representing the Japanese hiragana syllabary.</li>
+<li><code>KATAKANA</code>: representing the Japanese katakana syllabary.</li>
+<li><code>HANGUL</code>: representing Korean alphabetical characters.</li>
+<li><code>BOPOMOFO</code>: representing Chinese phonetic symbols.</li>
 </ul>
+<p>So we define a rule named <code>CJK</code> like this:</p>
+<pre><code class="language-pest">CJK = { HAN | HIRAGANA | KATAKANA | HANGUL | BOPOMOFO }
+</code></pre>
 <p><strong>All available rules:</strong></p>
 <ul>
 <li><code>ADLAM</code></li>

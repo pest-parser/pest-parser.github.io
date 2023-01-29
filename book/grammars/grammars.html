@@ -80,7 +80,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="../intro.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../examples/csv.html"><strong aria-hidden="true">1.1.</strong> Example: CSV</a></li></ol></li><li class="chapter-item expanded "><a href="../parser_api.html"><strong aria-hidden="true">2.</strong> Parser API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../examples/ini.html"><strong aria-hidden="true">2.1.</strong> Example: INI</a></li></ol></li><li class="chapter-item expanded "><a href="../grammars/grammars.html" class="active"><strong aria-hidden="true">3.</strong> Grammars</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../grammars/peg.html"><strong aria-hidden="true">3.1.</strong> Parsing expression grammars</a></li><li class="chapter-item expanded "><a href="../grammars/syntax.html"><strong aria-hidden="true">3.2.</strong> Syntax of pest parsers</a></li><li class="chapter-item expanded "><a href="../grammars/built-ins.html"><strong aria-hidden="true">3.3.</strong> Built-in rules</a></li><li class="chapter-item expanded "><a href="../examples/json.html"><strong aria-hidden="true">3.4.</strong> Example: JSON</a></li><li class="chapter-item expanded "><a href="../examples/jlang.html"><strong aria-hidden="true">3.5.</strong> Example: The J language</a></li></ol></li><li class="chapter-item expanded "><a href="../precedence.html"><strong aria-hidden="true">4.</strong> Operator precedence</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../examples/calculator.html"><strong aria-hidden="true">4.1.</strong> Example: Calculator</a></li></ol></li><li class="chapter-item expanded "><a href="../examples/awk.html"><strong aria-hidden="true">5.</strong> Final project: Awk clone (WIP)</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="../intro.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../examples/csv.html"><strong aria-hidden="true">1.1.</strong> Example: CSV</a></li></ol></li><li class="chapter-item expanded "><a href="../parser_api.html"><strong aria-hidden="true">2.</strong> Parser API</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../examples/ini.html"><strong aria-hidden="true">2.1.</strong> Example: INI</a></li></ol></li><li class="chapter-item expanded "><a href="../grammars/grammars.html" class="active"><strong aria-hidden="true">3.</strong> Grammars</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../grammars/peg.html"><strong aria-hidden="true">3.1.</strong> Parsing expression grammars</a></li><li class="chapter-item expanded "><a href="../grammars/syntax.html"><strong aria-hidden="true">3.2.</strong> Syntax of pest parsers</a></li><li class="chapter-item expanded "><a href="../grammars/comments.html"><strong aria-hidden="true">3.3.</strong> Comments</a></li><li class="chapter-item expanded "><a href="../grammars/built-ins.html"><strong aria-hidden="true">3.4.</strong> Built-in rules</a></li><li class="chapter-item expanded "><a href="../examples/json.html"><strong aria-hidden="true">3.5.</strong> Example: JSON</a></li><li class="chapter-item expanded "><a href="../examples/jlang.html"><strong aria-hidden="true">3.6.</strong> Example: The J language</a></li></ol></li><li class="chapter-item expanded "><a href="../precedence.html"><strong aria-hidden="true">4.</strong> Operator precedence</a></li><li><ol class="section"><li class="chapter-item expanded "><a href="../examples/calculator.html"><strong aria-hidden="true">4.1.</strong> Example: Calculator</a></li></ol></li><li class="chapter-item expanded "><a href="../examples/awk.html"><strong aria-hidden="true">5.</strong> Final project: Awk clone (WIP)</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -173,6 +173,19 @@ impl Parser for MyParser {
 exists during compilation. However, you can use <code>Rules</code> just like any other
 enum, and you can use <code>parse(...)</code> through the <a href="https://docs.rs/pest/2.0/pest/iterators/struct.Pairs.html"><code>Pairs</code></a> interface described in
 the <a href="../parser_api.html">Parser API chapter</a>.</p>
+<h2 id="load-multiple-grammars"><a class="header" href="#load-multiple-grammars">Load multiple grammars</a></h2>
+<p>If you have multiple grammars, you can load them all at once:</p>
+<pre><pre class="playground"><code class="language-rust"><span class="boring">#![allow(unused)]
+</span><span class="boring">fn main() {
+</span>use pest::Parser;
+
+#[derive(Parser)]
+#[grammar = &quot;parser/base.pest&quot;]
+#[grammar = &quot;parser/grammar.pest&quot;]
+struct MyParser;
+<span class="boring">}</span></code></pre></pre>
+<p>Then <code>pest</code> will generate a <code>Rules</code> enum that contains all the rules from both.
+This is useful if you have a base grammar that you want to extend in multiple grammars.</p>
 <h2 id="warning-about-pegs"><a class="header" href="#warning-about-pegs">Warning about PEGs!</a></h2>
 <p>Parsing expression grammars look quite similar to other parsing tools you might
 be used to, like regular expressions, BNF grammars, and others (Yacc/Bison,
